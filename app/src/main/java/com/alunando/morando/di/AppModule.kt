@@ -29,46 +29,46 @@ import org.koin.dsl.module
 /**
  * Módulo Koin com todas as dependências do app
  */
-val appModule = module {
-    
-    // Firebase (apenas quando não for MOCK)
-    single { FirebaseAuth.getInstance() }
-    single { FirebaseFirestore.getInstance() }
-    single { FirebaseStorage.getInstance() }
+val appModule =
+    module {
 
-    // Auth
-    single { AuthManager(get()) }
+        // Firebase (apenas quando não for MOCK)
+        single { FirebaseAuth.getInstance() }
+        single { FirebaseFirestore.getInstance() }
+        single { FirebaseStorage.getInstance() }
 
-    // Data Sources (apenas quando não for MOCK)
-    single { TasksRemoteDataSource(get(), get()) }
+        // Auth
+        single { AuthManager(get()) }
 
-    // Repositories - usa implementação mock ou real baseado no BuildConfig
-    single<TasksRepository> { 
-        if (BuildConfig.BACKEND_TYPE == "MOCK") {
-            TasksRepositoryMock()
-        } else {
-            TasksRepositoryImpl(get())
+        // Data Sources (apenas quando não for MOCK)
+        single { TasksRemoteDataSource(get(), get()) }
+
+        // Repositories - usa implementação mock ou real baseado no BuildConfig
+        single<TasksRepository> {
+            if (BuildConfig.BACKEND_TYPE == "MOCK") {
+                TasksRepositoryMock()
+            } else {
+                TasksRepositoryImpl(get())
+            }
         }
+        single<InventoryRepository> { InventoryRepositoryImpl() }
+        single<ShoppingRepository> { ShoppingRepositoryImpl() }
+
+        // Use Cases - Tasks
+        factory { GetDailyTasksUseCase(get()) }
+        factory { GetWeeklyTasksUseCase(get()) }
+        factory { MarkTaskCompleteUseCase(get()) }
+        factory { AddTaskUseCase(get()) }
+
+        // Use Cases - Inventory
+        factory { GetProductsUseCase(get()) }
+        factory { AddProductUseCase(get()) }
+
+        // Use Cases - Shopping
+        factory { GetShoppingItemsUseCase(get()) }
+        factory { GenerateShoppingListUseCase(get(), get()) }
+
+        // ViewModels
+        viewModel { TasksViewModel(get(), get(), get()) }
+        viewModel { BarcodeScannerViewModel() }
     }
-    single<InventoryRepository> { InventoryRepositoryImpl() }
-    single<ShoppingRepository> { ShoppingRepositoryImpl() }
-
-    // Use Cases - Tasks
-    factory { GetDailyTasksUseCase(get()) }
-    factory { GetWeeklyTasksUseCase(get()) }
-    factory { MarkTaskCompleteUseCase(get()) }
-    factory { AddTaskUseCase(get()) }
-
-    // Use Cases - Inventory
-    factory { GetProductsUseCase(get()) }
-    factory { AddProductUseCase(get()) }
-
-    // Use Cases - Shopping
-    factory { GetShoppingItemsUseCase(get()) }
-    factory { GenerateShoppingListUseCase(get(), get()) }
-
-    // ViewModels
-    viewModel { TasksViewModel(get(), get(), get()) }
-    viewModel { BarcodeScannerViewModel() }
-}
-
