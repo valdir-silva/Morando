@@ -1,50 +1,88 @@
 package com.alunando.morando.data.repository
 
 import com.alunando.morando.core.Result
+import com.alunando.morando.data.datasource.InventoryRemoteDataSource
 import com.alunando.morando.domain.model.Product
 import com.alunando.morando.domain.repository.InventoryRepository
 import kotlinx.coroutines.flow.Flow
-import kotlinx.coroutines.flow.flowOf
 
 /**
- * Implementação do repositório de inventário
- * Implementar com Firebase Firestore e Storage
+ * Implementação do repositório de inventário com Firebase
  */
-class InventoryRepositoryImpl : InventoryRepository {
+class InventoryRepositoryImpl(
+    private val remoteDataSource: InventoryRemoteDataSource
+) : InventoryRepository {
 
     override fun getProducts(): Flow<List<Product>> {
-        return flowOf(emptyList())
+        return remoteDataSource.getProducts()
     }
 
     override suspend fun getProductById(productId: String): Result<Product> {
-        return Result.Error(Exception("Not implemented yet"))
+        return try {
+            val product = remoteDataSource.getProductById(productId)
+            if (product != null) {
+                Result.Success(product)
+            } else {
+                Result.Error(Exception("Produto não encontrado"))
+            }
+        } catch (e: Exception) {
+            Result.Error(e)
+        }
     }
 
     override fun getProductsByCategory(category: String): Flow<List<Product>> {
-        return flowOf(emptyList())
+        return remoteDataSource.getProductsByCategory(category)
     }
 
     override suspend fun getProductByBarcode(barcode: String): Result<Product?> {
-        return Result.Success(null)
+        return try {
+            val product = remoteDataSource.getProductByBarcode(barcode)
+            Result.Success(product)
+        } catch (e: Exception) {
+            Result.Error(e)
+        }
     }
 
     override suspend fun addProduct(product: Product): Result<Product> {
-        return Result.Error(Exception("Not implemented yet"))
+        return try {
+            val addedProduct = remoteDataSource.addProduct(product)
+            Result.Success(addedProduct)
+        } catch (e: Exception) {
+            Result.Error(e)
+        }
     }
 
     override suspend fun updateProduct(product: Product): Result<Unit> {
-        return Result.Error(Exception("Not implemented yet"))
+        return try {
+            remoteDataSource.updateProduct(product)
+            Result.Success(Unit)
+        } catch (e: Exception) {
+            Result.Error(e)
+        }
     }
 
     override suspend fun deleteProduct(productId: String): Result<Unit> {
-        return Result.Error(Exception("Not implemented yet"))
+        return try {
+            remoteDataSource.deleteProduct(productId)
+            Result.Success(Unit)
+        } catch (e: Exception) {
+            Result.Error(e)
+        }
     }
 
-    override suspend fun uploadProductImage(productId: String, imageData: ByteArray): Result<String> {
-        return Result.Error(Exception("Not implemented yet"))
+    override suspend fun uploadProductImage(
+        productId: String,
+        imageData: ByteArray
+    ): Result<String> {
+        return try {
+            val imageUrl = remoteDataSource.uploadProductImage(productId, imageData)
+            Result.Success(imageUrl)
+        } catch (e: Exception) {
+            Result.Error(e)
+        }
     }
 
     override fun getProductsNeedingReplenishment(): Flow<List<Product>> {
-        return flowOf(emptyList())
+        return remoteDataSource.getProductsNeedingReplenishment()
     }
 }
