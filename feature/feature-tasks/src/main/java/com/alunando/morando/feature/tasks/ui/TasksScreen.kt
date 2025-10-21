@@ -32,11 +32,12 @@ import com.alunando.morando.feature.tasks.presentation.TasksViewModel
  */
 @Composable
 fun TasksScreen(
-    viewModel: TasksViewModel
+    viewModel: TasksViewModel,
+    modifier: Modifier = Modifier
 ) {
     val state by viewModel.state.collectAsState()
 
-    Column(modifier = Modifier.fillMaxSize()) {
+    Column(modifier = modifier.fillMaxSize()) {
         // Tabs para tipo de tarefa
         TabRow(selectedTabIndex = if (state.selectedType == TaskType.DIARIA) 0 else 1) {
             Tab(
