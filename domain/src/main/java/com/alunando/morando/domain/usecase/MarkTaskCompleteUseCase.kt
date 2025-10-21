@@ -9,8 +9,8 @@ import com.alunando.morando.domain.repository.TasksRepository
 class MarkTaskCompleteUseCase(
     private val repository: TasksRepository
 ) {
-    suspend operator fun invoke(taskId: String, complete: Boolean): Result<Unit> {
-        return repository.markTaskComplete(taskId, complete)
-    }
+    suspend operator fun invoke(
+        taskId: String,
+        complete: Boolean
+    ): Result<Unit> = repository.markTaskComplete(taskId, complete)
 }
-

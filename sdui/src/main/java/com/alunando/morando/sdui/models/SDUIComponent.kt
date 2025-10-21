@@ -68,4 +68,3 @@ sealed class SDUIAction {
     data class ShowToast(val message: String) : SDUIAction()
     data object Back : SDUIAction()
 }
-

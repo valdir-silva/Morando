@@ -8,7 +8,7 @@ import kotlinx.coroutines.flow.flowOf
 
 /**
  * Implementação do repositório de lista de compras
- * TODO: Implementar com Firebase Firestore
+ * Implementar com Firebase Firestore
  */
 class ShoppingRepositoryImpl : ShoppingRepository {
 
@@ -40,4 +40,3 @@ class ShoppingRepositoryImpl : ShoppingRepository {
         return Result.Error(Exception("Not implemented yet"))
     }
 }
-

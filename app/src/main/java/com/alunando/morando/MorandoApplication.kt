@@ -17,7 +17,6 @@ import org.koin.core.context.startKoin
  * Application class do app Morando
  */
 class MorandoApplication : Application() {
-
     private val applicationScope = CoroutineScope(SupervisorJob() + Dispatchers.Main)
     private val authManager: AuthManager by inject()
 
@@ -42,4 +41,3 @@ class MorandoApplication : Application() {
         }
     }
 }
-

@@ -13,23 +13,13 @@ import com.alunando.morando.ui.home.HomeScreen
 import org.koin.androidx.compose.koinViewModel
 
 /**
- * Rotas de navegação do app
- */
-sealed class Route(val route: String) {
-    data object Home : Route("home")
-    data object Tasks : Route("tasks")
-    data object Inventory : Route("inventory")
-    data object Shopping : Route("shopping")
-}
-
-/**
  * Configuração de navegação do app
  */
 @Composable
 fun AppNavigation(
     modifier: Modifier = Modifier,
     navController: NavHostController = rememberNavController(),
-    startDestination: String = Route.Home.route
+    startDestination: String = AppRoute.Home.route
 ) {
     NavHost(
         navController = navController,
@@ -37,36 +27,35 @@ fun AppNavigation(
         modifier = modifier
     ) {
         // Tela inicial
-        composable(Route.Home.route) {
+        composable(AppRoute.Home.route) {
             HomeScreen(
                 onNavigateToTasks = {
-                    navController.navigate(Route.Tasks.route)
+                    navController.navigate(AppRoute.Tasks.route)
                 },
                 onNavigateToInventory = {
-                    navController.navigate(Route.Inventory.route)
+                    navController.navigate(AppRoute.Inventory.route)
                 },
                 onNavigateToShopping = {
-                    navController.navigate(Route.Shopping.route)
+                    navController.navigate(AppRoute.Shopping.route)
                 }
             )
         }
 
         // Tarefas
-        composable(Route.Tasks.route) {
+        composable(AppRoute.Tasks.route) {
             TasksScreen(
                 viewModel = koinViewModel()
             )
         }
 
         // Estoque
-        composable(Route.Inventory.route) {
+        composable(AppRoute.Inventory.route) {
             InventoryScreen()
         }
 
         // Lista de compras
-        composable(Route.Shopping.route) {
+        composable(AppRoute.Shopping.route) {
             ShoppingScreen()
         }
     }
 }
-

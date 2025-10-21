@@ -25,7 +25,6 @@ class TasksViewModel(
     private val getWeeklyTasksUseCase: GetWeeklyTasksUseCase,
     private val markTaskCompleteUseCase: MarkTaskCompleteUseCase
 ) : ViewModel() {
-
     private val _state = MutableStateFlow(TasksState())
     val state: StateFlow<TasksState> = _state.asStateFlow()
 
@@ -55,22 +54,27 @@ class TasksViewModel(
             TaskType.DIARIA -> getDailyTasksUseCase()
             TaskType.SEMANAL -> getWeeklyTasksUseCase()
         }.onEach { tasks ->
-            _state.value = _state.value.copy(
-                tasks = tasks,
-                isLoading = false,
-                error = null
-            )
+            _state.value =
+                _state.value.copy(
+                    tasks = tasks,
+                    isLoading = false,
+                    error = null
+                )
         }.launchIn(viewModelScope)
     }
 
-    private fun toggleTaskComplete(taskId: String, complete: Boolean) {
+    private fun toggleTaskComplete(
+        taskId: String,
+        complete: Boolean
+    ) {
         viewModelScope.launch {
             val result = markTaskCompleteUseCase(taskId, complete)
-            result.onSuccess {
-                sendEffect(TasksEffect.ShowToast("Tarefa atualizada"))
-            }.onError {
-                sendEffect(TasksEffect.ShowError("Erro ao atualizar tarefa"))
-            }
+            result
+                .onSuccess {
+                    sendEffect(TasksEffect.ShowToast("Tarefa atualizada"))
+                }.onError {
+                    sendEffect(TasksEffect.ShowError("Erro ao atualizar tarefa"))
+                }
         }
     }
 
@@ -85,4 +89,3 @@ class TasksViewModel(
         }
     }
 }
-

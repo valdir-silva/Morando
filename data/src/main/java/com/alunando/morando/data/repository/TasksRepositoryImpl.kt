@@ -22,6 +22,7 @@ class TasksRepositoryImpl(
         return remoteDataSource.getTasksByType(type)
     }
 
+    @Suppress("TooGenericExceptionCaught")
     override suspend fun getTaskById(taskId: String): Result<Task> {
         return try {
             val task = remoteDataSource.getTaskById(taskId)
@@ -35,6 +36,7 @@ class TasksRepositoryImpl(
         }
     }
 
+    @Suppress("TooGenericExceptionCaught")
     override suspend fun addTask(task: Task): Result<Task> {
         return try {
             val newTask = remoteDataSource.addTask(task)
@@ -44,6 +46,7 @@ class TasksRepositoryImpl(
         }
     }
 
+    @Suppress("TooGenericExceptionCaught")
     override suspend fun updateTask(task: Task): Result<Unit> {
         return try {
             remoteDataSource.updateTask(task)
@@ -53,6 +56,7 @@ class TasksRepositoryImpl(
         }
     }
 
+    @Suppress("TooGenericExceptionCaught")
     override suspend fun deleteTask(taskId: String): Result<Unit> {
         return try {
             remoteDataSource.deleteTask(taskId)
@@ -62,6 +66,7 @@ class TasksRepositoryImpl(
         }
     }
 
+    @Suppress("TooGenericExceptionCaught")
     override suspend fun markTaskComplete(taskId: String, complete: Boolean): Result<Unit> {
         return try {
             remoteDataSource.markTaskComplete(taskId, complete)
@@ -71,4 +76,3 @@ class TasksRepositoryImpl(
         }
     }
 }
-

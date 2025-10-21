@@ -14,4 +14,3 @@ class AddProductUseCase(
         return repository.addProduct(product)
     }
 }
-

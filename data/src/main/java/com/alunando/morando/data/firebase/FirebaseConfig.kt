@@ -4,7 +4,7 @@ package com.alunando.morando.data.firebase
  * Constantes de configuração do Firebase
  */
 object FirebaseConfig {
-    
+
     // Collections
     const val COLLECTION_USERS = "users"
     const val COLLECTION_TASKS = "tasks"
@@ -24,4 +24,3 @@ object FirebaseConfig {
     const val FIELD_COMPRADO = "comprado"
     const val FIELD_DIAS_PARA_ACABAR = "diasParaAcabar"
 }
-

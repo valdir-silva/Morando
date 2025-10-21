@@ -10,12 +10,6 @@ complexity:
     active: true
     functionThreshold: 6
     constructorThreshold: 6
-  LongMethod:
-    active: true
-    threshold: 50
-  LargeClass:
-    active: true
-    threshold: 300
 
 style:
   active: true
@@ -25,20 +19,12 @@ style:
   ForbiddenComment:
     active: true
     comments: ['TODO:', 'FIXME:', 'STOPSHIP:']
-  MagicNumber:
-    active: false
-  ReturnCount:
-    active: true
-    max: 3
 
 naming:
   active: true
   FunctionNaming:
     active: true
-  ClassNaming:
-    active: true
-  VariableNaming:
-    active: true
+    ignoreAnnotated: ['Composable']
 
 potential-bugs:
   active: true
@@ -46,27 +32,14 @@ potential-bugs:
     active: true
   UnsafeCast:
     active: true
-  LateinitUsage:
-    active: false
 
 performance:
   active: true
   ForEachOnRange:
     active: true
-  SpreadOperator:
-    active: false
 
 coroutines:
   active: true
   GlobalCoroutineUsage:
     active: true
-  SuspendFunWithFlowReturnType:
-    active: false
-
-exceptions:
-  active: true
-  TooGenericExceptionCaught:
-    active: false
-  SwallowedException:
-    active: false
 

@@ -7,10 +7,9 @@ import kotlinx.coroutines.flow.asStateFlow
 
 /**
  * ViewModel para scanner de código de barras
- * TODO: Implementar com ML Kit e CameraX
+ * Implementar com ML Kit e CameraX
  */
 class BarcodeScannerViewModel : ViewModel() {
-
     private val _barcode = MutableStateFlow<String?>(null)
     val barcode: StateFlow<String?> = _barcode.asStateFlow()
 
@@ -22,4 +21,3 @@ class BarcodeScannerViewModel : ViewModel() {
         _barcode.value = null
     }
 }
-

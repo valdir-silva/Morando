@@ -6,11 +6,11 @@ import com.alunando.morando.domain.model.Task
 import com.alunando.morando.domain.model.TaskType
 import com.google.firebase.firestore.FirebaseFirestore
 import com.google.firebase.firestore.Query
+import java.util.Date
 import kotlinx.coroutines.channels.awaitClose
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.callbackFlow
 import kotlinx.coroutines.tasks.await
-import java.util.Date
 
 /**
  * Data source remoto para tarefas (Firestore)
@@ -19,86 +19,93 @@ class TasksRemoteDataSource(
     private val firestore: FirebaseFirestore,
     private val authManager: AuthManager
 ) {
-    
-    private fun getUserTasksCollection() = authManager.currentUserId.let { userId ->
-        if (userId.isEmpty()) {
-            throw IllegalStateException("Usuário não autenticado")
+    private fun getUserTasksCollection() =
+        authManager.currentUserId.let { userId ->
+            check(userId.isNotEmpty()) { "Usuário não autenticado" }
+            firestore
+                .collection(FirebaseConfig.COLLECTION_USERS)
+                .document(userId)
+                .collection(FirebaseConfig.COLLECTION_TASKS)
         }
-        firestore
-            .collection(FirebaseConfig.COLLECTION_USERS)
-            .document(userId)
-            .collection(FirebaseConfig.COLLECTION_TASKS)
-    }
 
     /**
      * Busca todas as tarefas do usuário
      */
-    fun getTasks(): Flow<List<Task>> = callbackFlow {
-        // Aguarda até que o usuário esteja autenticado
-        while (authManager.currentUserId.isEmpty()) {
-            kotlinx.coroutines.delay(100)
-        }
-        
-        val listener = getUserTasksCollection()
-            .orderBy(FirebaseConfig.FIELD_CREATED_AT, Query.Direction.DESCENDING)
-            .addSnapshotListener { snapshot, error ->
-                if (error != null) {
-                    close(error)
-                    return@addSnapshotListener
-                }
-
-                val tasks = snapshot?.documents?.mapNotNull { doc ->
-                    doc.toTask()
-                } ?: emptyList()
-
-                trySend(tasks)
+    @Suppress("MagicNumber")
+    fun getTasks(): Flow<List<Task>> =
+        callbackFlow {
+            // Aguarda até que o usuário esteja autenticado
+            while (authManager.currentUserId.isEmpty()) {
+                kotlinx.coroutines.delay(100)
             }
 
-        awaitClose { listener.remove() }
-    }
+            val listener =
+                getUserTasksCollection()
+                    .orderBy(FirebaseConfig.FIELD_CREATED_AT, Query.Direction.DESCENDING)
+                    .addSnapshotListener { snapshot, error ->
+                        if (error != null) {
+                            close(error)
+                            return@addSnapshotListener
+                        }
+
+                        val tasks =
+                            snapshot?.documents?.mapNotNull { doc ->
+                                doc.toTask()
+                            } ?: emptyList()
+
+                        trySend(tasks)
+                    }
+
+            awaitClose { listener.remove() }
+        }
 
     /**
      * Busca tarefas por tipo
      */
-    fun getTasksByType(type: TaskType): Flow<List<Task>> = callbackFlow {
-        // Aguarda até que o usuário esteja autenticado
-        while (authManager.currentUserId.isEmpty()) {
-            kotlinx.coroutines.delay(100)
-        }
-        
-        val listener = getUserTasksCollection()
-            .whereEqualTo(FirebaseConfig.FIELD_TIPO, type.name.lowercase())
-            .orderBy(FirebaseConfig.FIELD_CREATED_AT, Query.Direction.DESCENDING)
-            .addSnapshotListener { snapshot, error ->
-                if (error != null) {
-                    close(error)
-                    return@addSnapshotListener
-                }
-
-                val tasks = snapshot?.documents?.mapNotNull { doc ->
-                    doc.toTask()
-                } ?: emptyList()
-
-                trySend(tasks)
+    @Suppress("MagicNumber")
+    fun getTasksByType(type: TaskType): Flow<List<Task>> =
+        callbackFlow {
+            // Aguarda até que o usuário esteja autenticado
+            while (authManager.currentUserId.isEmpty()) {
+                kotlinx.coroutines.delay(100)
             }
 
-        awaitClose { listener.remove() }
-    }
+            val listener =
+                getUserTasksCollection()
+                    .whereEqualTo(FirebaseConfig.FIELD_TIPO, type.name.lowercase())
+                    .orderBy(FirebaseConfig.FIELD_CREATED_AT, Query.Direction.DESCENDING)
+                    .addSnapshotListener { snapshot, error ->
+                        if (error != null) {
+                            close(error)
+                            return@addSnapshotListener
+                        }
+
+                        val tasks =
+                            snapshot?.documents?.mapNotNull { doc ->
+                                doc.toTask()
+                            } ?: emptyList()
+
+                        trySend(tasks)
+                    }
+
+            awaitClose { listener.remove() }
+        }
 
     /**
      * Busca tarefa por ID
      */
-    suspend fun getTaskById(taskId: String): Task? {
-        return try {
-            val doc = getUserTasksCollection()
-                .document(taskId)
-                .get()
-                .await()
+    @Suppress("TooGenericExceptionCaught", "SwallowedException")
+    suspend fun getTaskById(taskId: String): Task? =
+        try {
+            val doc =
+                getUserTasksCollection()
+                    .document(taskId)
+                    .get()
+                    .await()
             doc.toTask()
         } catch (e: Exception) {
             null
         }
-    }
 
     /**
      * Adiciona nova tarefa
@@ -133,7 +140,10 @@ class TasksRemoteDataSource(
     /**
      * Marca tarefa como completa/incompleta
      */
-    suspend fun markTaskComplete(taskId: String, complete: Boolean) {
+    suspend fun markTaskComplete(
+        taskId: String,
+        complete: Boolean
+    ) {
         getUserTasksCollection()
             .document(taskId)
             .update(FirebaseConfig.FIELD_COMPLETA, complete)
@@ -141,8 +151,9 @@ class TasksRemoteDataSource(
     }
 
     // Extension functions
-    private fun com.google.firebase.firestore.DocumentSnapshot.toTask(): Task? {
-        return try {
+    @Suppress("TooGenericExceptionCaught", "SwallowedException")
+    private fun com.google.firebase.firestore.DocumentSnapshot.toTask(): Task? =
+        try {
             Task(
                 id = id,
                 titulo = getString("titulo") ?: "",
@@ -155,17 +166,16 @@ class TasksRemoteDataSource(
         } catch (e: Exception) {
             null
         }
-    }
 
-    private fun Task.toMap(userId: String): Map<String, Any?> {
-        return mapOf(
+    private fun Task.toMap(userId: String): Map<String, Any?> =
+        mapOf(
             "titulo" to titulo,
             "descricao" to descricao,
             "tipo" to tipo.name.lowercase(),
             "completa" to completa,
             "userId" to userId,
-            "createdAt" to com.google.firebase.Timestamp.now()
+            "createdAt" to
+                com.google.firebase.Timestamp
+                    .now()
         )
-    }
 }
-

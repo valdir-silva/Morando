@@ -14,7 +14,7 @@ import androidx.compose.ui.unit.dp
 
 /**
  * Tela de lista de compras
- * TODO: Implementar MVI completo com lista de compras, geração automática, checkbox
+ * Implementar MVI completo com lista de compras, geração automática, checkbox
  */
 @Composable
 fun ShoppingScreen(modifier: Modifier = Modifier) {
@@ -39,7 +39,9 @@ fun ShoppingScreen(modifier: Modifier = Modifier) {
                 textAlign = TextAlign.Center
             )
             Text(
-                text = "\nEm breve você poderá:\n• Criar lista de compras manual\n• Gerar lista automaticamente\n• Marcar itens como comprados\n• Ver histórico de compras",
+                text = "\nEm breve você poderá:\n• Criar lista de compras manual\n" +
+                    "• Gerar lista automaticamente\n• Marcar itens como comprados\n" +
+                    "• Ver histórico de compras",
                 style = MaterialTheme.typography.bodyMedium,
                 color = MaterialTheme.colorScheme.onSurfaceVariant,
                 textAlign = TextAlign.Center,
@@ -48,4 +50,3 @@ fun ShoppingScreen(modifier: Modifier = Modifier) {
         }
     }
 }
-

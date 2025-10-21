@@ -12,4 +12,3 @@ data class TasksState(
     val isLoading: Boolean = false,
     val error: String? = null
 )
-

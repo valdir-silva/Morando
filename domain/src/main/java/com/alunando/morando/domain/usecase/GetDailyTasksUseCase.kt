@@ -15,4 +15,3 @@ class GetDailyTasksUseCase(
         return repository.getTasksByType(TaskType.DIARIA)
     }
 }
-

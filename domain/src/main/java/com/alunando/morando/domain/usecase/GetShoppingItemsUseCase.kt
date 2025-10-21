@@ -14,4 +14,3 @@ class GetShoppingItemsUseCase(
         return repository.getShoppingItems()
     }
 }
-

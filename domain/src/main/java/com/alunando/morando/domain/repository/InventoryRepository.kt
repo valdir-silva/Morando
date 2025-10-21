@@ -8,7 +8,7 @@ import kotlinx.coroutines.flow.Flow
  * Interface do repositório de inventário/estoque
  */
 interface InventoryRepository {
-    
+
     /**
      * Busca todos os produtos do usuário
      */
@@ -54,4 +54,3 @@ interface InventoryRepository {
      */
     fun getProductsNeedingReplenishment(): Flow<List<Product>>
 }
-

@@ -67,7 +67,8 @@ fun TasksScreen(
             }
         } else {
             LazyColumn(
-                modifier = Modifier
+                modifier =
+                Modifier
                     .fillMaxSize()
                     .padding(16.dp),
                 verticalArrangement = Arrangement.spacedBy(8.dp)
@@ -96,7 +97,8 @@ fun TaskItem(
         modifier = Modifier.fillMaxWidth()
     ) {
         Row(
-            modifier = Modifier
+            modifier =
+            Modifier
                 .fillMaxWidth()
                 .padding(16.dp),
             horizontalArrangement = Arrangement.SpaceBetween,
@@ -123,4 +125,3 @@ fun TaskItem(
         }
     }
 }
-

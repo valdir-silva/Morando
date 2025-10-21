@@ -70,4 +70,3 @@ dependencies {
     testImplementation(libs.bundles.testing)
     androidTestImplementation(libs.androidx.compose.ui.test.junit4)
 }
-

@@ -13,7 +13,7 @@ import kotlinx.coroutines.tasks.await
 class AuthManager(
     private val firebaseAuth: FirebaseAuth
 ) {
-    
+
     /**
      * Flow do usuário atual
      */
@@ -46,6 +46,7 @@ class AuthManager(
     /**
      * Faz login anônimo
      */
+    @Suppress("TooGenericExceptionCaught")
     suspend fun signInAnonymously(): Result<FirebaseUser> {
         return try {
             val result = firebaseAuth.signInAnonymously().await()
@@ -60,6 +61,7 @@ class AuthManager(
     /**
      * Faz login com email e senha
      */
+    @Suppress("TooGenericExceptionCaught")
     suspend fun signInWithEmailPassword(email: String, password: String): Result<FirebaseUser> {
         return try {
             val result = firebaseAuth.signInWithEmailAndPassword(email, password).await()
@@ -74,6 +76,7 @@ class AuthManager(
     /**
      * Registra novo usuário
      */
+    @Suppress("TooGenericExceptionCaught")
     suspend fun registerWithEmailPassword(email: String, password: String): Result<FirebaseUser> {
         return try {
             val result = firebaseAuth.createUserWithEmailAndPassword(email, password).await()
@@ -99,4 +102,3 @@ class AuthManager(
         return currentUser?.let { Result.success(it) } ?: signInAnonymously()
     }
 }
-

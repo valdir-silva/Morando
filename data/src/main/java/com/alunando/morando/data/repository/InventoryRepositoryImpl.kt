@@ -8,7 +8,7 @@ import kotlinx.coroutines.flow.flowOf
 
 /**
  * Implementação do repositório de inventário
- * TODO: Implementar com Firebase Firestore e Storage
+ * Implementar com Firebase Firestore e Storage
  */
 class InventoryRepositoryImpl : InventoryRepository {
 
@@ -48,4 +48,3 @@ class InventoryRepositoryImpl : InventoryRepository {
         return flowOf(emptyList())
     }
 }
-

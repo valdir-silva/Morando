@@ -1,8 +1,8 @@
 package com.alunando.morando.domain.model
 
 import android.os.Parcelable
-import kotlinx.parcelize.Parcelize
 import java.util.Date
+import kotlinx.parcelize.Parcelize
 
 /**
  * Modelo de domínio para Produto
@@ -22,7 +22,7 @@ data class Product(
     val userId: String = "",
     val createdAt: Date = Date()
 ) : Parcelable {
-    
+
     /**
      * Verifica se o produto está vencido
      */
@@ -33,6 +33,7 @@ data class Product(
     /**
      * Verifica se o produto está próximo do vencimento (dentro de 7 dias)
      */
+    @Suppress("MagicNumber")
     fun isProximoVencimento(): Boolean {
         return dataVencimento?.let {
             val diasRestantes = Date().time.let { now ->
@@ -45,8 +46,8 @@ data class Product(
     /**
      * Verifica se o produto está acabando
      */
+    @Suppress("MagicNumber")
     fun isAcabando(): Boolean {
         return diasParaAcabar <= 7 && diasParaAcabar > 0
     }
 }
-

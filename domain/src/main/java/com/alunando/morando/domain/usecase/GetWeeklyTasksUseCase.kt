@@ -15,4 +15,3 @@ class GetWeeklyTasksUseCase(
         return repository.getTasksByType(TaskType.SEMANAL)
     }
 }
-

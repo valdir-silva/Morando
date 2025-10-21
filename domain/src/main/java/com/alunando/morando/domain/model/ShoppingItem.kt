@@ -1,8 +1,8 @@
 package com.alunando.morando.domain.model
 
 import android.os.Parcelable
-import kotlinx.parcelize.Parcelize
 import java.util.Date
+import kotlinx.parcelize.Parcelize
 
 /**
  * Modelo de domínio para Item de Lista de Compras
@@ -17,4 +17,3 @@ data class ShoppingItem(
     val userId: String = "",
     val createdAt: Date = Date()
 ) : Parcelable
-

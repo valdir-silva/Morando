@@ -12,7 +12,6 @@ import com.alunando.morando.navigation.AppNavigation
 import com.alunando.morando.ui.theme.MorandoTheme
 
 class MainActivity : ComponentActivity() {
-
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         enableEdgeToEdge()

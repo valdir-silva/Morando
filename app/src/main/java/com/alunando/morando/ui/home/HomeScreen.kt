@@ -35,29 +35,31 @@ fun HomeScreen(
     onNavigateToShopping: () -> Unit,
     modifier: Modifier = Modifier
 ) {
-    val features = listOf(
-        FeatureCard(
-            title = "Tarefas Diárias/Semanais",
-            description = "Gerencie suas tarefas do dia a dia",
-            iconRes = R.drawable.ic_tasks,
-            onClick = onNavigateToTasks
-        ),
-        FeatureCard(
-            title = "Estoque de Produtos",
-            description = "Controle produtos e vencimentos",
-            iconRes = R.drawable.ic_inventory,
-            onClick = onNavigateToInventory
-        ),
-        FeatureCard(
-            title = "Lista de Compras",
-            description = "Organize suas compras",
-            iconRes = R.drawable.ic_shopping,
-            onClick = onNavigateToShopping
+    val features =
+        listOf(
+            FeatureCard(
+                title = "Tarefas Diárias/Semanais",
+                description = "Gerencie suas tarefas do dia a dia",
+                iconRes = R.drawable.ic_tasks,
+                onClick = onNavigateToTasks
+            ),
+            FeatureCard(
+                title = "Estoque de Produtos",
+                description = "Controle produtos e vencimentos",
+                iconRes = R.drawable.ic_inventory,
+                onClick = onNavigateToInventory
+            ),
+            FeatureCard(
+                title = "Lista de Compras",
+                description = "Organize suas compras",
+                iconRes = R.drawable.ic_shopping,
+                onClick = onNavigateToShopping
+            )
         )
-    )
 
     Column(
-        modifier = modifier
+        modifier =
+        modifier
             .fillMaxSize()
             .padding(16.dp),
         horizontalAlignment = Alignment.CenterHorizontally
@@ -90,7 +92,8 @@ private fun FeatureCardItem(feature: FeatureCard) {
         elevation = CardDefaults.cardElevation(defaultElevation = 4.dp)
     ) {
         Column(
-            modifier = Modifier
+            modifier =
+            Modifier
                 .fillMaxWidth()
                 .padding(24.dp),
             horizontalAlignment = Alignment.CenterHorizontally,
@@ -100,7 +103,8 @@ private fun FeatureCardItem(feature: FeatureCard) {
                 painter = painterResource(id = feature.iconRes),
                 contentDescription = feature.title,
                 tint = MaterialTheme.colorScheme.primary,
-                modifier = Modifier
+                modifier =
+                Modifier
                     .size(48.dp)
                     .padding(8.dp)
             )
@@ -125,4 +129,3 @@ private data class FeatureCard(
     @DrawableRes val iconRes: Int,
     val onClick: () -> Unit
 )
-

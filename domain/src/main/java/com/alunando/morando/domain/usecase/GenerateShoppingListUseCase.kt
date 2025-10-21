@@ -1,7 +1,6 @@
 package com.alunando.morando.domain.usecase
 
 import com.alunando.morando.core.Result
-import com.alunando.morando.domain.model.Product
 import com.alunando.morando.domain.model.ShoppingItem
 import com.alunando.morando.domain.repository.InventoryRepository
 import com.alunando.morando.domain.repository.ShoppingRepository
@@ -15,6 +14,7 @@ class GenerateShoppingListUseCase(
     private val inventoryRepository: InventoryRepository,
     private val shoppingRepository: ShoppingRepository
 ) {
+    @Suppress("TooGenericExceptionCaught")
     suspend operator fun invoke(): Result<List<ShoppingItem>> {
         return try {
             // Busca produtos que precisam ser repostos
@@ -42,4 +42,3 @@ class GenerateShoppingListUseCase(
         }
     }
 }
-

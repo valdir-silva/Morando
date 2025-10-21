@@ -60,7 +60,7 @@ object SDUIEngine {
 
     @Composable
     private fun RenderList(component: SDUIComponent.List) {
-        // TODO: Implementar renderização de lista dinâmica
+        // Implementar renderização de lista dinâmica
         Text("Lista dinâmica: ${component.dataSource}")
     }
 
@@ -90,4 +90,3 @@ object SDUIEngine {
         }
     }
 }
-

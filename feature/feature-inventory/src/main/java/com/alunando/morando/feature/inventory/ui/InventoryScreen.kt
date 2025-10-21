@@ -14,7 +14,8 @@ import androidx.compose.ui.unit.dp
 
 /**
  * Tela de gerenciamento de estoque de produtos
- * TODO: Implementar MVI completo com lista de produtos, upload de fotos, scanner de código de barras
+ * Implementar MVI completo com lista de produtos, upload de fotos,
+ * scanner de código de barras
  */
 @Composable
 fun InventoryScreen(modifier: Modifier = Modifier) {
@@ -39,7 +40,9 @@ fun InventoryScreen(modifier: Modifier = Modifier) {
                 textAlign = TextAlign.Center
             )
             Text(
-                text = "\nEm breve você poderá:\n• Cadastrar produtos com fotos\n• Usar scanner de código de barras\n• Controlar datas de vencimento\n• Receber alertas de produtos acabando",
+                text = "\nEm breve você poderá:\n• Cadastrar produtos com fotos\n" +
+                    "• Usar scanner de código de barras\n• Controlar datas de vencimento\n" +
+                    "• Receber alertas de produtos acabando",
                 style = MaterialTheme.typography.bodyMedium,
                 color = MaterialTheme.colorScheme.onSurfaceVariant,
                 textAlign = TextAlign.Center,
@@ -48,4 +51,3 @@ fun InventoryScreen(modifier: Modifier = Modifier) {
         }
     }
 }
-

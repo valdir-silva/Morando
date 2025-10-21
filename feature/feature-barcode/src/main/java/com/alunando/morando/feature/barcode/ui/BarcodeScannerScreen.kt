@@ -9,17 +9,17 @@ import androidx.compose.ui.Modifier
 
 /**
  * Tela de scanner de código de barras
- * TODO: Implementar CameraX Preview e ML Kit Barcode Scanning
+ * Implementar CameraX Preview e ML Kit Barcode Scanning
  */
 @Composable
-fun BarcodeScannerScreen(
-    onBarcodeScanned: (String) -> Unit
-) {
+@Suppress("UnusedParameter")
+fun BarcodeScannerScreen(onBarcodeScanned: (String) -> Unit) {
+    // Placeholder para implementação futura
+    // onBarcodeScanned será usado quando implementarmos o scanner
     Box(
         modifier = Modifier.fillMaxSize(),
         contentAlignment = Alignment.Center
     ) {
-        Text("TODO: Implementar Camera Preview com ML Kit")
+        Text("Implementar Camera Preview com ML Kit")
     }
 }
-

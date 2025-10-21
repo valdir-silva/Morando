@@ -32,16 +32,12 @@ fun Date.daysBetween(other: Date): Long {
 /**
  * Adiciona dias à data
  */
-fun Date.plusDays(days: Int): Date {
-    return Date(this.time + TimeUnit.DAYS.toMillis(days.toLong()))
-}
+fun Date.plusDays(days: Int): Date = Date(this.time + TimeUnit.DAYS.toMillis(days.toLong()))
 
 /**
  * Verifica se a data já passou
  */
-fun Date.isPast(): Boolean {
-    return this.before(Date())
-}
+fun Date.isPast(): Boolean = this.before(Date())
 
 /**
  * Verifica se a data está próxima (dentro de X dias)
@@ -51,4 +47,3 @@ fun Date.isWithinDays(days: Int): Boolean {
     val future = now.plusDays(days)
     return this.after(now) && this.before(future)
 }
-
