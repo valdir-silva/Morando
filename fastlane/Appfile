@@ -1,0 +1,3 @@
+json_key_file("") # Path to the json secret file
+package_name("com.alunando.morando") # e.g. com.krausefx.app
+

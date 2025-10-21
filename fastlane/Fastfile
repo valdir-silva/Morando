@@ -1,0 +1,62 @@
+default_platform(:android)
+
+platform :android do
+  desc "Executar ktlint e detekt"
+  lane :lint do
+    gradle(task: "ktlintCheck")
+    gradle(task: "detekt")
+  end
+
+  desc "Executar testes unitários"
+  lane :unit_tests do
+    gradle(task: "testDebugUnitTest")
+  end
+
+  desc "Executar testes instrumentados"
+  lane :ui_tests do
+    gradle(task: "connectedDebugAndroidTest")
+  end
+
+  desc "Capturar screenshots"
+  lane :screenshots do
+    gradle(task: "connectedDebugAndroidTest")
+    screengrab(
+      locales: ["pt-BR", "en-US"],
+      clear_previous_screenshots: true
+    )
+  end
+
+  desc "Build debug"
+  lane :build_debug do
+    gradle(
+      task: "assemble",
+      build_type: "Debug"
+    )
+  end
+
+  desc "Build mock"
+  lane :build_mock do
+    gradle(
+      task: "assemble",
+      build_type: "Mock"
+    )
+  end
+
+  desc "Build release"
+  lane :build_release do
+    gradle(
+      task: "bundle",
+      build_type: "Release"
+    )
+  end
+
+  desc "CI - Executar todas as verificações"
+  lane :ci do
+    lint
+    unit_tests
+    ui_tests
+    build_debug
+    build_mock
+  end
+end
+
