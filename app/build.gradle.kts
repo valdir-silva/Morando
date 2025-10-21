@@ -30,6 +30,7 @@ android {
         }
 
         create("mock") {
+            initWith(getByName("debug"))
             isMinifyEnabled = false
             applicationIdSuffix = ".mock"
             buildConfigField("String", "BACKEND_TYPE", "\"MOCK\"")

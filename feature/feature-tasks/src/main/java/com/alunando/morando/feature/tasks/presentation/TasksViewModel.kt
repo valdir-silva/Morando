@@ -2,6 +2,8 @@ package com.alunando.morando.feature.tasks.presentation
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.alunando.morando.core.onError
+import com.alunando.morando.core.onSuccess
 import com.alunando.morando.domain.model.TaskType
 import com.alunando.morando.domain.usecase.GetDailyTasksUseCase
 import com.alunando.morando.domain.usecase.GetWeeklyTasksUseCase
@@ -31,7 +33,8 @@ class TasksViewModel(
     val effect = _effect.receiveAsFlow()
 
     init {
-        handleIntent(TasksIntent.LoadTasks)
+        // Não carrega automaticamente - espera o usuário autenticar
+        // O loadTasks será chamado quando a UI estiver pronta
     }
 
     /**
@@ -48,20 +51,16 @@ class TasksViewModel(
     private fun loadTasks() {
         _state.value = _state.value.copy(isLoading = true)
 
-        val useCase = when (_state.value.selectedType) {
-            TaskType.DIARIA -> getDailyTasksUseCase
-            TaskType.SEMANAL -> getWeeklyTasksUseCase
-        }
-
-        useCase()
-            .onEach { tasks ->
-                _state.value = _state.value.copy(
-                    tasks = tasks,
-                    isLoading = false,
-                    error = null
-                )
-            }
-            .launchIn(viewModelScope)
+        when (_state.value.selectedType) {
+            TaskType.DIARIA -> getDailyTasksUseCase()
+            TaskType.SEMANAL -> getWeeklyTasksUseCase()
+        }.onEach { tasks ->
+            _state.value = _state.value.copy(
+                tasks = tasks,
+                isLoading = false,
+                error = null
+            )
+        }.launchIn(viewModelScope)
     }
 
     private fun toggleTaskComplete(taskId: String, complete: Boolean) {

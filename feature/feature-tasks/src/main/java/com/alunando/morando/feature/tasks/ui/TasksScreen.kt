@@ -37,6 +37,11 @@ fun TasksScreen(
 ) {
     val state by viewModel.state.collectAsState()
 
+    // Carrega as tarefas quando a tela é exibida
+    androidx.compose.runtime.LaunchedEffect(Unit) {
+        viewModel.handleIntent(TasksIntent.LoadTasks)
+    }
+
     Column(modifier = modifier.fillMaxSize()) {
         // Tabs para tipo de tarefa
         TabRow(selectedTabIndex = if (state.selectedType == TaskType.DIARIA) 0 else 1) {

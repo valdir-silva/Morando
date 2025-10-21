@@ -1,10 +1,12 @@
 package com.alunando.morando.di
 
+import com.alunando.morando.BuildConfig
 import com.alunando.morando.data.datasource.TasksRemoteDataSource
 import com.alunando.morando.data.firebase.AuthManager
 import com.alunando.morando.data.repository.InventoryRepositoryImpl
 import com.alunando.morando.data.repository.ShoppingRepositoryImpl
 import com.alunando.morando.data.repository.TasksRepositoryImpl
+import com.alunando.morando.data.repository.TasksRepositoryMock
 import com.alunando.morando.domain.repository.InventoryRepository
 import com.alunando.morando.domain.repository.ShoppingRepository
 import com.alunando.morando.domain.repository.TasksRepository
@@ -29,7 +31,7 @@ import org.koin.dsl.module
  */
 val appModule = module {
     
-    // Firebase
+    // Firebase (apenas quando não for MOCK)
     single { FirebaseAuth.getInstance() }
     single { FirebaseFirestore.getInstance() }
     single { FirebaseStorage.getInstance() }
@@ -37,11 +39,17 @@ val appModule = module {
     // Auth
     single { AuthManager(get()) }
 
-    // Data Sources
+    // Data Sources (apenas quando não for MOCK)
     single { TasksRemoteDataSource(get(), get()) }
 
-    // Repositories
-    single<TasksRepository> { TasksRepositoryImpl(get()) }
+    // Repositories - usa implementação mock ou real baseado no BuildConfig
+    single<TasksRepository> { 
+        if (BuildConfig.BACKEND_TYPE == "MOCK") {
+            TasksRepositoryMock()
+        } else {
+            TasksRepositoryImpl(get())
+        }
+    }
     single<InventoryRepository> { InventoryRepositoryImpl() }
     single<ShoppingRepository> { ShoppingRepositoryImpl() }
 

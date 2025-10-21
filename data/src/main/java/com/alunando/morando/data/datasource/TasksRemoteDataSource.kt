@@ -20,15 +20,25 @@ class TasksRemoteDataSource(
     private val authManager: AuthManager
 ) {
     
-    private fun getUserTasksCollection() = firestore
-        .collection(FirebaseConfig.COLLECTION_USERS)
-        .document(authManager.currentUserId)
-        .collection(FirebaseConfig.COLLECTION_TASKS)
+    private fun getUserTasksCollection() = authManager.currentUserId.let { userId ->
+        if (userId.isEmpty()) {
+            throw IllegalStateException("Usuário não autenticado")
+        }
+        firestore
+            .collection(FirebaseConfig.COLLECTION_USERS)
+            .document(userId)
+            .collection(FirebaseConfig.COLLECTION_TASKS)
+    }
 
     /**
      * Busca todas as tarefas do usuário
      */
     fun getTasks(): Flow<List<Task>> = callbackFlow {
+        // Aguarda até que o usuário esteja autenticado
+        while (authManager.currentUserId.isEmpty()) {
+            kotlinx.coroutines.delay(100)
+        }
+        
         val listener = getUserTasksCollection()
             .orderBy(FirebaseConfig.FIELD_CREATED_AT, Query.Direction.DESCENDING)
             .addSnapshotListener { snapshot, error ->
@@ -51,6 +61,11 @@ class TasksRemoteDataSource(
      * Busca tarefas por tipo
      */
     fun getTasksByType(type: TaskType): Flow<List<Task>> = callbackFlow {
+        // Aguarda até que o usuário esteja autenticado
+        while (authManager.currentUserId.isEmpty()) {
+            kotlinx.coroutines.delay(100)
+        }
+        
         val listener = getUserTasksCollection()
             .whereEqualTo(FirebaseConfig.FIELD_TIPO, type.name.lowercase())
             .orderBy(FirebaseConfig.FIELD_CREATED_AT, Query.Direction.DESCENDING)
