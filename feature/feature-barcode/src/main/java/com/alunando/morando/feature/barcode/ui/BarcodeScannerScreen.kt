@@ -13,7 +13,10 @@ import androidx.compose.ui.Modifier
  */
 @Composable
 @Suppress("UnusedParameter")
-fun BarcodeScannerScreen(onBarcodeScanned: (String) -> Unit) {
+fun BarcodeScannerScreen(
+    onBarcodeScanned: (String) -> Unit = {},
+    onNavigateBack: () -> Unit = {}
+) {
     // Placeholder para implementação futura
     // onBarcodeScanned será usado quando implementarmos o scanner
     Box(

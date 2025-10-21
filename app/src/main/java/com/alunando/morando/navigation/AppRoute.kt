@@ -12,5 +12,7 @@ sealed class AppRoute(
 
     data object Inventory : AppRoute("inventory")
 
+    data object BarcodeScanner : AppRoute("barcode_scanner")
+
     data object Shopping : AppRoute("shopping")
 }

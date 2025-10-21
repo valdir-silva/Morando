@@ -6,6 +6,7 @@ import androidx.navigation.NavHostController
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
+import com.alunando.morando.feature.barcode.ui.BarcodeScannerScreen
 import com.alunando.morando.feature.inventory.ui.InventoryScreen
 import com.alunando.morando.feature.shopping.ui.ShoppingScreen
 import com.alunando.morando.feature.tasks.ui.TasksScreen
@@ -50,7 +51,21 @@ fun AppNavigation(
 
         // Estoque
         composable(AppRoute.Inventory.route) {
-            InventoryScreen()
+            InventoryScreen(
+                viewModel = koinViewModel(),
+                onNavigateToBarcodeScanner = {
+                    navController.navigate(AppRoute.BarcodeScanner.route)
+                }
+            )
+        }
+
+        // Scanner de código de barras
+        composable(AppRoute.BarcodeScanner.route) {
+            BarcodeScannerScreen(
+                onNavigateBack = {
+                    navController.popBackStack()
+                }
+            )
         }
 
         // Lista de compras
