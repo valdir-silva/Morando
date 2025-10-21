@@ -1,5 +1,5 @@
 # Progress: Morando
-*Version: 1.0*
+*Version: 1.1*
 *Created: 2025-10-21*
 *Last Updated: 2025-10-21*
 
@@ -41,17 +41,19 @@
 - [ ] Integração com Firestore para configs
 - [ ] Componentes avançados
 
-### Features (40%)
+### Features (50%)
 - [x] **feature-tasks**: MVI completo (Intent, State, Effect, ViewModel, Screen)
 - [x] **feature-barcode**: Estrutura básica (ViewModel, Screen stub)
-- [ ] **feature-inventory**: TODO - implementar completo
-- [ ] **feature-shopping**: TODO - implementar completo
+- [x] **feature-inventory**: Placeholder screen criado
+- [x] **feature-shopping**: Placeholder screen criado
 
 ### App Module (100%)
 - [x] Koin DI setup completo (AppModule)
 - [x] MorandoApplication com Firebase init
-- [x] MainActivity com TasksScreen
+- [x] MainActivity com navegação
 - [x] AndroidManifest com permissões
+- [x] HomeScreen com cards de navegação
+- [x] Navigation Compose implementado (AppNavigation)
 
 ### CI/CD (100%)
 - [x] Fastlane configurado (Fastfile, Screengrabfile, Appfile)
@@ -126,9 +128,9 @@
    - Exemplo de configuração no Firestore
 
 #### Low Priority
-8. **Navigation** (1 dia)
-   - Navigation Compose entre features
-   - Bottom navigation ou drawer
+8. **Bottom Navigation** (1 dia)
+   - Bottom navigation bar (opcional)
+   - Navigation drawer (opcional)
    - Deep linking
 
 9. **Melhorias de UX** (2 dias)
@@ -181,7 +183,7 @@
 
 ## 📊 Metrics
 
-### Overall Progress: ~60% ✅
+### Overall Progress: ~65% ✅
 
 | Component | Status | Progress |
 |-----------|--------|----------|
@@ -190,7 +192,8 @@
 | Domain | ✅ Complete | 100% |
 | Data | 🚧 In Progress | 70% |
 | SDUI | 🚧 In Progress | 60% |
-| Features | 🚧 In Progress | 40% |
+| Features | 🚧 In Progress | 50% |
+| Navigation | ✅ Complete | 100% |
 | App Module | ✅ Complete | 100% |
 | CI/CD | ✅ Complete | 100% |
 | Documentation | ✅ Complete | 100% |
@@ -198,25 +201,28 @@
 
 ### Code Statistics
 - **Modules**: 9 (app + 8 libraries)
-- **Kotlin Files**: ~30+
-- **Lines of Code**: ~3000+
+- **Kotlin Files**: ~35+
+- **Lines of Code**: ~3500+
 - **Test Coverage**: 0% (TODO)
 
 ## 🎯 Immediate Next Steps
 
-1. Adicionar `google-services.json` placeholder
-2. Implementar InventoryRemoteDataSource
-3. Completar feature-inventory
-4. Implementar barcode scanner
-5. Adicionar testes unitários básicos
+1. ~~Implementar navegação básica~~ ✅ **COMPLETO**
+2. ~~Criar placeholders para features vazias~~ ✅ **COMPLETO**
+3. Adicionar `google-services.json` ou configurar modo mock completo
+4. Implementar InventoryRemoteDataSource
+5. Completar feature-inventory (MVI completo)
+6. Implementar barcode scanner com ML Kit
+7. Completar feature-shopping (MVI completo)
+8. Adicionar testes unitários básicos
 
 ## 🐛 Known Issues
 
-- [ ] google-services.json não incluído (necessário para build)
+- [ ] google-services.json não incluído (necessário para build Firebase, mas mock build funciona)
 - [ ] Stub implementations em InventoryRepository e ShoppingRepository
 - [ ] Barcode scanner apenas placeholder
+- [ ] Inventory e Shopping features com tela placeholder (implementação MVI pendente)
 - [ ] Nenhum teste implementado ainda
-- [ ] Navigation não implementada
 
 ## 📝 Notes
 
