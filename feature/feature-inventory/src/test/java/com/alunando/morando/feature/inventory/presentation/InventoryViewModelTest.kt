@@ -5,8 +5,10 @@ import com.alunando.morando.core.Result
 import com.alunando.morando.domain.model.Product
 import com.alunando.morando.domain.usecase.AddProductUseCase
 import com.alunando.morando.domain.usecase.DeleteProductUseCase
+import com.alunando.morando.domain.usecase.GetProductInfoFromBarcodeUseCase
 import com.alunando.morando.domain.usecase.GetProductsUseCase
 import com.alunando.morando.domain.usecase.UpdateProductUseCase
+import com.alunando.morando.domain.usecase.UploadProductImageUseCase
 import io.mockk.coEvery
 import io.mockk.coVerify
 import io.mockk.every
@@ -34,6 +36,8 @@ class InventoryViewModelTest {
     private lateinit var addProductUseCase: AddProductUseCase
     private lateinit var updateProductUseCase: UpdateProductUseCase
     private lateinit var deleteProductUseCase: DeleteProductUseCase
+    private lateinit var uploadProductImageUseCase: UploadProductImageUseCase
+    private lateinit var getProductInfoFromBarcodeUseCase: GetProductInfoFromBarcodeUseCase
 
     private val testDispatcher = StandardTestDispatcher()
 
@@ -62,6 +66,8 @@ class InventoryViewModelTest {
         addProductUseCase = mockk()
         updateProductUseCase = mockk()
         deleteProductUseCase = mockk()
+        uploadProductImageUseCase = mockk()
+        getProductInfoFromBarcodeUseCase = mockk()
 
         // Setup default behavior
         every { getProductsUseCase() } returns flowOf(emptyList())
@@ -83,6 +89,8 @@ class InventoryViewModelTest {
                     addProductUseCase,
                     updateProductUseCase,
                     deleteProductUseCase,
+                    uploadProductImageUseCase,
+                    getProductInfoFromBarcodeUseCase,
                 )
 
             // When
@@ -113,6 +121,8 @@ class InventoryViewModelTest {
                     addProductUseCase,
                     updateProductUseCase,
                     deleteProductUseCase,
+                    uploadProductImageUseCase,
+                    getProductInfoFromBarcodeUseCase,
                 )
             advanceUntilIdle()
 
@@ -148,6 +158,8 @@ class InventoryViewModelTest {
                     addProductUseCase,
                     updateProductUseCase,
                     deleteProductUseCase,
+                    uploadProductImageUseCase,
+                    getProductInfoFromBarcodeUseCase,
                 )
             advanceUntilIdle()
 
@@ -175,6 +187,8 @@ class InventoryViewModelTest {
                     addProductUseCase,
                     updateProductUseCase,
                     deleteProductUseCase,
+                    uploadProductImageUseCase,
+                    getProductInfoFromBarcodeUseCase,
                 )
             advanceUntilIdle()
 
@@ -201,6 +215,8 @@ class InventoryViewModelTest {
                     addProductUseCase,
                     updateProductUseCase,
                     deleteProductUseCase,
+                    uploadProductImageUseCase,
+                    getProductInfoFromBarcodeUseCase,
                 )
             advanceUntilIdle()
 
@@ -222,6 +238,8 @@ class InventoryViewModelTest {
                     addProductUseCase,
                     updateProductUseCase,
                     deleteProductUseCase,
+                    uploadProductImageUseCase,
+                    getProductInfoFromBarcodeUseCase,
                 )
             advanceUntilIdle()
             viewModel.handleIntent(InventoryIntent.OpenAddDialog)
@@ -245,6 +263,8 @@ class InventoryViewModelTest {
                     addProductUseCase,
                     updateProductUseCase,
                     deleteProductUseCase,
+                    uploadProductImageUseCase,
+                    getProductInfoFromBarcodeUseCase,
                 )
             advanceUntilIdle()
 
