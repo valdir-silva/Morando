@@ -27,13 +27,25 @@ import org.koin.androidx.compose.koinViewModel
 fun AppNavigation(
     modifier: Modifier = Modifier,
     navController: NavHostController = rememberNavController(),
-    startDestination: String = AppRoute.Home.route,
+    startDestination: String = AppRoute.Login.route,
 ) {
     NavHost(
         navController = navController,
         startDestination = startDestination,
         modifier = modifier,
     ) {
+        // Tela de login
+        composable(AppRoute.Login.route) {
+            com.alunando.morando.ui.login.LoginScreen(
+                viewModel = koinViewModel(),
+                onLoginSuccess = {
+                    navController.navigate(AppRoute.Home.route) {
+                        popUpTo(AppRoute.Login.route) { inclusive = true }
+                    }
+                },
+            )
+        }
+
         // Tela inicial
         composable(AppRoute.Home.route) {
             HomeScreen(
@@ -61,29 +73,48 @@ fun AppNavigation(
 
         // Estoque
         composable(AppRoute.Inventory.route) {
+            InventoryScreen(
+                viewModel = koinViewModel(),
+                onNavigateToAddProduct = {
+                    navController.navigate(AppRoute.AddProduct.route)
+                },
+            )
+        }
+
+        // Adicionar produto
+        composable(AppRoute.AddProduct.route) {
             val viewModel: com.alunando.morando.feature.inventory.presentation.InventoryViewModel =
                 koinViewModel()
 
             // Recebe o código de barras escaneado
-            navController.currentBackStackEntry
-                ?.savedStateHandle
-                ?.get<String>("scanned_barcode")
-                ?.let { barcode ->
+            val scannedBarcode =
+                navController.currentBackStackEntry
+                    ?.savedStateHandle
+                    ?.get<String>("scanned_barcode")
+
+            com.alunando.morando.feature.inventory.ui.AddProductScreen(
+                onNavigateBack = {
+                    navController.popBackStack()
+                },
+                onSaveProduct = { product, imageData ->
                     viewModel.handleIntent(
-                        com.alunando.morando.feature.inventory.presentation.InventoryIntent.OnBarcodeScanned(
-                            barcode,
+                        com.alunando.morando.feature.inventory.presentation.InventoryIntent.AddProduct(
+                            product,
+                            imageData,
                         ),
                     )
-                    // Remove o valor após processar
-                    navController.currentBackStackEntry?.savedStateHandle?.remove<String>("scanned_barcode")
-                }
-
-            InventoryScreen(
-                viewModel = viewModel,
+                    navController.popBackStack()
+                },
                 onNavigateToBarcodeScanner = {
                     navController.navigate(AppRoute.BarcodeScanner.route)
                 },
+                scannedBarcode = scannedBarcode,
             )
+
+            // Remove o código de barras após usar
+            scannedBarcode?.let {
+                navController.currentBackStackEntry?.savedStateHandle?.remove<String>("scanned_barcode")
+            }
         }
 
         // Scanner de código de barras
