@@ -14,5 +14,5 @@ data class InventoryState(
     val selectedCategory: String? = null,
     val scannedProduct: Product? = null,
     val editingProduct: Product? = null,
-    val isLoadingBarcodeInfo: Boolean = false
+    val isLoadingBarcodeInfo: Boolean = false,
 )

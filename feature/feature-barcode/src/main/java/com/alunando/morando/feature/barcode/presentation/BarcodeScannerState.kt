@@ -7,6 +7,5 @@ data class BarcodeScannerState(
     val hasCameraPermission: Boolean = false,
     val isScanning: Boolean = false,
     val scannedBarcode: String? = null,
-    val error: String? = null
+    val error: String? = null,
 )
-

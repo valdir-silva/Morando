@@ -23,7 +23,7 @@ import kotlinx.coroutines.launch
 class TasksViewModel(
     private val getDailyTasksUseCase: GetDailyTasksUseCase,
     private val getWeeklyTasksUseCase: GetWeeklyTasksUseCase,
-    private val markTaskCompleteUseCase: MarkTaskCompleteUseCase
+    private val markTaskCompleteUseCase: MarkTaskCompleteUseCase,
 ) : ViewModel() {
     private val _state = MutableStateFlow(TasksState())
     val state: StateFlow<TasksState> = _state.asStateFlow()
@@ -58,14 +58,14 @@ class TasksViewModel(
                 _state.value.copy(
                     tasks = tasks,
                     isLoading = false,
-                    error = null
+                    error = null,
                 )
         }.launchIn(viewModelScope)
     }
 
     private fun toggleTaskComplete(
         taskId: String,
-        complete: Boolean
+        complete: Boolean,
     ) {
         viewModelScope.launch {
             val result = markTaskCompleteUseCase(taskId, complete)

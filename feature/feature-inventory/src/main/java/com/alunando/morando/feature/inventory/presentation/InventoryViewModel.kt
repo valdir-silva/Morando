@@ -30,7 +30,7 @@ class InventoryViewModel(
     private val updateProductUseCase: UpdateProductUseCase,
     private val deleteProductUseCase: DeleteProductUseCase,
     private val uploadProductImageUseCase: UploadProductImageUseCase,
-    private val getProductInfoFromBarcodeUseCase: GetProductInfoFromBarcodeUseCase
+    private val getProductInfoFromBarcodeUseCase: GetProductInfoFromBarcodeUseCase,
 ) : ViewModel() {
     private val _state = MutableStateFlow(InventoryState())
     val state: StateFlow<InventoryState> = _state.asStateFlow()
@@ -71,14 +71,14 @@ class InventoryViewModel(
                     _state.value.copy(
                         products = products,
                         isLoading = false,
-                        error = null
+                        error = null,
                     )
             }.launchIn(viewModelScope)
     }
 
     private fun addProduct(
         product: Product,
-        imageData: ByteArray?
+        imageData: ByteArray?,
     ) {
         viewModelScope.launch {
             // Primeiro adiciona o produto
@@ -103,7 +103,7 @@ class InventoryViewModel(
 
     private fun updateProduct(
         product: Product,
-        imageData: ByteArray?
+        imageData: ByteArray?,
     ) {
         viewModelScope.launch {
             // Se tem nova imagem, faz upload primeiro
@@ -139,30 +139,33 @@ class InventoryViewModel(
     }
 
     private fun openAddDialog() {
-        _state.value = _state.value.copy(
-            showAddDialog = true,
-            showEditDialog = false,
-            scannedProduct = null,
-            editingProduct = null
-        )
+        _state.value =
+            _state.value.copy(
+                showAddDialog = true,
+                showEditDialog = false,
+                scannedProduct = null,
+                editingProduct = null,
+            )
     }
 
     private fun openEditDialog(product: Product) {
-        _state.value = _state.value.copy(
-            showEditDialog = true,
-            showAddDialog = false,
-            editingProduct = product,
-            scannedProduct = null
-        )
+        _state.value =
+            _state.value.copy(
+                showEditDialog = true,
+                showAddDialog = false,
+                editingProduct = product,
+                scannedProduct = null,
+            )
     }
 
     private fun closeAddDialog() {
-        _state.value = _state.value.copy(
-            showAddDialog = false,
-            showEditDialog = false,
-            scannedProduct = null,
-            editingProduct = null
-        )
+        _state.value =
+            _state.value.copy(
+                showAddDialog = false,
+                showEditDialog = false,
+                scannedProduct = null,
+                editingProduct = null,
+            )
     }
 
     private fun openBarcodeScanner() {
@@ -181,12 +184,13 @@ class InventoryViewModel(
                 .onSuccess { productInfo ->
                     _state.value =
                         _state.value.copy(
-                            scannedProduct = productInfo ?: Product(
-                                codigoBarras = barcode,
-                                nome = ""
-                            ),
+                            scannedProduct =
+                                productInfo ?: Product(
+                                    codigoBarras = barcode,
+                                    nome = "",
+                                ),
                             isLoadingBarcodeInfo = false,
-                            showAddDialog = true
+                            showAddDialog = true,
                         )
                     if (productInfo != null) {
                         sendEffect(InventoryEffect.ShowToast("Produto encontrado!"))
@@ -194,11 +198,12 @@ class InventoryViewModel(
                         sendEffect(InventoryEffect.ShowToast("Produto não encontrado. Preencha os dados manualmente."))
                     }
                 }.onError { error ->
-                    _state.value = _state.value.copy(
-                        scannedProduct = Product(codigoBarras = barcode, nome = ""),
-                        isLoadingBarcodeInfo = false,
-                        showAddDialog = true
-                    )
+                    _state.value =
+                        _state.value.copy(
+                            scannedProduct = Product(codigoBarras = barcode, nome = ""),
+                            isLoadingBarcodeInfo = false,
+                            showAddDialog = true,
+                        )
                     sendEffect(InventoryEffect.ShowToast("Erro ao buscar produto. Preencha manualmente."))
                 }
         }

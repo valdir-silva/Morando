@@ -58,11 +58,11 @@ import com.alunando.morando.domain.model.Product
 import com.alunando.morando.feature.inventory.presentation.InventoryEffect
 import com.alunando.morando.feature.inventory.presentation.InventoryIntent
 import com.alunando.morando.feature.inventory.presentation.InventoryViewModel
+import org.koin.androidx.compose.koinViewModel
 import java.text.NumberFormat
 import java.text.SimpleDateFormat
 import java.util.Date
 import java.util.Locale
-import org.koin.androidx.compose.koinViewModel
 
 /**
  * Tela de gerenciamento de estoque de produtos
@@ -72,7 +72,7 @@ import org.koin.androidx.compose.koinViewModel
 fun InventoryScreen(
     modifier: Modifier = Modifier,
     viewModel: InventoryViewModel = koinViewModel(),
-    onNavigateToBarcodeScanner: () -> Unit = {}
+    onNavigateToBarcodeScanner: () -> Unit = {},
 ) {
     val state by viewModel.state.collectAsState()
     val snackbarHostState = remember { SnackbarHostState() }
@@ -84,9 +84,11 @@ fun InventoryScreen(
                 is InventoryEffect.ShowToast -> {
                     snackbarHostState.showSnackbar(effect.message)
                 }
+
                 is InventoryEffect.ShowError -> {
                     snackbarHostState.showSnackbar(effect.message)
                 }
+
                 is InventoryEffect.NavigateToBarcodeScanner -> {
                     onNavigateToBarcodeScanner()
                 }
@@ -99,30 +101,32 @@ fun InventoryScreen(
         snackbarHost = { SnackbarHost(snackbarHostState) },
         floatingActionButton = {
             FloatingActionButton(
-                onClick = { viewModel.handleIntent(InventoryIntent.OpenAddDialog) }
+                onClick = { viewModel.handleIntent(InventoryIntent.OpenAddDialog) },
             ) {
                 Icon(Icons.Default.Add, contentDescription = "Adicionar produto")
             }
-        }
+        },
     ) { paddingValues ->
         Box(
             modifier =
-            Modifier
-                .fillMaxSize()
-                .padding(paddingValues)
+                Modifier
+                    .fillMaxSize()
+                    .padding(paddingValues),
         ) {
             when {
                 state.isLoading -> {
                     CircularProgressIndicator(
-                        modifier = Modifier.align(Alignment.Center)
+                        modifier = Modifier.align(Alignment.Center),
                     )
                 }
+
                 state.products.isEmpty() -> {
                     EmptyState(
                         modifier = Modifier.align(Alignment.Center),
-                        onAddClick = { viewModel.handleIntent(InventoryIntent.OpenAddDialog) }
+                        onAddClick = { viewModel.handleIntent(InventoryIntent.OpenAddDialog) },
                     )
                 }
+
                 else -> {
                     ProductList(
                         products = state.products,
@@ -131,7 +135,7 @@ fun InventoryScreen(
                         },
                         onEditProduct = { product ->
                             viewModel.handleIntent(InventoryIntent.OpenEditDialog(product))
-                        }
+                        },
                     )
                 }
             }
@@ -147,7 +151,7 @@ fun InventoryScreen(
                 onScanBarcode = {
                     viewModel.handleIntent(InventoryIntent.OpenBarcodeScanner)
                 },
-                scannedProduct = state.scannedProduct
+                scannedProduct = state.scannedProduct,
             )
         }
 
@@ -159,7 +163,7 @@ fun InventoryScreen(
                     onDismiss = { viewModel.handleIntent(InventoryIntent.CloseAddDialog) },
                     onConfirm = { product, imageData ->
                         viewModel.handleIntent(InventoryIntent.UpdateProduct(product, imageData))
-                    }
+                    },
                 )
             }
         }
@@ -170,19 +174,19 @@ fun InventoryScreen(
 private fun ProductList(
     products: List<Product>,
     onDeleteProduct: (String) -> Unit,
-    onEditProduct: (Product) -> Unit
+    onEditProduct: (Product) -> Unit,
 ) {
     LazyVerticalGrid(
         columns = GridCells.Fixed(2),
         contentPadding = PaddingValues(16.dp),
         horizontalArrangement = Arrangement.spacedBy(12.dp),
-        verticalArrangement = Arrangement.spacedBy(12.dp)
+        verticalArrangement = Arrangement.spacedBy(12.dp),
     ) {
         items(products) { product ->
             ProductCard(
                 product = product,
                 onDelete = { onDeleteProduct(product.id) },
-                onEdit = { onEditProduct(product) }
+                onEdit = { onEditProduct(product) },
             )
         }
     }
@@ -193,40 +197,40 @@ private fun ProductList(
 private fun ProductCard(
     product: Product,
     onDelete: () -> Unit,
-    onEdit: () -> Unit = {}
+    onEdit: () -> Unit = {},
 ) {
     Card(
         modifier =
-        Modifier
-            .fillMaxWidth()
-            .height(240.dp),
+            Modifier
+                .fillMaxWidth()
+                .height(240.dp),
         elevation = CardDefaults.cardElevation(defaultElevation = 2.dp),
-        onClick = onEdit
+        onClick = onEdit,
     ) {
         Column {
             // Imagem do produto
             Box(
                 modifier =
-                Modifier
-                    .fillMaxWidth()
-                    .height(120.dp)
-                    .background(MaterialTheme.colorScheme.surfaceVariant)
+                    Modifier
+                        .fillMaxWidth()
+                        .height(120.dp)
+                        .background(MaterialTheme.colorScheme.surfaceVariant),
             ) {
                 if (product.fotoUrl.isNotEmpty()) {
                     AsyncImage(
                         model = product.fotoUrl,
                         contentDescription = product.nome,
                         modifier =
-                        Modifier
-                            .fillMaxSize()
-                            .clip(RoundedCornerShape(topStart = 8.dp, topEnd = 8.dp)),
-                        contentScale = ContentScale.Crop
+                            Modifier
+                                .fillMaxSize()
+                                .clip(RoundedCornerShape(topStart = 8.dp, topEnd = 8.dp)),
+                        contentScale = ContentScale.Crop,
                     )
                 } else {
                     Text(
                         text = "📦",
                         style = MaterialTheme.typography.displayMedium,
-                        modifier = Modifier.align(Alignment.Center)
+                        modifier = Modifier.align(Alignment.Center),
                     )
                 }
 
@@ -234,23 +238,23 @@ private fun ProductCard(
                 if (product.isVencido() || product.isProximoVencimento()) {
                     Box(
                         modifier =
-                        Modifier
-                            .align(Alignment.TopEnd)
-                            .padding(8.dp)
-                            .background(
-                                color =
-                                if (product.isVencido()) {
-                                    Color.Red
-                                } else {
-                                    Color(0xFFFF9800)
-                                },
-                                shape = RoundedCornerShape(4.dp)
-                            ).padding(horizontal = 6.dp, vertical = 2.dp)
+                            Modifier
+                                .align(Alignment.TopEnd)
+                                .padding(8.dp)
+                                .background(
+                                    color =
+                                        if (product.isVencido()) {
+                                            Color.Red
+                                        } else {
+                                            Color(0xFFFF9800)
+                                        },
+                                    shape = RoundedCornerShape(4.dp),
+                                ).padding(horizontal = 6.dp, vertical = 2.dp),
                     ) {
                         Text(
                             text = if (product.isVencido()) "Vencido" else "Vence em breve",
                             style = MaterialTheme.typography.labelSmall,
-                            color = Color.White
+                            color = Color.White,
                         )
                     }
                 }
@@ -259,15 +263,15 @@ private fun ProductCard(
             // Informações do produto
             Column(
                 modifier =
-                Modifier
-                    .fillMaxWidth()
-                    .padding(12.dp)
+                    Modifier
+                        .fillMaxWidth()
+                        .padding(12.dp),
             ) {
                 Text(
                     text = product.nome,
                     style = MaterialTheme.typography.titleMedium,
                     maxLines = 1,
-                    overflow = TextOverflow.Ellipsis
+                    overflow = TextOverflow.Ellipsis,
                 )
 
                 if (product.categoria.isNotEmpty()) {
@@ -276,7 +280,7 @@ private fun ProductCard(
                         style = MaterialTheme.typography.bodySmall,
                         color = MaterialTheme.colorScheme.onSurfaceVariant,
                         maxLines = 1,
-                        overflow = TextOverflow.Ellipsis
+                        overflow = TextOverflow.Ellipsis,
                     )
                 }
 
@@ -285,43 +289,43 @@ private fun ProductCard(
                 Row(
                     modifier = Modifier.fillMaxWidth(),
                     horizontalArrangement = Arrangement.SpaceBetween,
-                    verticalAlignment = Alignment.CenterVertically
+                    verticalAlignment = Alignment.CenterVertically,
                 ) {
                     Column {
                         if (product.valor > 0) {
                             Text(
                                 text =
-                                NumberFormat
-                                    .getCurrencyInstance(Locale("pt", "BR"))
-                                    .format(product.valor),
+                                    NumberFormat
+                                        .getCurrencyInstance(Locale("pt", "BR"))
+                                        .format(product.valor),
                                 style = MaterialTheme.typography.bodyMedium,
-                                color = MaterialTheme.colorScheme.primary
+                                color = MaterialTheme.colorScheme.primary,
                             )
                         }
 
                         product.dataVencimento?.let { vencimento ->
                             Text(
                                 text =
-                                "Venc: ${
-                                SimpleDateFormat(
-                                    "dd/MM/yy",
-                                    Locale.getDefault()
-                                ).format(vencimento)
-                                }",
+                                    "Venc: ${
+                                        SimpleDateFormat(
+                                            "dd/MM/yy",
+                                            Locale.getDefault(),
+                                        ).format(vencimento)
+                                    }",
                                 style = MaterialTheme.typography.bodySmall,
-                                color = MaterialTheme.colorScheme.onSurfaceVariant
+                                color = MaterialTheme.colorScheme.onSurfaceVariant,
                             )
                         }
                     }
 
                     IconButton(
                         onClick = onDelete,
-                        modifier = Modifier.size(32.dp)
+                        modifier = Modifier.size(32.dp),
                     ) {
                         Icon(
                             Icons.Default.Delete,
                             contentDescription = "Deletar",
-                            tint = MaterialTheme.colorScheme.error
+                            tint = MaterialTheme.colorScheme.error,
                         )
                     }
                 }
@@ -333,26 +337,26 @@ private fun ProductCard(
 @Composable
 private fun EmptyState(
     modifier: Modifier = Modifier,
-    onAddClick: () -> Unit
+    onAddClick: () -> Unit,
 ) {
     Column(
         modifier = modifier.padding(32.dp),
-        horizontalAlignment = Alignment.CenterHorizontally
+        horizontalAlignment = Alignment.CenterHorizontally,
     ) {
         Text(
             text = "📦",
-            style = MaterialTheme.typography.displayLarge
+            style = MaterialTheme.typography.displayLarge,
         )
         Spacer(modifier = Modifier.height(16.dp))
         Text(
             text = "Nenhum produto cadastrado",
-            style = MaterialTheme.typography.titleLarge
+            style = MaterialTheme.typography.titleLarge,
         )
         Spacer(modifier = Modifier.height(8.dp))
         Text(
             text = "Adicione produtos para começar a controlar seu estoque",
             style = MaterialTheme.typography.bodyMedium,
-            color = MaterialTheme.colorScheme.onSurfaceVariant
+            color = MaterialTheme.colorScheme.onSurfaceVariant,
         )
         Spacer(modifier = Modifier.height(24.dp))
         Button(onClick = onAddClick) {
@@ -369,7 +373,7 @@ private fun AddProductDialog(
     onDismiss: () -> Unit,
     onConfirm: (Product, ByteArray?) -> Unit,
     onScanBarcode: () -> Unit,
-    scannedProduct: Product? = null
+    scannedProduct: Product? = null,
 ) {
     var nome by remember(scannedProduct) { mutableStateOf(scannedProduct?.nome ?: "") }
     var categoria by remember(scannedProduct) { mutableStateOf(scannedProduct?.categoria ?: "") }
@@ -380,7 +384,7 @@ private fun AddProductDialog(
                 scannedProduct.valor.toString()
             } else {
                 ""
-            }
+            },
         )
     }
     var diasParaAcabar by remember(scannedProduct) { mutableStateOf(scannedProduct?.diasParaAcabar?.toString() ?: "") }
@@ -393,11 +397,11 @@ private fun AddProductDialog(
         text = {
             Column(
                 modifier =
-                Modifier
-                    .fillMaxWidth()
-                    .height(600.dp)
-                    .verticalScroll(rememberScrollState()),
-                verticalArrangement = Arrangement.spacedBy(12.dp)
+                    Modifier
+                        .fillMaxWidth()
+                        .height(600.dp)
+                        .verticalScroll(rememberScrollState()),
+                verticalArrangement = Arrangement.spacedBy(12.dp),
             ) {
                 // ImagePicker
                 ImagePicker(
@@ -407,14 +411,14 @@ private fun AddProductDialog(
                     },
                     onImageRemoved = {
                         imageData = null
-                    }
+                    },
                 )
 
                 Spacer(modifier = Modifier.height(8.dp))
 
                 OutlinedButton(
                     onClick = onScanBarcode,
-                    modifier = Modifier.fillMaxWidth()
+                    modifier = Modifier.fillMaxWidth(),
                 ) {
                     Text("Escanear Código de Barras")
                 }
@@ -426,7 +430,7 @@ private fun AddProductDialog(
                         label = { Text("Código de Barras") },
                         modifier = Modifier.fillMaxWidth(),
                         singleLine = true,
-                        enabled = false
+                        enabled = false,
                     )
                 }
 
@@ -435,7 +439,7 @@ private fun AddProductDialog(
                     onValueChange = { nome = it },
                     label = { Text("Nome do produto *") },
                     modifier = Modifier.fillMaxWidth(),
-                    singleLine = true
+                    singleLine = true,
                 )
 
                 OutlinedTextField(
@@ -443,7 +447,7 @@ private fun AddProductDialog(
                     onValueChange = { categoria = it },
                     label = { Text("Categoria") },
                     modifier = Modifier.fillMaxWidth(),
-                    singleLine = true
+                    singleLine = true,
                 )
 
                 OutlinedTextField(
@@ -451,7 +455,7 @@ private fun AddProductDialog(
                     onValueChange = { valor = it },
                     label = { Text("Valor (R$)") },
                     modifier = Modifier.fillMaxWidth(),
-                    singleLine = true
+                    singleLine = true,
                 )
 
                 OutlinedTextField(
@@ -459,7 +463,7 @@ private fun AddProductDialog(
                     onValueChange = { diasParaAcabar = it },
                     label = { Text("Dias para acabar") },
                     modifier = Modifier.fillMaxWidth(),
-                    singleLine = true
+                    singleLine = true,
                 )
 
                 OutlinedTextField(
@@ -467,7 +471,7 @@ private fun AddProductDialog(
                     onValueChange = { detalhes = it },
                     label = { Text("Detalhes") },
                     modifier = Modifier.fillMaxWidth(),
-                    maxLines = 3
+                    maxLines = 3,
                 )
             }
         },
@@ -484,11 +488,11 @@ private fun AddProductDialog(
                                 diasParaAcabar = diasParaAcabar.toIntOrNull() ?: 0,
                                 detalhes = detalhes,
                                 dataCompra = Date(),
-                                createdAt = Date()
+                                createdAt = Date(),
                             )
                         onConfirm(product, imageData)
                     }
-                }
+                },
             ) {
                 Text("Adicionar")
             }
@@ -497,7 +501,7 @@ private fun AddProductDialog(
             TextButton(onClick = onDismiss) {
                 Text("Cancelar")
             }
-        }
+        },
     )
 }
 
@@ -506,7 +510,7 @@ private fun AddProductDialog(
 private fun EditProductDialog(
     product: Product,
     onDismiss: () -> Unit,
-    onConfirm: (Product, ByteArray?) -> Unit
+    onConfirm: (Product, ByteArray?) -> Unit,
 ) {
     var nome by remember(product) { mutableStateOf(product.nome) }
     var categoria by remember(product) { mutableStateOf(product.categoria) }
@@ -517,7 +521,7 @@ private fun EditProductDialog(
                 product.valor.toString()
             } else {
                 ""
-            }
+            },
         )
     }
     var diasParaAcabar by remember(product) {
@@ -526,7 +530,7 @@ private fun EditProductDialog(
                 product.diasParaAcabar.toString()
             } else {
                 ""
-            }
+            },
         )
     }
     var detalhes by remember(product) { mutableStateOf(product.detalhes) }
@@ -538,11 +542,11 @@ private fun EditProductDialog(
         text = {
             Column(
                 modifier =
-                Modifier
-                    .fillMaxWidth()
-                    .height(600.dp)
-                    .verticalScroll(rememberScrollState()),
-                verticalArrangement = Arrangement.spacedBy(12.dp)
+                    Modifier
+                        .fillMaxWidth()
+                        .height(600.dp)
+                        .verticalScroll(rememberScrollState()),
+                verticalArrangement = Arrangement.spacedBy(12.dp),
             ) {
                 // ImagePicker
                 ImagePicker(
@@ -552,7 +556,7 @@ private fun EditProductDialog(
                     },
                     onImageRemoved = {
                         imageData = null
-                    }
+                    },
                 )
 
                 Spacer(modifier = Modifier.height(8.dp))
@@ -564,7 +568,7 @@ private fun EditProductDialog(
                         label = { Text("Código de Barras") },
                         modifier = Modifier.fillMaxWidth(),
                         singleLine = true,
-                        enabled = false
+                        enabled = false,
                     )
                 }
 
@@ -573,7 +577,7 @@ private fun EditProductDialog(
                     onValueChange = { nome = it },
                     label = { Text("Nome do produto *") },
                     modifier = Modifier.fillMaxWidth(),
-                    singleLine = true
+                    singleLine = true,
                 )
 
                 OutlinedTextField(
@@ -581,7 +585,7 @@ private fun EditProductDialog(
                     onValueChange = { categoria = it },
                     label = { Text("Categoria") },
                     modifier = Modifier.fillMaxWidth(),
-                    singleLine = true
+                    singleLine = true,
                 )
 
                 OutlinedTextField(
@@ -589,7 +593,7 @@ private fun EditProductDialog(
                     onValueChange = { valor = it },
                     label = { Text("Valor (R$)") },
                     modifier = Modifier.fillMaxWidth(),
-                    singleLine = true
+                    singleLine = true,
                 )
 
                 OutlinedTextField(
@@ -597,7 +601,7 @@ private fun EditProductDialog(
                     onValueChange = { diasParaAcabar = it },
                     label = { Text("Dias para acabar") },
                     modifier = Modifier.fillMaxWidth(),
-                    singleLine = true
+                    singleLine = true,
                 )
 
                 OutlinedTextField(
@@ -605,7 +609,7 @@ private fun EditProductDialog(
                     onValueChange = { detalhes = it },
                     label = { Text("Detalhes") },
                     modifier = Modifier.fillMaxWidth(),
-                    maxLines = 3
+                    maxLines = 3,
                 )
             }
         },
@@ -620,11 +624,11 @@ private fun EditProductDialog(
                                 codigoBarras = codigoBarras,
                                 valor = valor.toDoubleOrNull() ?: 0.0,
                                 diasParaAcabar = diasParaAcabar.toIntOrNull() ?: 0,
-                                detalhes = detalhes
+                                detalhes = detalhes,
                             )
                         onConfirm(updatedProduct, imageData)
                     }
-                }
+                },
             ) {
                 Text("Salvar")
             }
@@ -633,6 +637,6 @@ private fun EditProductDialog(
             TextButton(onClick = onDismiss) {
                 Text("Cancelar")
             }
-        }
+        },
     )
 }
