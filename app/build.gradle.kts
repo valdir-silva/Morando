@@ -78,6 +78,7 @@ dependencies {
     implementation(project(":feature:feature-inventory"))
     implementation(project(":feature:feature-shopping"))
     implementation(project(":feature:feature-barcode"))
+    implementation(project(":feature:feature-cooking"))
 
     // Core Android
     implementation(libs.androidx.core.ktx)
