@@ -31,12 +31,13 @@ class TasksRemoteDataSource(
     /**
      * Busca todas as tarefas do usuário
      */
-    @Suppress("MagicNumber")
     fun getTasks(): Flow<List<Task>> =
         callbackFlow {
-            // Aguarda até que o usuário esteja autenticado
-            while (authManager.currentUserId.isEmpty()) {
-                kotlinx.coroutines.delay(100)
+            // Verifica se está autenticado, senão retorna lista vazia
+            if (authManager.currentUserId.isEmpty()) {
+                trySend(emptyList())
+                awaitClose { }
+                return@callbackFlow
             }
 
             val listener =
@@ -62,12 +63,13 @@ class TasksRemoteDataSource(
     /**
      * Busca tarefas por tipo
      */
-    @Suppress("MagicNumber")
     fun getTasksByType(type: TaskType): Flow<List<Task>> =
         callbackFlow {
-            // Aguarda até que o usuário esteja autenticado
-            while (authManager.currentUserId.isEmpty()) {
-                kotlinx.coroutines.delay(100)
+            // Verifica se está autenticado, senão retorna lista vazia
+            if (authManager.currentUserId.isEmpty()) {
+                trySend(emptyList())
+                awaitClose { }
+                return@callbackFlow
             }
 
             val listener =
@@ -111,6 +113,9 @@ class TasksRemoteDataSource(
      * Adiciona nova tarefa
      */
     suspend fun addTask(task: Task): Task {
+        // Aguarda autenticação antes de tentar adicionar
+        authManager.waitForAuthentication()
+
         val docRef = getUserTasksCollection().document()
         val taskMap = task.toMap(authManager.currentUserId)
         docRef.set(taskMap).await()
@@ -121,6 +126,9 @@ class TasksRemoteDataSource(
      * Atualiza tarefa
      */
     suspend fun updateTask(task: Task) {
+        // Aguarda autenticação antes de tentar atualizar
+        authManager.waitForAuthentication()
+
         getUserTasksCollection()
             .document(task.id)
             .set(task.toMap(authManager.currentUserId))
@@ -131,6 +139,9 @@ class TasksRemoteDataSource(
      * Deleta tarefa
      */
     suspend fun deleteTask(taskId: String) {
+        // Aguarda autenticação antes de tentar deletar
+        authManager.waitForAuthentication()
+
         getUserTasksCollection()
             .document(taskId)
             .delete()
@@ -144,6 +155,9 @@ class TasksRemoteDataSource(
         taskId: String,
         complete: Boolean,
     ) {
+        // Aguarda autenticação antes de tentar atualizar
+        authManager.waitForAuthentication()
+
         getUserTasksCollection()
             .document(taskId)
             .update(FirebaseConfig.FIELD_COMPLETA, complete)
