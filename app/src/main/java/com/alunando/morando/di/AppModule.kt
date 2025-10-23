@@ -23,6 +23,7 @@ import com.alunando.morando.domain.usecase.AddTaskUseCase
 import com.alunando.morando.domain.usecase.CheckIngredientsAvailabilityUseCase
 import com.alunando.morando.domain.usecase.DeleteProductUseCase
 import com.alunando.morando.domain.usecase.DeleteRecipeUseCase
+import com.alunando.morando.domain.usecase.DeleteTaskUseCase
 import com.alunando.morando.domain.usecase.GenerateShoppingListUseCase
 import com.alunando.morando.domain.usecase.GetDailyTasksUseCase
 import com.alunando.morando.domain.usecase.GetProductByIdUseCase
@@ -144,6 +145,7 @@ val appModule =
         factory { GetWeeklyTasksUseCase(get()) }
         factory { MarkTaskCompleteUseCase(get()) }
         factory { AddTaskUseCase(get()) }
+        factory { DeleteTaskUseCase(get()) }
 
         // Use Cases - Inventory
         factory { GetProductsUseCase(get()) }
@@ -170,7 +172,7 @@ val appModule =
         factory { SaveUserStovePreferenceUseCase(get()) }
 
         // ViewModels
-        viewModel { TasksViewModel(get(), get(), get()) }
+        viewModel { TasksViewModel(get(), get(), get(), get(), get(), get()) }
         viewModel { InventoryViewModel(get(), get(), get(), get(), get(), get()) }
         viewModel { BarcodeScannerViewModel() }
         viewModel { CookingViewModel(get(), get(), get(), get(), get(), get(), get(), get()) }

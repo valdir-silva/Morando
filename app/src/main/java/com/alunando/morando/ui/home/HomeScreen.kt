@@ -39,7 +39,7 @@ fun HomeScreen(
     val features =
         listOf(
             FeatureCard(
-                title = "Tarefas Diárias/Semanais",
+                title = "Tarefas",
                 description = "Gerencie suas tarefas do dia a dia",
                 iconRes = R.drawable.ic_tasks,
                 onClick = onNavigateToTasks,
