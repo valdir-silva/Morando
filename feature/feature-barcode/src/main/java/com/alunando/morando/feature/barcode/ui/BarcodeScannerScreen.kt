@@ -57,7 +57,7 @@ import java.util.concurrent.Executors
  * Tela de scanner de código de barras com CameraX e ML Kit
  */
 @Composable
-@Suppress("LongMethod")
+@Suppress("LongMethod", "MagicNumber")
 fun BarcodeScannerScreen(
     onBarcodeScanned: (String) -> Unit = {},
     onNavigateBack: () -> Unit = {},
@@ -193,6 +193,7 @@ fun BarcodeScannerScreen(
     }
 }
 
+@Suppress("MagicNumber", "LongMethod", "TooGenericExceptionCaught")
 @Composable
 private fun CameraPreview(onBarcodeDetected: (String) -> Unit) {
     val context = LocalContext.current
