@@ -176,4 +176,5 @@ val appModule =
         viewModel { InventoryViewModel(get(), get(), get(), get(), get(), get()) }
         viewModel { BarcodeScannerViewModel() }
         viewModel { CookingViewModel(get(), get(), get(), get(), get(), get(), get(), get()) }
+        viewModel { com.alunando.morando.ui.login.LoginViewModel(get()) }
     }
