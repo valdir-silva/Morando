@@ -14,6 +14,7 @@ class InventoryRepositoryImpl(
 ) : InventoryRepository {
     override fun getProducts(): Flow<List<Product>> = remoteDataSource.getProducts()
 
+    @Suppress("TooGenericExceptionCaught")
     override suspend fun getProductById(productId: String): Result<Product> =
         try {
             val product = remoteDataSource.getProductById(productId)
@@ -29,6 +30,7 @@ class InventoryRepositoryImpl(
     override fun getProductsByCategory(category: String): Flow<List<Product>> =
         remoteDataSource.getProductsByCategory(category)
 
+    @Suppress("TooGenericExceptionCaught")
     override suspend fun getProductByBarcode(barcode: String): Result<Product?> =
         try {
             val product = remoteDataSource.getProductByBarcode(barcode)
@@ -37,6 +39,7 @@ class InventoryRepositoryImpl(
             Result.Error(e)
         }
 
+    @Suppress("TooGenericExceptionCaught")
     override suspend fun addProduct(product: Product): Result<Product> =
         try {
             val addedProduct = remoteDataSource.addProduct(product)
@@ -45,6 +48,7 @@ class InventoryRepositoryImpl(
             Result.Error(e)
         }
 
+    @Suppress("TooGenericExceptionCaught")
     override suspend fun updateProduct(product: Product): Result<Unit> =
         try {
             remoteDataSource.updateProduct(product)
@@ -53,6 +57,7 @@ class InventoryRepositoryImpl(
             Result.Error(e)
         }
 
+    @Suppress("TooGenericExceptionCaught")
     override suspend fun deleteProduct(productId: String): Result<Unit> =
         try {
             remoteDataSource.deleteProduct(productId)
@@ -61,6 +66,7 @@ class InventoryRepositoryImpl(
             Result.Error(e)
         }
 
+    @Suppress("TooGenericExceptionCaught")
     override suspend fun uploadProductImage(
         productId: String,
         imageData: ByteArray,
