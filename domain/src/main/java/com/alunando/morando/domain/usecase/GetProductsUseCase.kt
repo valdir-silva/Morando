@@ -8,9 +8,7 @@ import kotlinx.coroutines.flow.Flow
  * Use case para buscar todos os produtos
  */
 class GetProductsUseCase(
-    private val repository: InventoryRepository
+    private val repository: InventoryRepository,
 ) {
-    operator fun invoke(): Flow<List<Product>> {
-        return repository.getProducts()
-    }
+    operator fun invoke(): Flow<List<Product>> = repository.getProducts()
 }

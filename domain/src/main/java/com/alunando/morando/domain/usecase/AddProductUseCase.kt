@@ -8,9 +8,7 @@ import com.alunando.morando.domain.repository.InventoryRepository
  * Use case para adicionar novo produto
  */
 class AddProductUseCase(
-    private val repository: InventoryRepository
+    private val repository: InventoryRepository,
 ) {
-    suspend operator fun invoke(product: Product): Result<Product> {
-        return repository.addProduct(product)
-    }
+    suspend operator fun invoke(product: Product): Result<Product> = repository.addProduct(product)
 }

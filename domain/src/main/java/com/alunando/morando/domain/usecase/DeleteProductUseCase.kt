@@ -7,10 +7,7 @@ import com.alunando.morando.domain.repository.InventoryRepository
  * Use case para deletar produto
  */
 class DeleteProductUseCase(
-    private val repository: InventoryRepository
+    private val repository: InventoryRepository,
 ) {
-    suspend operator fun invoke(productId: String): Result<Unit> {
-        return repository.deleteProduct(productId)
-    }
+    suspend operator fun invoke(productId: String): Result<Unit> = repository.deleteProduct(productId)
 }
-

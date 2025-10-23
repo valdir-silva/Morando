@@ -8,7 +8,6 @@ import kotlinx.coroutines.flow.Flow
  * Interface do repositório de lista de compras
  */
 interface ShoppingRepository {
-
     /**
      * Busca todos os itens da lista de compras
      */
@@ -37,7 +36,10 @@ interface ShoppingRepository {
     /**
      * Marca item como comprado/não comprado
      */
-    suspend fun markItemPurchased(itemId: String, purchased: Boolean): Result<Unit>
+    suspend fun markItemPurchased(
+        itemId: String,
+        purchased: Boolean,
+    ): Result<Unit>
 
     /**
      * Remove todos os itens comprados

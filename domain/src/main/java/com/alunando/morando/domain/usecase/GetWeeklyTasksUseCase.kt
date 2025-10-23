@@ -9,9 +9,7 @@ import kotlinx.coroutines.flow.Flow
  * Use case para buscar tarefas semanais
  */
 class GetWeeklyTasksUseCase(
-    private val repository: TasksRepository
+    private val repository: TasksRepository,
 ) {
-    operator fun invoke(): Flow<List<Task>> {
-        return repository.getTasksByType(TaskType.SEMANAL)
-    }
+    operator fun invoke(): Flow<List<Task>> = repository.getTasksByType(TaskType.SEMANAL)
 }

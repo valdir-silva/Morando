@@ -1,8 +1,8 @@
 package com.alunando.morando.domain.model
 
 import android.os.Parcelable
-import java.util.Date
 import kotlinx.parcelize.Parcelize
+import java.util.Date
 
 /**
  * Modelo de domínio para Tarefa
@@ -15,7 +15,7 @@ data class Task(
     val tipo: TaskType,
     val completa: Boolean = false,
     val userId: String = "",
-    val createdAt: Date = Date()
+    val createdAt: Date = Date(),
 ) : Parcelable
 
 /**
@@ -23,15 +23,15 @@ data class Task(
  */
 enum class TaskType {
     DIARIA,
-    SEMANAL;
+    SEMANAL,
+    ;
 
     companion object {
-        fun fromString(value: String): TaskType {
-            return when (value.lowercase()) {
+        fun fromString(value: String): TaskType =
+            when (value.lowercase()) {
                 "diaria" -> DIARIA
                 "semanal" -> SEMANAL
                 else -> DIARIA
             }
-        }
     }
 }

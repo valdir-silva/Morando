@@ -12,24 +12,26 @@ import kotlinx.coroutines.flow.first
  */
 class GenerateShoppingListUseCase(
     private val inventoryRepository: InventoryRepository,
-    private val shoppingRepository: ShoppingRepository
+    private val shoppingRepository: ShoppingRepository,
 ) {
     @Suppress("TooGenericExceptionCaught")
-    suspend operator fun invoke(): Result<List<ShoppingItem>> {
-        return try {
+    suspend operator fun invoke(): Result<List<ShoppingItem>> =
+        try {
             // Busca produtos que precisam ser repostos
-            val productsNeedingReplenishment = inventoryRepository
-                .getProductsNeedingReplenishment()
-                .first()
+            val productsNeedingReplenishment =
+                inventoryRepository
+                    .getProductsNeedingReplenishment()
+                    .first()
 
             // Cria itens da lista de compras
-            val shoppingItems = productsNeedingReplenishment.map { product ->
-                ShoppingItem(
-                    produtoId = product.id,
-                    nome = product.nome,
-                    quantidade = 1
-                )
-            }
+            val shoppingItems =
+                productsNeedingReplenishment.map { product ->
+                    ShoppingItem(
+                        produtoId = product.id,
+                        nome = product.nome,
+                        quantidade = 1,
+                    )
+                }
 
             // Adiciona cada item à lista
             shoppingItems.forEach { item ->
@@ -40,5 +42,4 @@ class GenerateShoppingListUseCase(
         } catch (e: Exception) {
             Result.Error(e, "Erro ao gerar lista de compras")
         }
-    }
 }

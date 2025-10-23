@@ -9,7 +9,6 @@ import kotlinx.coroutines.flow.Flow
  * Interface do repositório de tarefas
  */
 interface TasksRepository {
-
     /**
      * Busca todas as tarefas do usuário
      */
@@ -43,5 +42,8 @@ interface TasksRepository {
     /**
      * Marca tarefa como completa/incompleta
      */
-    suspend fun markTaskComplete(taskId: String, complete: Boolean): Result<Unit>
+    suspend fun markTaskComplete(
+        taskId: String,
+        complete: Boolean,
+    ): Result<Unit>
 }

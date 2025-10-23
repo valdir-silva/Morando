@@ -8,9 +8,7 @@ import com.alunando.morando.domain.repository.TasksRepository
  * Use case para adicionar nova tarefa
  */
 class AddTaskUseCase(
-    private val repository: TasksRepository
+    private val repository: TasksRepository,
 ) {
-    suspend operator fun invoke(task: Task): Result<Task> {
-        return repository.addTask(task)
-    }
+    suspend operator fun invoke(task: Task): Result<Task> = repository.addTask(task)
 }

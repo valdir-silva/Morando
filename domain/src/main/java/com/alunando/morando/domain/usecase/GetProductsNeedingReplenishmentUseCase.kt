@@ -8,10 +8,7 @@ import kotlinx.coroutines.flow.Flow
  * Use case para buscar produtos que estão acabando ou próximos do vencimento
  */
 class GetProductsNeedingReplenishmentUseCase(
-    private val repository: InventoryRepository
+    private val repository: InventoryRepository,
 ) {
-    operator fun invoke(): Flow<List<Product>> {
-        return repository.getProductsNeedingReplenishment()
-    }
+    operator fun invoke(): Flow<List<Product>> = repository.getProductsNeedingReplenishment()
 }
-

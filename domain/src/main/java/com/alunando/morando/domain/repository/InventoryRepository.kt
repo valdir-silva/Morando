@@ -8,7 +8,6 @@ import kotlinx.coroutines.flow.Flow
  * Interface do repositório de inventário/estoque
  */
 interface InventoryRepository {
-
     /**
      * Busca todos os produtos do usuário
      */
@@ -47,10 +46,18 @@ interface InventoryRepository {
     /**
      * Upload de foto do produto
      */
-    suspend fun uploadProductImage(productId: String, imageData: ByteArray): Result<String>
+    suspend fun uploadProductImage(
+        productId: String,
+        imageData: ByteArray,
+    ): Result<String>
 
     /**
      * Busca produtos que estão acabando ou vencidos
      */
     fun getProductsNeedingReplenishment(): Flow<List<Product>>
+
+    /**
+     * Busca informações do produto em API externa por código de barras
+     */
+    suspend fun getProductInfoFromBarcode(barcode: String): Result<Product?>
 }

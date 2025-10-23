@@ -9,9 +9,7 @@ import kotlinx.coroutines.flow.Flow
  * Use case para buscar tarefas diárias
  */
 class GetDailyTasksUseCase(
-    private val repository: TasksRepository
+    private val repository: TasksRepository,
 ) {
-    operator fun invoke(): Flow<List<Task>> {
-        return repository.getTasksByType(TaskType.DIARIA)
-    }
+    operator fun invoke(): Flow<List<Task>> = repository.getTasksByType(TaskType.DIARIA)
 }
