@@ -39,7 +39,7 @@ class ProductApiDataSource(
             } else {
                 null
             }
-        } catch (e: Exception) {
+        } catch (_: Exception) {
             null
         }
 
@@ -53,7 +53,7 @@ class ProductApiDataSource(
             } else {
                 null
             }
-        } catch (e: Exception) {
+        } catch (_: Exception) {
             null
         }
 

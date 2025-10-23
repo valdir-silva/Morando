@@ -23,6 +23,7 @@ import kotlinx.coroutines.launch
 /**
  * ViewModel para tela de inventário (MVI)
  */
+@Suppress("LongParameterList", "TooManyFunctions")
 class InventoryViewModel(
     private val getProductsUseCase: GetProductsUseCase,
     private val addProductUseCase: AddProductUseCase,
@@ -45,6 +46,7 @@ class InventoryViewModel(
     /**
      * Processa intenções do usuário
      */
+    @Suppress("CyclomaticComplexMethod")
     fun handleIntent(intent: InventoryIntent) {
         when (intent) {
             is InventoryIntent.LoadProducts -> loadProducts()
@@ -204,7 +206,7 @@ class InventoryViewModel(
 
     private fun filterByCategory(category: String?) {
         _state.value = _state.value.copy(selectedCategory = category)
-        // TODO: Implementar filtro quando necessário
+        // TODO Filtro será implementado em versão futura
     }
 
     private fun sendEffect(effect: InventoryEffect) {

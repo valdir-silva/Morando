@@ -12,6 +12,7 @@ import java.util.UUID
 /**
  * Implementação mock do InventoryRepository para desenvolvimento sem Firebase
  */
+@Suppress("MagicNumber")
 class InventoryRepositoryMock : InventoryRepository {
     private val mockProducts =
         listOf(

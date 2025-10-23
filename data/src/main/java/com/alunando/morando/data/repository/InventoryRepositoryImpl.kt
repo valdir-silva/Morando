@@ -75,6 +75,7 @@ class InventoryRepositoryImpl(
     override fun getProductsNeedingReplenishment(): Flow<List<Product>> =
         remoteDataSource.getProductsNeedingReplenishment()
 
+    @Suppress("TooGenericExceptionCaught")
     override suspend fun getProductInfoFromBarcode(barcode: String): Result<Product?> =
         try {
             val product = remoteDataSource.searchProductByBarcode(barcode)

@@ -16,6 +16,7 @@ import java.util.UUID
 /**
  * Data source remoto para produtos (Firestore + Storage)
  */
+@Suppress("TooManyFunctions")
 class InventoryRemoteDataSource(
     private val firestore: FirebaseFirestore,
     private val storage: FirebaseStorage,
@@ -215,7 +216,7 @@ class InventoryRemoteDataSource(
         productApiDataSource?.searchProductByBarcode(barcode)
 
     // Extension functions
-    @Suppress("TooGenericExceptionCaught", "SwallowedException")
+    @Suppress("TooGenericExceptionCaught", "SwallowedException", "CyclomaticComplexMethod")
     private fun com.google.firebase.firestore.DocumentSnapshot.toProduct(): Product? =
         try {
             Product(

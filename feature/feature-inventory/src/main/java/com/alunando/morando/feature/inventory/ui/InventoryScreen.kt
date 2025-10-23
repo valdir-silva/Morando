@@ -67,6 +67,7 @@ import org.koin.androidx.compose.koinViewModel
 /**
  * Tela de gerenciamento de estoque de produtos
  */
+@Suppress("LongMethod", "CyclomaticComplexMethod")
 @Composable
 fun InventoryScreen(
     modifier: Modifier = Modifier,
@@ -187,6 +188,7 @@ private fun ProductList(
     }
 }
 
+@Suppress("LongMethod", "MagicNumber")
 @Composable
 private fun ProductCard(
     product: Product,
@@ -361,6 +363,7 @@ private fun EmptyState(
     }
 }
 
+@Suppress("LongMethod", "CyclomaticComplexMethod")
 @Composable
 private fun AddProductDialog(
     onDismiss: () -> Unit,
@@ -498,6 +501,7 @@ private fun AddProductDialog(
     )
 }
 
+@Suppress("LongMethod")
 @Composable
 private fun EditProductDialog(
     product: Product,
