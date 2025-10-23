@@ -2,7 +2,7 @@ plugins {
     alias(libs.plugins.android.application)
     alias(libs.plugins.kotlin.android)
     alias(libs.plugins.kotlin.compose)
-    alias(libs.plugins.google.services)
+    // Google Services plugin aplicado condicionalmente no final do arquivo
 }
 
 android {
@@ -110,4 +110,10 @@ dependencies {
     // Debug
     debugImplementation(libs.androidx.compose.ui.tooling)
     debugImplementation(libs.androidx.compose.ui.test.manifest)
+}
+
+// Aplicar plugin do Google Services apenas se o arquivo google-services.json existir
+// Isso evita falha no build variant mock que não precisa do Firebase
+if (file("google-services.json").exists()) {
+    apply(plugin = libs.plugins.google.services.get().pluginId)
 }
