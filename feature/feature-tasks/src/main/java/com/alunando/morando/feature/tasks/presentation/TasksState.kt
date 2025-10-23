@@ -11,4 +11,7 @@ data class TasksState(
     val selectedType: TaskType = TaskType.DIARIA,
     val isLoading: Boolean = false,
     val error: String? = null,
+    val expandedCommitments: Set<String> = emptySet(),
+    val showCreateDialog: Boolean = false,
+    val editingTask: Task? = null,
 )
