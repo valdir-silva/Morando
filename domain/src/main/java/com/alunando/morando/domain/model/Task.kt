@@ -16,6 +16,8 @@ data class Task(
     val completa: Boolean = false,
     val userId: String = "",
     val createdAt: Date = Date(),
+    val parentTaskId: String? = null,
+    val scheduledDate: Date? = null,
 ) : Parcelable
 
 /**
@@ -24,6 +26,7 @@ data class Task(
 enum class TaskType {
     DIARIA,
     SEMANAL,
+    COMPROMISSO,
     ;
 
     companion object {
@@ -31,6 +34,7 @@ enum class TaskType {
             when (value.lowercase()) {
                 "diaria" -> DIARIA
                 "semanal" -> SEMANAL
+                "compromisso" -> COMPROMISSO
                 else -> DIARIA
             }
     }
