@@ -387,7 +387,6 @@ private fun AddProductDialog(
             },
         )
     }
-    var diasParaAcabar by remember(scannedProduct) { mutableStateOf(scannedProduct?.diasParaAcabar?.toString() ?: "") }
     var detalhes by remember(scannedProduct) { mutableStateOf(scannedProduct?.detalhes ?: "") }
     var imageData by remember { mutableStateOf<ByteArray?>(null) }
 
@@ -459,14 +458,6 @@ private fun AddProductDialog(
                 )
 
                 OutlinedTextField(
-                    value = diasParaAcabar,
-                    onValueChange = { diasParaAcabar = it },
-                    label = { Text("Dias para acabar") },
-                    modifier = Modifier.fillMaxWidth(),
-                    singleLine = true,
-                )
-
-                OutlinedTextField(
                     value = detalhes,
                     onValueChange = { detalhes = it },
                     label = { Text("Detalhes") },
@@ -485,7 +476,6 @@ private fun AddProductDialog(
                                 categoria = categoria,
                                 codigoBarras = codigoBarras,
                                 valor = valor.toDoubleOrNull() ?: 0.0,
-                                diasParaAcabar = diasParaAcabar.toIntOrNull() ?: 0,
                                 detalhes = detalhes,
                                 dataCompra = Date(),
                                 createdAt = Date(),
@@ -519,15 +509,6 @@ private fun EditProductDialog(
         mutableStateOf(
             if (product.valor > 0) {
                 product.valor.toString()
-            } else {
-                ""
-            },
-        )
-    }
-    var diasParaAcabar by remember(product) {
-        mutableStateOf(
-            if (product.diasParaAcabar > 0) {
-                product.diasParaAcabar.toString()
             } else {
                 ""
             },
@@ -597,14 +578,6 @@ private fun EditProductDialog(
                 )
 
                 OutlinedTextField(
-                    value = diasParaAcabar,
-                    onValueChange = { diasParaAcabar = it },
-                    label = { Text("Dias para acabar") },
-                    modifier = Modifier.fillMaxWidth(),
-                    singleLine = true,
-                )
-
-                OutlinedTextField(
                     value = detalhes,
                     onValueChange = { detalhes = it },
                     label = { Text("Detalhes") },
@@ -623,7 +596,6 @@ private fun EditProductDialog(
                                 categoria = categoria,
                                 codigoBarras = codigoBarras,
                                 valor = valor.toDoubleOrNull() ?: 0.0,
-                                diasParaAcabar = diasParaAcabar.toIntOrNull() ?: 0,
                                 detalhes = detalhes,
                             )
                         onConfirm(updatedProduct, imageData)

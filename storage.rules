@@ -1,0 +1,58 @@
+rules_version = '2';
+
+service firebase.storage {
+  match /b/{bucket}/o {
+    // Função auxiliar para verificar se o usuário está autenticado
+    function isAuthenticated() {
+      return request.auth != null;
+    }
+    
+    // Função auxiliar para verificar se é o próprio usuário
+    function isOwner(userId) {
+      return isAuthenticated() && request.auth.uid == userId;
+    }
+    
+    // Função auxiliar para validar tamanho do arquivo (5MB)
+    function isValidSize() {
+      return request.resource.size < 5 * 1024 * 1024;
+    }
+    
+    // Função auxiliar para validar tipo de imagem
+    function isValidImageType() {
+      return request.resource.contentType.matches('image/(jpeg|jpg|png|webp)');
+    }
+    
+    // Regras para imagens de produtos
+    match /products/{userId}/{productId}/images/{imageName} {
+      // Permite leitura para usuários autenticados
+      allow read: if isAuthenticated();
+      
+      // Permite upload apenas para o próprio usuário, com validação de tamanho e tipo
+      allow create: if isOwner(userId)
+        && isValidSize()
+        && isValidImageType();
+      
+      // Permite atualização apenas para o próprio usuário
+      allow update: if isOwner(userId)
+        && isValidSize()
+        && isValidImageType();
+      
+      // Permite deleção apenas para o próprio usuário
+      allow delete: if isOwner(userId);
+    }
+    
+    // Regras para outras imagens do usuário (futuro)
+    match /users/{userId}/{allPaths=**} {
+      allow read: if isAuthenticated();
+      allow write: if isOwner(userId)
+        && isValidSize()
+        && isValidImageType();
+    }
+    
+    // Nega acesso a qualquer outro caminho
+    match /{allPaths=**} {
+      allow read, write: if false;
+    }
+  }
+}
+

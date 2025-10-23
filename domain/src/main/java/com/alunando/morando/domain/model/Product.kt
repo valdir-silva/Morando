@@ -18,7 +18,6 @@ data class Product(
     val valor: Double = 0.0,
     val detalhes: String = "",
     val dataVencimento: Date? = null,
-    val diasParaAcabar: Int = 0,
     val userId: String = "",
     val createdAt: Date = Date(),
 ) : Parcelable {
@@ -39,10 +38,4 @@ data class Product(
                 }
             diasRestantes in 0..7
         } ?: false
-
-    /**
-     * Verifica se o produto está acabando
-     */
-    @Suppress("MagicNumber")
-    fun isAcabando(): Boolean = diasParaAcabar <= 7 && diasParaAcabar > 0
 }

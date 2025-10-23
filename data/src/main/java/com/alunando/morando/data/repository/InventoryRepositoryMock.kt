@@ -26,7 +26,6 @@ class InventoryRepositoryMock : InventoryRepository {
                 valor = 4.50,
                 detalhes = "Leite integral 1L",
                 dataVencimento = Calendar.getInstance().apply { add(Calendar.DAY_OF_MONTH, 3) }.time,
-                diasParaAcabar = 5,
                 userId = "mock-user",
                 createdAt = Date(),
             ),
@@ -40,7 +39,6 @@ class InventoryRepositoryMock : InventoryRepository {
                 valor = 25.90,
                 detalhes = "Arroz branco tipo 1, 5kg",
                 dataVencimento = Calendar.getInstance().apply { add(Calendar.MONTH, 6) }.time,
-                diasParaAcabar = 15,
                 userId = "mock-user",
                 createdAt = Date(),
             ),
@@ -54,7 +52,6 @@ class InventoryRepositoryMock : InventoryRepository {
                 valor = 8.90,
                 detalhes = "Feijão preto 1kg",
                 dataVencimento = Calendar.getInstance().apply { add(Calendar.MONTH, 12) }.time,
-                diasParaAcabar = 20,
                 userId = "mock-user",
                 createdAt = Date(),
             ),
@@ -68,7 +65,6 @@ class InventoryRepositoryMock : InventoryRepository {
                 valor = 6.50,
                 detalhes = "Tomate fresco 1kg",
                 dataVencimento = Calendar.getInstance().apply { add(Calendar.DAY_OF_MONTH, 5) }.time,
-                diasParaAcabar = 3,
                 userId = "mock-user",
                 createdAt = Date(),
             ),
@@ -82,7 +78,6 @@ class InventoryRepositoryMock : InventoryRepository {
                 valor = 7.20,
                 detalhes = "Óleo de soja 900ml",
                 dataVencimento = Calendar.getInstance().apply { add(Calendar.MONTH, 8) }.time,
-                diasParaAcabar = 10,
                 userId = "mock-user",
                 createdAt = Date(),
             ),
@@ -96,7 +91,6 @@ class InventoryRepositoryMock : InventoryRepository {
                 valor = 5.80,
                 detalhes = "Pão de forma integral 500g",
                 dataVencimento = Calendar.getInstance().apply { add(Calendar.DAY_OF_MONTH, 2) }.time,
-                diasParaAcabar = 2,
                 userId = "mock-user",
                 createdAt = Date(),
             ),
@@ -134,7 +128,7 @@ class InventoryRepositoryMock : InventoryRepository {
     ): Result<String> = Result.Success("https://via.placeholder.com/200?text=Mock+Image")
 
     override fun getProductsNeedingReplenishment(): Flow<List<Product>> =
-        flowOf(mockProducts.filter { it.diasParaAcabar <= 7 })
+        flowOf(mockProducts.filter { it.isProximoVencimento() || it.isVencido() })
 
     @Suppress("MagicNumber")
     override suspend fun getProductInfoFromBarcode(barcode: String): Result<Product?> {
@@ -151,7 +145,6 @@ class InventoryRepositoryMock : InventoryRepository {
                         fotoUrl = "https://via.placeholder.com/300x300.png?text=Arroz",
                         valor = 25.90,
                         detalhes = "Marca: Tio João\nPeso: 5kg",
-                        diasParaAcabar = 30,
                         createdAt = Date(),
                     )
                 barcode.startsWith("890") ->
@@ -162,7 +155,6 @@ class InventoryRepositoryMock : InventoryRepository {
                         fotoUrl = "https://via.placeholder.com/300x300.png?text=Feijao",
                         valor = 8.50,
                         detalhes = "Marca: Camil\nPeso: 1kg",
-                        diasParaAcabar = 45,
                         createdAt = Date(),
                     )
                 else -> null

@@ -32,7 +32,6 @@ object FirebaseConfig {
     const val FIELD_VALOR = "valor"
     const val FIELD_DETALHES = "detalhes"
     const val FIELD_DATA_VENCIMENTO = "dataVencimento"
-    const val FIELD_DIAS_PARA_ACABAR = "diasParaAcabar"
 
     // Fields - Shopping
     const val FIELD_COMPRADO = "comprado"

@@ -55,7 +55,6 @@ class InventoryScreenshotTest {
                 valor = 4.50,
                 detalhes = "Leite integral 1L",
                 dataVencimento = Calendar.getInstance().apply { add(Calendar.DAY_OF_MONTH, 3) }.time,
-                diasParaAcabar = 5,
                 createdAt = Date(),
             ),
             Product(
@@ -68,7 +67,6 @@ class InventoryScreenshotTest {
                 valor = 25.90,
                 detalhes = "Arroz branco tipo 1, 5kg",
                 dataVencimento = Calendar.getInstance().apply { add(Calendar.MONTH, 6) }.time,
-                diasParaAcabar = 15,
                 createdAt = Date(),
             ),
             Product(
@@ -81,7 +79,6 @@ class InventoryScreenshotTest {
                 valor = 8.90,
                 detalhes = "Feijão preto 1kg",
                 dataVencimento = Calendar.getInstance().apply { add(Calendar.MONTH, 12) }.time,
-                diasParaAcabar = 20,
                 createdAt = Date(),
             ),
             Product(
@@ -93,7 +90,6 @@ class InventoryScreenshotTest {
                 valor = 6.50,
                 detalhes = "Tomate fresco 1kg",
                 dataVencimento = Calendar.getInstance().apply { add(Calendar.DAY_OF_MONTH, 5) }.time,
-                diasParaAcabar = 3,
                 createdAt = Date(),
             ),
             Product(
@@ -106,7 +102,6 @@ class InventoryScreenshotTest {
                 valor = 5.80,
                 detalhes = "Pão de forma integral 500g",
                 dataVencimento = Calendar.getInstance().apply { add(Calendar.DAY_OF_MONTH, 2) }.time,
-                diasParaAcabar = 2,
                 createdAt = Date(),
             ),
         )
@@ -218,7 +213,7 @@ class InventoryScreenshotTest {
     fun screenshot_04_inventory_products_expiring_soon() {
         // Given - Only products that are expiring soon
         val expiringProducts =
-            mockProducts.filter { it.diasParaAcabar <= 5 }
+            mockProducts.filter { it.isProximoVencimento() || it.isVencido() }
         every { getProductsUseCase() } returns flowOf(expiringProducts)
         val viewModel =
             InventoryViewModel(

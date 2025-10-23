@@ -96,7 +96,7 @@ class InventoryRemoteDataSource(
         }
 
     /**
-     * Busca produtos que estão acabando
+     * Busca produtos que estão acabando (vencimento próximo ou vencidos)
      */
     @Suppress("MagicNumber")
     fun getProductsNeedingReplenishment(): Flow<List<Product>> =
@@ -108,8 +108,7 @@ class InventoryRemoteDataSource(
 
             val listener =
                 getUserProductsCollection()
-                    .whereLessThanOrEqualTo(FirebaseConfig.FIELD_DIAS_PARA_ACABAR, 7)
-                    .orderBy(FirebaseConfig.FIELD_DIAS_PARA_ACABAR, Query.Direction.ASCENDING)
+                    .orderBy(FirebaseConfig.FIELD_DATA_VENCIMENTO, Query.Direction.ASCENDING)
                     .addSnapshotListener { snapshot, error ->
                         if (error != null) {
                             close(error)
@@ -119,7 +118,7 @@ class InventoryRemoteDataSource(
                         val products =
                             snapshot?.documents?.mapNotNull { doc ->
                                 doc.toProduct()
-                            } ?: emptyList()
+                            }?.filter { it.isProximoVencimento() || it.isVencido() } ?: emptyList()
 
                         trySend(products)
                     }
@@ -229,7 +228,6 @@ class InventoryRemoteDataSource(
                 valor = getDouble(FirebaseConfig.FIELD_VALOR) ?: 0.0,
                 detalhes = getString(FirebaseConfig.FIELD_DETALHES) ?: "",
                 dataVencimento = getTimestamp(FirebaseConfig.FIELD_DATA_VENCIMENTO)?.toDate(),
-                diasParaAcabar = getLong(FirebaseConfig.FIELD_DIAS_PARA_ACABAR)?.toInt() ?: 0,
                 userId = getString(FirebaseConfig.FIELD_USER_ID) ?: "",
                 createdAt = getTimestamp(FirebaseConfig.FIELD_CREATED_AT)?.toDate() ?: Date(),
             )
@@ -247,7 +245,6 @@ class InventoryRemoteDataSource(
             FirebaseConfig.FIELD_VALOR to valor,
             FirebaseConfig.FIELD_DETALHES to detalhes,
             FirebaseConfig.FIELD_DATA_VENCIMENTO to dataVencimento?.let { com.google.firebase.Timestamp(it) },
-            FirebaseConfig.FIELD_DIAS_PARA_ACABAR to diasParaAcabar,
             FirebaseConfig.FIELD_USER_ID to userId,
             FirebaseConfig.FIELD_CREATED_AT to
                 com.google.firebase.Timestamp

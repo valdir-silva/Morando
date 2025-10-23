@@ -26,7 +26,6 @@ class ProductApiDataSourceMock {
                     fotoUrl = "https://via.placeholder.com/300x300.png?text=Arroz",
                     valor = 25.90,
                     detalhes = "Marca: Tio João\nPeso: 5kg",
-                    diasParaAcabar = 30,
                     createdAt = Date(),
                 )
 
@@ -38,7 +37,6 @@ class ProductApiDataSourceMock {
                     fotoUrl = "https://via.placeholder.com/300x300.png?text=Feijao",
                     valor = 8.50,
                     detalhes = "Marca: Camil\nPeso: 1kg",
-                    diasParaAcabar = 45,
                     createdAt = Date(),
                 )
 
@@ -50,7 +48,6 @@ class ProductApiDataSourceMock {
                     fotoUrl = "https://via.placeholder.com/300x300.png?text=Cafe",
                     valor = 15.90,
                     detalhes = "Marca: Pilão\nPeso: 500g",
-                    diasParaAcabar = 60,
                     createdAt = Date(),
                 )
 
@@ -62,7 +59,6 @@ class ProductApiDataSourceMock {
                     fotoUrl = "",
                     valor = 10.00,
                     detalhes = "Produto de exemplo para teste",
-                    diasParaAcabar = 30,
                     createdAt = Date(),
                 )
         }
