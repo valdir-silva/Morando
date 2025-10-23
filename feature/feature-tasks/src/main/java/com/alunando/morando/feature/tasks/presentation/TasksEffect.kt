@@ -5,10 +5,10 @@ package com.alunando.morando.feature.tasks.presentation
  */
 sealed interface TasksEffect {
     data class ShowToast(
-        val message: String
+        val message: String,
     ) : TasksEffect
 
     data class ShowError(
-        val message: String
+        val message: String,
     ) : TasksEffect
 }

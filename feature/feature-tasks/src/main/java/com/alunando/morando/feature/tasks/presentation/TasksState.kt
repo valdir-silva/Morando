@@ -10,5 +10,5 @@ data class TasksState(
     val tasks: List<Task> = emptyList(),
     val selectedType: TaskType = TaskType.DIARIA,
     val isLoading: Boolean = false,
-    val error: String? = null
+    val error: String? = null,
 )

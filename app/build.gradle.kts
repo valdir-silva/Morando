@@ -41,7 +41,7 @@ android {
             isShrinkResources = true
             proguardFiles(
                 getDefaultProguardFile("proguard-android-optimize.txt"),
-                "proguard-rules.pro"
+                "proguard-rules.pro",
             )
             buildConfigField("String", "BACKEND_TYPE", "\"FIREBASE\"")
         }
@@ -91,6 +91,9 @@ dependencies {
 
     // Koin
     implementation(libs.bundles.koin)
+
+    // Retrofit & Moshi
+    implementation(libs.bundles.retrofit)
 
     // Firebase
     implementation(platform(libs.firebase.bom))

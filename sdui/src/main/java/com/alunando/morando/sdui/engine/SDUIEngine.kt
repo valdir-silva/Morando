@@ -14,7 +14,6 @@ import com.alunando.morando.sdui.models.TextStyle
  * Motor de renderização SDUI
  */
 object SDUIEngine {
-
     /**
      * Renderiza um componente SDUI
      */
@@ -22,7 +21,7 @@ object SDUIEngine {
     fun RenderComponent(
         component: SDUIComponent,
         modifier: Modifier = Modifier,
-        onAction: (com.alunando.morando.sdui.models.SDUIAction) -> Unit = {}
+        onAction: (com.alunando.morando.sdui.models.SDUIAction) -> Unit = {},
     ) {
         when (component) {
             is SDUIComponent.Text -> RenderText(component)
@@ -35,23 +34,24 @@ object SDUIEngine {
 
     @Composable
     private fun RenderText(component: SDUIComponent.Text) {
-        val textStyle = when (component.style) {
-            TextStyle.TITLE -> MaterialTheme.typography.titleLarge
-            TextStyle.SUBTITLE -> MaterialTheme.typography.titleMedium
-            TextStyle.BODY -> MaterialTheme.typography.bodyMedium
-            TextStyle.CAPTION -> MaterialTheme.typography.bodySmall
-        }
+        val textStyle =
+            when (component.style) {
+                TextStyle.TITLE -> MaterialTheme.typography.titleLarge
+                TextStyle.SUBTITLE -> MaterialTheme.typography.titleMedium
+                TextStyle.BODY -> MaterialTheme.typography.bodyMedium
+                TextStyle.CAPTION -> MaterialTheme.typography.bodySmall
+            }
 
         Text(
             text = component.value,
-            style = textStyle
+            style = textStyle,
         )
     }
 
     @Composable
     private fun RenderButton(
         component: SDUIComponent.Button,
-        onAction: (com.alunando.morando.sdui.models.SDUIAction) -> Unit
+        onAction: (com.alunando.morando.sdui.models.SDUIAction) -> Unit,
     ) {
         Button(onClick = { onAction(component.action) }) {
             Text(component.label)
@@ -68,7 +68,7 @@ object SDUIEngine {
     private fun RenderColumn(
         component: SDUIComponent.Column,
         modifier: Modifier,
-        onAction: (com.alunando.morando.sdui.models.SDUIAction) -> Unit
+        onAction: (com.alunando.morando.sdui.models.SDUIAction) -> Unit,
     ) {
         Column(modifier = modifier) {
             component.children.forEach { child ->
@@ -81,7 +81,7 @@ object SDUIEngine {
     private fun RenderRow(
         component: SDUIComponent.Row,
         modifier: Modifier,
-        onAction: (com.alunando.morando.sdui.models.SDUIAction) -> Unit
+        onAction: (com.alunando.morando.sdui.models.SDUIAction) -> Unit,
     ) {
         Row(modifier = modifier) {
             component.children.forEach { child ->
