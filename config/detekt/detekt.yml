@@ -42,4 +42,3 @@ coroutines:
   active: true
   GlobalCoroutineUsage:
     active: true
-
