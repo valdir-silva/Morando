@@ -104,4 +104,33 @@ class AuthManager(
      */
     suspend fun ensureAuthenticated(): Result<FirebaseUser> =
         currentUser?.let { Result.success(it) } ?: signInAnonymously()
+
+    /**
+     * Aguarda até que o usuário esteja autenticado (com timeout)
+     * Retorna o user ID ou lança exceção se não autenticar
+     */
+    @Suppress("MagicNumber")
+    suspend fun waitForAuthentication(timeoutMillis: Long = 5000): String {
+        android.util.Log.d("AuthManager", "Aguardando autenticação... (userId atual: '$currentUserId')")
+
+        var elapsed = 0L
+        val interval = 100L
+
+        while (currentUserId.isEmpty() && elapsed < timeoutMillis) {
+            kotlinx.coroutines.delay(interval)
+            elapsed += interval
+
+            if (elapsed % 1000 == 0L) {
+                android.util.Log.d("AuthManager", "Aguardando... ${elapsed}ms de ${timeoutMillis}ms")
+            }
+        }
+
+        if (currentUserId.isEmpty()) {
+            android.util.Log.e("AuthManager", "❌ Timeout: Usuário não autenticado após ${timeoutMillis}ms")
+            throw IllegalStateException("Usuário não autenticado após ${timeoutMillis}ms")
+        }
+
+        android.util.Log.d("AuthManager", "✅ Usuário autenticado: $currentUserId")
+        return currentUserId
+    }
 }
