@@ -46,6 +46,7 @@
 - [x] **feature-barcode**: Estrutura básica (ViewModel, Screen stub)
 - [x] **feature-inventory**: Placeholder screen criado
 - [x] **feature-shopping**: Placeholder screen criado
+- [x] **icone do app**: drawable com o icone do app Morando
 
 ### App Module (100%)
 - [x] Koin DI setup completo (AppModule)
@@ -83,7 +84,28 @@
 - [ ] feature-barcode: Integração ML Kit + CameraX
 - [ ] feature-shopping: Implementação completa com MVI
 - [ ] feature-ai-assistant: Módulo de IA com suporte multi-provider
-- [ ] feature-cooking: Módulo de receitas (futuro app separado)
+
+### Feature Cooking - MVP (100%) ✅ COMPLETO
+- [x] Domain: Models (Recipe, Ingredient, Steps, enums, CookingSession, IngredientAvailability)
+- [x] Domain: CookingRepository interface
+- [x] Domain: Use Cases (GetRecipes, GetRecipeById, Add, Update, Delete, CheckIngredients, StartSession, StovePreferences)
+- [x] Data: CookingRepositoryMock com 6+ receitas variadas
+- [x] Data: CookingPreferencesDataSource (DataStore)
+- [x] Feature: MVI (Intent, State, Effect, ViewModel com timer)
+- [x] Feature: CookingListScreen (grid com filtros)
+- [x] Feature: RecipeDetailScreen (detalhes + verificação de ingredientes)
+- [x] Feature: CookingSessionScreen (parceiro de cozinha - mise en place + preparo + cronômetro)
+- [x] Feature: RecipeFormScreen (CRUD completo)
+- [x] Feature: StoveSettingsScreen (seleção de tipo de fogão)
+- [x] Feature: Componentes compartilhados (Timer, AvailabilityChip, ProgressIndicator)
+- [x] Feature: build.gradle.kts
+- [x] App: Integração DI (AppModule)
+- [x] App: Navegação (AppNavigation, AppRoute)
+- [x] App: Card no HomeScreen
+- [x] Build: Incluir módulo em settings.gradle.kts
+- [x] Fix: Dependências (DataStore adicionado)
+- [x] Fix: Ícones corrigidos (substituídos por emojis onde necessário)
+- [x] Enhancement: Temperatura adicionada em TODOS os tipos de fogão (indução, gás, elétrico, lenha)
 
 ## 📋 Next Tasks
 
