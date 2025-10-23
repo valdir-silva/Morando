@@ -10,6 +10,9 @@ data class InventoryState(
     val isLoading: Boolean = false,
     val error: String? = null,
     val showAddDialog: Boolean = false,
-    val selectedCategory: String? = null
+    val showEditDialog: Boolean = false,
+    val selectedCategory: String? = null,
+    val scannedProduct: Product? = null,
+    val editingProduct: Product? = null,
+    val isLoadingBarcodeInfo: Boolean = false
 )
-

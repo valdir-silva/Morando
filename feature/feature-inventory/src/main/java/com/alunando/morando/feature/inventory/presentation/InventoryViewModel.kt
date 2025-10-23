@@ -7,8 +7,10 @@ import com.alunando.morando.core.onSuccess
 import com.alunando.morando.domain.model.Product
 import com.alunando.morando.domain.usecase.AddProductUseCase
 import com.alunando.morando.domain.usecase.DeleteProductUseCase
+import com.alunando.morando.domain.usecase.GetProductInfoFromBarcodeUseCase
 import com.alunando.morando.domain.usecase.GetProductsUseCase
 import com.alunando.morando.domain.usecase.UpdateProductUseCase
+import com.alunando.morando.domain.usecase.UploadProductImageUseCase
 import kotlinx.coroutines.channels.Channel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
@@ -25,7 +27,9 @@ class InventoryViewModel(
     private val getProductsUseCase: GetProductsUseCase,
     private val addProductUseCase: AddProductUseCase,
     private val updateProductUseCase: UpdateProductUseCase,
-    private val deleteProductUseCase: DeleteProductUseCase
+    private val deleteProductUseCase: DeleteProductUseCase,
+    private val uploadProductImageUseCase: UploadProductImageUseCase,
+    private val getProductInfoFromBarcodeUseCase: GetProductInfoFromBarcodeUseCase
 ) : ViewModel() {
     private val _state = MutableStateFlow(InventoryState())
     val state: StateFlow<InventoryState> = _state.asStateFlow()
@@ -44,12 +48,14 @@ class InventoryViewModel(
     fun handleIntent(intent: InventoryIntent) {
         when (intent) {
             is InventoryIntent.LoadProducts -> loadProducts()
-            is InventoryIntent.AddProduct -> addProduct(intent.product)
-            is InventoryIntent.UpdateProduct -> updateProduct(intent.product)
+            is InventoryIntent.AddProduct -> addProduct(intent.product, intent.imageData)
+            is InventoryIntent.UpdateProduct -> updateProduct(intent.product, intent.imageData)
             is InventoryIntent.DeleteProduct -> deleteProduct(intent.productId)
             is InventoryIntent.OpenAddDialog -> openAddDialog()
+            is InventoryIntent.OpenEditDialog -> openEditDialog(intent.product)
             is InventoryIntent.CloseAddDialog -> closeAddDialog()
             is InventoryIntent.OpenBarcodeScanner -> openBarcodeScanner()
+            is InventoryIntent.OnBarcodeScanned -> onBarcodeScanned(intent.barcode)
             is InventoryIntent.FilterByCategory -> filterByCategory(intent.category)
         }
     }
@@ -68,11 +74,23 @@ class InventoryViewModel(
             }.launchIn(viewModelScope)
     }
 
-    private fun addProduct(product: Product) {
+    private fun addProduct(
+        product: Product,
+        imageData: ByteArray?
+    ) {
         viewModelScope.launch {
+            // Primeiro adiciona o produto
             val result = addProductUseCase(product)
             result
-                .onSuccess {
+                .onSuccess { addedProduct ->
+                    // Se tem imagem, faz upload
+                    if (imageData != null) {
+                        uploadProductImageUseCase(addedProduct.id, imageData)
+                            .onSuccess { imageUrl ->
+                                // Atualiza produto com URL da imagem
+                                updateProductUseCase(addedProduct.copy(fotoUrl = imageUrl))
+                            }
+                    }
                     sendEffect(InventoryEffect.ShowToast("Produto adicionado com sucesso"))
                     closeAddDialog()
                 }.onError { error ->
@@ -81,12 +99,25 @@ class InventoryViewModel(
         }
     }
 
-    private fun updateProduct(product: Product) {
+    private fun updateProduct(
+        product: Product,
+        imageData: ByteArray?
+    ) {
         viewModelScope.launch {
-            val result = updateProductUseCase(product)
+            // Se tem nova imagem, faz upload primeiro
+            var updatedProduct = product
+            if (imageData != null) {
+                uploadProductImageUseCase(product.id, imageData)
+                    .onSuccess { imageUrl ->
+                        updatedProduct = product.copy(fotoUrl = imageUrl)
+                    }
+            }
+
+            val result = updateProductUseCase(updatedProduct)
             result
                 .onSuccess {
                     sendEffect(InventoryEffect.ShowToast("Produto atualizado com sucesso"))
+                    closeAddDialog()
                 }.onError { error ->
                     sendEffect(InventoryEffect.ShowError(error.message ?: "Erro ao atualizar produto"))
                 }
@@ -106,16 +137,68 @@ class InventoryViewModel(
     }
 
     private fun openAddDialog() {
-        _state.value = _state.value.copy(showAddDialog = true)
+        _state.value = _state.value.copy(
+            showAddDialog = true,
+            showEditDialog = false,
+            scannedProduct = null,
+            editingProduct = null
+        )
+    }
+
+    private fun openEditDialog(product: Product) {
+        _state.value = _state.value.copy(
+            showEditDialog = true,
+            showAddDialog = false,
+            editingProduct = product,
+            scannedProduct = null
+        )
     }
 
     private fun closeAddDialog() {
-        _state.value = _state.value.copy(showAddDialog = false)
+        _state.value = _state.value.copy(
+            showAddDialog = false,
+            showEditDialog = false,
+            scannedProduct = null,
+            editingProduct = null
+        )
     }
 
     private fun openBarcodeScanner() {
         viewModelScope.launch {
             _effect.send(InventoryEffect.NavigateToBarcodeScanner)
+        }
+    }
+
+    private fun onBarcodeScanned(barcode: String) {
+        viewModelScope.launch {
+            _state.value = _state.value.copy(isLoadingBarcodeInfo = true)
+
+            // Busca informações do produto na API externa
+            val result = getProductInfoFromBarcodeUseCase(barcode)
+            result
+                .onSuccess { productInfo ->
+                    _state.value =
+                        _state.value.copy(
+                            scannedProduct = productInfo ?: Product(
+                                codigoBarras = barcode,
+                                nome = ""
+                            ),
+                            isLoadingBarcodeInfo = false,
+                            showAddDialog = true
+                        )
+                    if (productInfo != null) {
+                        sendEffect(InventoryEffect.ShowToast("Produto encontrado!"))
+                    } else {
+                        sendEffect(InventoryEffect.ShowToast("Produto não encontrado. Preencha os dados manualmente."))
+                    }
+                }.onError { error ->
+                    _state.value = _state.value.copy(
+                        scannedProduct = Product(codigoBarras = barcode, nome = ""),
+                        isLoadingBarcodeInfo = false,
+                        showAddDialog = true
+                    )
+                    sendEffect(InventoryEffect.ShowToast("Erro ao buscar produto. Preencha manualmente."))
+                }
         }
     }
 
@@ -130,4 +213,3 @@ class InventoryViewModel(
         }
     }
 }
-

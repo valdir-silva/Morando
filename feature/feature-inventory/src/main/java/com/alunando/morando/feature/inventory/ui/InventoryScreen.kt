@@ -1,7 +1,6 @@
 package com.alunando.morando.feature.inventory.ui
 
 import androidx.compose.foundation.background
-import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -17,7 +16,9 @@ import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.grid.GridCells
 import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
 import androidx.compose.foundation.lazy.grid.items
+import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.Delete
@@ -52,15 +53,16 @@ import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import coil.compose.AsyncImage
+import com.alunando.morando.core.ui.ImagePicker
 import com.alunando.morando.domain.model.Product
 import com.alunando.morando.feature.inventory.presentation.InventoryEffect
 import com.alunando.morando.feature.inventory.presentation.InventoryIntent
 import com.alunando.morando.feature.inventory.presentation.InventoryViewModel
-import org.koin.androidx.compose.koinViewModel
 import java.text.NumberFormat
 import java.text.SimpleDateFormat
 import java.util.Date
 import java.util.Locale
+import org.koin.androidx.compose.koinViewModel
 
 /**
  * Tela de gerenciamento de estoque de produtos
@@ -104,9 +106,9 @@ fun InventoryScreen(
     ) { paddingValues ->
         Box(
             modifier =
-                Modifier
-                    .fillMaxSize()
-                    .padding(paddingValues)
+            Modifier
+                .fillMaxSize()
+                .padding(paddingValues)
         ) {
             when {
                 state.isLoading -> {
@@ -125,6 +127,9 @@ fun InventoryScreen(
                         products = state.products,
                         onDeleteProduct = { productId ->
                             viewModel.handleIntent(InventoryIntent.DeleteProduct(productId))
+                        },
+                        onEditProduct = { product ->
+                            viewModel.handleIntent(InventoryIntent.OpenEditDialog(product))
                         }
                     )
                 }
@@ -135,13 +140,27 @@ fun InventoryScreen(
         if (state.showAddDialog) {
             AddProductDialog(
                 onDismiss = { viewModel.handleIntent(InventoryIntent.CloseAddDialog) },
-                onConfirm = { product ->
-                    viewModel.handleIntent(InventoryIntent.AddProduct(product))
+                onConfirm = { product, imageData ->
+                    viewModel.handleIntent(InventoryIntent.AddProduct(product, imageData))
                 },
                 onScanBarcode = {
                     viewModel.handleIntent(InventoryIntent.OpenBarcodeScanner)
-                }
+                },
+                scannedProduct = state.scannedProduct
             )
+        }
+
+        // Dialog de editar produto
+        state.editingProduct?.let { editingProduct ->
+            if (state.showEditDialog) {
+                EditProductDialog(
+                    product = editingProduct,
+                    onDismiss = { viewModel.handleIntent(InventoryIntent.CloseAddDialog) },
+                    onConfirm = { product, imageData ->
+                        viewModel.handleIntent(InventoryIntent.UpdateProduct(product, imageData))
+                    }
+                )
+            }
         }
     }
 }
@@ -149,7 +168,8 @@ fun InventoryScreen(
 @Composable
 private fun ProductList(
     products: List<Product>,
-    onDeleteProduct: (String) -> Unit
+    onDeleteProduct: (String) -> Unit,
+    onEditProduct: (Product) -> Unit
 ) {
     LazyVerticalGrid(
         columns = GridCells.Fixed(2),
@@ -160,7 +180,8 @@ private fun ProductList(
         items(products) { product ->
             ProductCard(
                 product = product,
-                onDelete = { onDeleteProduct(product.id) }
+                onDelete = { onDeleteProduct(product.id) },
+                onEdit = { onEditProduct(product) }
             )
         }
     }
@@ -169,32 +190,34 @@ private fun ProductList(
 @Composable
 private fun ProductCard(
     product: Product,
-    onDelete: () -> Unit
+    onDelete: () -> Unit,
+    onEdit: () -> Unit = {}
 ) {
     Card(
         modifier =
-            Modifier
-                .fillMaxWidth()
-                .height(240.dp),
-        elevation = CardDefaults.cardElevation(defaultElevation = 2.dp)
+        Modifier
+            .fillMaxWidth()
+            .height(240.dp),
+        elevation = CardDefaults.cardElevation(defaultElevation = 2.dp),
+        onClick = onEdit
     ) {
         Column {
             // Imagem do produto
             Box(
                 modifier =
-                    Modifier
-                        .fillMaxWidth()
-                        .height(120.dp)
-                        .background(MaterialTheme.colorScheme.surfaceVariant)
+                Modifier
+                    .fillMaxWidth()
+                    .height(120.dp)
+                    .background(MaterialTheme.colorScheme.surfaceVariant)
             ) {
                 if (product.fotoUrl.isNotEmpty()) {
                     AsyncImage(
                         model = product.fotoUrl,
                         contentDescription = product.nome,
                         modifier =
-                            Modifier
-                                .fillMaxSize()
-                                .clip(RoundedCornerShape(topStart = 8.dp, topEnd = 8.dp)),
+                        Modifier
+                            .fillMaxSize()
+                            .clip(RoundedCornerShape(topStart = 8.dp, topEnd = 8.dp)),
                         contentScale = ContentScale.Crop
                     )
                 } else {
@@ -209,18 +232,18 @@ private fun ProductCard(
                 if (product.isVencido() || product.isProximoVencimento()) {
                     Box(
                         modifier =
-                            Modifier
-                                .align(Alignment.TopEnd)
-                                .padding(8.dp)
-                                .background(
-                                    color =
-                                        if (product.isVencido()) {
-                                            Color.Red
-                                        } else {
-                                            Color(0xFFFF9800)
-                                        },
-                                    shape = RoundedCornerShape(4.dp)
-                                ).padding(horizontal = 6.dp, vertical = 2.dp)
+                        Modifier
+                            .align(Alignment.TopEnd)
+                            .padding(8.dp)
+                            .background(
+                                color =
+                                if (product.isVencido()) {
+                                    Color.Red
+                                } else {
+                                    Color(0xFFFF9800)
+                                },
+                                shape = RoundedCornerShape(4.dp)
+                            ).padding(horizontal = 6.dp, vertical = 2.dp)
                     ) {
                         Text(
                             text = if (product.isVencido()) "Vencido" else "Vence em breve",
@@ -234,9 +257,9 @@ private fun ProductCard(
             // Informações do produto
             Column(
                 modifier =
-                    Modifier
-                        .fillMaxWidth()
-                        .padding(12.dp)
+                Modifier
+                    .fillMaxWidth()
+                    .padding(12.dp)
             ) {
                 Text(
                     text = product.nome,
@@ -266,9 +289,9 @@ private fun ProductCard(
                         if (product.valor > 0) {
                             Text(
                                 text =
-                                    NumberFormat
-                                        .getCurrencyInstance(Locale("pt", "BR"))
-                                        .format(product.valor),
+                                NumberFormat
+                                    .getCurrencyInstance(Locale("pt", "BR"))
+                                    .format(product.valor),
                                 style = MaterialTheme.typography.bodyMedium,
                                 color = MaterialTheme.colorScheme.primary
                             )
@@ -277,12 +300,12 @@ private fun ProductCard(
                         product.dataVencimento?.let { vencimento ->
                             Text(
                                 text =
-                                    "Venc: ${
-                                        SimpleDateFormat(
-                                            "dd/MM/yy",
-                                            Locale.getDefault()
-                                        ).format(vencimento)
-                                    }",
+                                "Venc: ${
+                                SimpleDateFormat(
+                                    "dd/MM/yy",
+                                    Locale.getDefault()
+                                ).format(vencimento)
+                                }",
                                 style = MaterialTheme.typography.bodySmall,
                                 color = MaterialTheme.colorScheme.onSurfaceVariant
                             )
@@ -341,26 +364,73 @@ private fun EmptyState(
 @Composable
 private fun AddProductDialog(
     onDismiss: () -> Unit,
-    onConfirm: (Product) -> Unit,
-    onScanBarcode: () -> Unit
+    onConfirm: (Product, ByteArray?) -> Unit,
+    onScanBarcode: () -> Unit,
+    scannedProduct: Product? = null
 ) {
-    var nome by remember { mutableStateOf("") }
-    var categoria by remember { mutableStateOf("") }
-    var valor by remember { mutableStateOf("") }
-    var diasParaAcabar by remember { mutableStateOf("") }
+    var nome by remember(scannedProduct) { mutableStateOf(scannedProduct?.nome ?: "") }
+    var categoria by remember(scannedProduct) { mutableStateOf(scannedProduct?.categoria ?: "") }
+    var codigoBarras by remember(scannedProduct) { mutableStateOf(scannedProduct?.codigoBarras ?: "") }
+    var valor by remember(scannedProduct) {
+        mutableStateOf(
+            if (scannedProduct?.valor != null && scannedProduct.valor > 0) {
+                scannedProduct.valor.toString()
+            } else {
+                ""
+            }
+        )
+    }
+    var diasParaAcabar by remember(scannedProduct) { mutableStateOf(scannedProduct?.diasParaAcabar?.toString() ?: "") }
+    var detalhes by remember(scannedProduct) { mutableStateOf(scannedProduct?.detalhes ?: "") }
+    var imageData by remember { mutableStateOf<ByteArray?>(null) }
 
     AlertDialog(
         onDismissRequest = onDismiss,
         title = { Text("Adicionar Produto") },
         text = {
             Column(
-                modifier = Modifier.fillMaxWidth(),
-                verticalArrangement = Arrangement.spacedBy(8.dp)
+                modifier =
+                Modifier
+                    .fillMaxWidth()
+                    .height(600.dp)
+                    .verticalScroll(rememberScrollState()),
+                verticalArrangement = Arrangement.spacedBy(12.dp)
             ) {
+                // ImagePicker
+                ImagePicker(
+                    imageUrl = scannedProduct?.fotoUrl,
+                    onImageSelected = { bytes ->
+                        imageData = bytes
+                    },
+                    onImageRemoved = {
+                        imageData = null
+                    }
+                )
+
+                Spacer(modifier = Modifier.height(8.dp))
+
+                OutlinedButton(
+                    onClick = onScanBarcode,
+                    modifier = Modifier.fillMaxWidth()
+                ) {
+                    Text("Escanear Código de Barras")
+                }
+
+                if (codigoBarras.isNotEmpty()) {
+                    OutlinedTextField(
+                        value = codigoBarras,
+                        onValueChange = { codigoBarras = it },
+                        label = { Text("Código de Barras") },
+                        modifier = Modifier.fillMaxWidth(),
+                        singleLine = true,
+                        enabled = false
+                    )
+                }
+
                 OutlinedTextField(
                     value = nome,
                     onValueChange = { nome = it },
-                    label = { Text("Nome do produto") },
+                    label = { Text("Nome do produto *") },
                     modifier = Modifier.fillMaxWidth(),
                     singleLine = true
                 )
@@ -389,12 +459,13 @@ private fun AddProductDialog(
                     singleLine = true
                 )
 
-                OutlinedButton(
-                    onClick = onScanBarcode,
-                    modifier = Modifier.fillMaxWidth()
-                ) {
-                    Text("Escanear Código de Barras")
-                }
+                OutlinedTextField(
+                    value = detalhes,
+                    onValueChange = { detalhes = it },
+                    label = { Text("Detalhes") },
+                    modifier = Modifier.fillMaxWidth(),
+                    maxLines = 3
+                )
             }
         },
         confirmButton = {
@@ -405,12 +476,14 @@ private fun AddProductDialog(
                             Product(
                                 nome = nome,
                                 categoria = categoria,
+                                codigoBarras = codigoBarras,
                                 valor = valor.toDoubleOrNull() ?: 0.0,
                                 diasParaAcabar = diasParaAcabar.toIntOrNull() ?: 0,
+                                detalhes = detalhes,
                                 dataCompra = Date(),
                                 createdAt = Date()
                             )
-                        onConfirm(product)
+                        onConfirm(product, imageData)
                     }
                 }
             ) {
@@ -425,3 +498,137 @@ private fun AddProductDialog(
     )
 }
 
+@Composable
+private fun EditProductDialog(
+    product: Product,
+    onDismiss: () -> Unit,
+    onConfirm: (Product, ByteArray?) -> Unit
+) {
+    var nome by remember(product) { mutableStateOf(product.nome) }
+    var categoria by remember(product) { mutableStateOf(product.categoria) }
+    var codigoBarras by remember(product) { mutableStateOf(product.codigoBarras) }
+    var valor by remember(product) {
+        mutableStateOf(
+            if (product.valor > 0) {
+                product.valor.toString()
+            } else {
+                ""
+            }
+        )
+    }
+    var diasParaAcabar by remember(product) {
+        mutableStateOf(
+            if (product.diasParaAcabar > 0) {
+                product.diasParaAcabar.toString()
+            } else {
+                ""
+            }
+        )
+    }
+    var detalhes by remember(product) { mutableStateOf(product.detalhes) }
+    var imageData by remember { mutableStateOf<ByteArray?>(null) }
+
+    AlertDialog(
+        onDismissRequest = onDismiss,
+        title = { Text("Editar Produto") },
+        text = {
+            Column(
+                modifier =
+                Modifier
+                    .fillMaxWidth()
+                    .height(600.dp)
+                    .verticalScroll(rememberScrollState()),
+                verticalArrangement = Arrangement.spacedBy(12.dp)
+            ) {
+                // ImagePicker
+                ImagePicker(
+                    imageUrl = product.fotoUrl,
+                    onImageSelected = { bytes ->
+                        imageData = bytes
+                    },
+                    onImageRemoved = {
+                        imageData = null
+                    }
+                )
+
+                Spacer(modifier = Modifier.height(8.dp))
+
+                if (codigoBarras.isNotEmpty()) {
+                    OutlinedTextField(
+                        value = codigoBarras,
+                        onValueChange = { codigoBarras = it },
+                        label = { Text("Código de Barras") },
+                        modifier = Modifier.fillMaxWidth(),
+                        singleLine = true,
+                        enabled = false
+                    )
+                }
+
+                OutlinedTextField(
+                    value = nome,
+                    onValueChange = { nome = it },
+                    label = { Text("Nome do produto *") },
+                    modifier = Modifier.fillMaxWidth(),
+                    singleLine = true
+                )
+
+                OutlinedTextField(
+                    value = categoria,
+                    onValueChange = { categoria = it },
+                    label = { Text("Categoria") },
+                    modifier = Modifier.fillMaxWidth(),
+                    singleLine = true
+                )
+
+                OutlinedTextField(
+                    value = valor,
+                    onValueChange = { valor = it },
+                    label = { Text("Valor (R$)") },
+                    modifier = Modifier.fillMaxWidth(),
+                    singleLine = true
+                )
+
+                OutlinedTextField(
+                    value = diasParaAcabar,
+                    onValueChange = { diasParaAcabar = it },
+                    label = { Text("Dias para acabar") },
+                    modifier = Modifier.fillMaxWidth(),
+                    singleLine = true
+                )
+
+                OutlinedTextField(
+                    value = detalhes,
+                    onValueChange = { detalhes = it },
+                    label = { Text("Detalhes") },
+                    modifier = Modifier.fillMaxWidth(),
+                    maxLines = 3
+                )
+            }
+        },
+        confirmButton = {
+            Button(
+                onClick = {
+                    if (nome.isNotBlank()) {
+                        val updatedProduct =
+                            product.copy(
+                                nome = nome,
+                                categoria = categoria,
+                                codigoBarras = codigoBarras,
+                                valor = valor.toDoubleOrNull() ?: 0.0,
+                                diasParaAcabar = diasParaAcabar.toIntOrNull() ?: 0,
+                                detalhes = detalhes
+                            )
+                        onConfirm(updatedProduct, imageData)
+                    }
+                }
+            ) {
+                Text("Salvar")
+            }
+        },
+        dismissButton = {
+            TextButton(onClick = onDismiss) {
+                Text("Cancelar")
+            }
+        }
+    )
+}

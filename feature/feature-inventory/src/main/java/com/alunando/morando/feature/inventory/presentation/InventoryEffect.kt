@@ -8,4 +8,3 @@ sealed interface InventoryEffect {
     data class ShowError(val message: String) : InventoryEffect
     data object NavigateToBarcodeScanner : InventoryEffect
 }
-
