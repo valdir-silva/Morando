@@ -7,10 +7,8 @@ import com.google.firebase.FirebaseApp
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.SupervisorJob
-import kotlinx.coroutines.launch
 import org.koin.android.ext.android.inject
 import org.koin.android.ext.koin.androidContext
-import org.koin.android.ext.koin.androidLogger
 import org.koin.core.context.startKoin
 
 /**
@@ -28,16 +26,12 @@ class MorandoApplication : Application() {
 
         // Inicializa Koin
         startKoin {
-            androidLogger()
+            // androidLogger() removido para reduzir logs
             androidContext(this@MorandoApplication)
             modules(appModule)
         }
 
-        // Faz login anônimo automaticamente (apenas se não for MOCK)
-        if (BuildConfig.BACKEND_TYPE != "MOCK") {
-            applicationScope.launch {
-                authManager.ensureAuthenticated()
-            }
-        }
+        // Login será feito na tela de Login, não automaticamente
+        android.util.Log.d("MorandoApp", "App iniciado - flavor: ${BuildConfig.BACKEND_TYPE}")
     }
 }
