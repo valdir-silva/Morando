@@ -6,12 +6,12 @@ import com.alunando.morando.domain.model.Product
 import com.google.firebase.firestore.FirebaseFirestore
 import com.google.firebase.firestore.Query
 import com.google.firebase.storage.FirebaseStorage
-import java.util.Date
-import java.util.UUID
 import kotlinx.coroutines.channels.awaitClose
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.callbackFlow
 import kotlinx.coroutines.tasks.await
+import java.util.Date
+import java.util.UUID
 
 /**
  * Data source remoto para produtos (Firestore + Storage)
@@ -19,7 +19,8 @@ import kotlinx.coroutines.tasks.await
 class InventoryRemoteDataSource(
     private val firestore: FirebaseFirestore,
     private val storage: FirebaseStorage,
-    private val authManager: AuthManager
+    private val authManager: AuthManager,
+    private val productApiDataSource: com.alunando.morando.data.api.ProductApiDataSource? = null,
 ) {
     private fun getUserProductsCollection() =
         authManager.currentUserId.let { userId ->
@@ -193,7 +194,7 @@ class InventoryRemoteDataSource(
      */
     suspend fun uploadProductImage(
         productId: String,
-        imageData: ByteArray
+        imageData: ByteArray,
     ): String {
         val userId = authManager.currentUserId
         check(userId.isNotEmpty()) { "Usuário não autenticado" }
@@ -206,6 +207,12 @@ class InventoryRemoteDataSource(
         storageRef.putBytes(imageData).await()
         return storageRef.downloadUrl.await().toString()
     }
+
+    /**
+     * Busca informações do produto em API externa
+     */
+    suspend fun searchProductByBarcode(barcode: String): Product? =
+        productApiDataSource?.searchProductByBarcode(barcode)
 
     // Extension functions
     @Suppress("TooGenericExceptionCaught", "SwallowedException")
@@ -223,7 +230,7 @@ class InventoryRemoteDataSource(
                 dataVencimento = getTimestamp(FirebaseConfig.FIELD_DATA_VENCIMENTO)?.toDate(),
                 diasParaAcabar = getLong(FirebaseConfig.FIELD_DIAS_PARA_ACABAR)?.toInt() ?: 0,
                 userId = getString(FirebaseConfig.FIELD_USER_ID) ?: "",
-                createdAt = getTimestamp(FirebaseConfig.FIELD_CREATED_AT)?.toDate() ?: Date()
+                createdAt = getTimestamp(FirebaseConfig.FIELD_CREATED_AT)?.toDate() ?: Date(),
             )
         } catch (e: Exception) {
             null
@@ -241,7 +248,8 @@ class InventoryRemoteDataSource(
             FirebaseConfig.FIELD_DATA_VENCIMENTO to dataVencimento?.let { com.google.firebase.Timestamp(it) },
             FirebaseConfig.FIELD_DIAS_PARA_ACABAR to diasParaAcabar,
             FirebaseConfig.FIELD_USER_ID to userId,
-            FirebaseConfig.FIELD_CREATED_AT to com.google.firebase.Timestamp.now()
+            FirebaseConfig.FIELD_CREATED_AT to
+                com.google.firebase.Timestamp
+                    .now(),
         )
 }
-

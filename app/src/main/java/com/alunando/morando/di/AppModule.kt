@@ -1,6 +1,9 @@
 package com.alunando.morando.di
 
 import com.alunando.morando.BuildConfig
+import com.alunando.morando.data.api.CosmosApiService
+import com.alunando.morando.data.api.OpenFoodFactsApiService
+import com.alunando.morando.data.api.ProductApiDataSource
 import com.alunando.morando.data.datasource.InventoryRemoteDataSource
 import com.alunando.morando.data.datasource.TasksRemoteDataSource
 import com.alunando.morando.data.firebase.AuthManager
@@ -18,6 +21,7 @@ import com.alunando.morando.domain.usecase.DeleteProductUseCase
 import com.alunando.morando.domain.usecase.GenerateShoppingListUseCase
 import com.alunando.morando.domain.usecase.GetDailyTasksUseCase
 import com.alunando.morando.domain.usecase.GetProductByIdUseCase
+import com.alunando.morando.domain.usecase.GetProductInfoFromBarcodeUseCase
 import com.alunando.morando.domain.usecase.GetProductsNeedingReplenishmentUseCase
 import com.alunando.morando.domain.usecase.GetProductsUseCase
 import com.alunando.morando.domain.usecase.GetShoppingItemsUseCase
@@ -31,12 +35,19 @@ import com.alunando.morando.feature.tasks.presentation.TasksViewModel
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.firestore.FirebaseFirestore
 import com.google.firebase.storage.FirebaseStorage
+import com.squareup.moshi.Moshi
+import com.squareup.moshi.kotlin.reflect.KotlinJsonAdapterFactory
+import okhttp3.OkHttpClient
 import org.koin.androidx.viewmodel.dsl.viewModel
 import org.koin.dsl.module
+import retrofit2.Retrofit
+import retrofit2.converter.moshi.MoshiConverterFactory
+import java.util.concurrent.TimeUnit
 
 /**
  * Módulo Koin com todas as dependências do app
  */
+@Suppress("MagicNumber")
 val appModule =
     module {
 
@@ -48,9 +59,56 @@ val appModule =
         // Auth
         single { AuthManager(get()) }
 
+        // HTTP Client
+        single {
+            OkHttpClient
+                .Builder()
+                .connectTimeout(30, TimeUnit.SECONDS)
+                .readTimeout(30, TimeUnit.SECONDS)
+                .build()
+        }
+
+        // Moshi
+        single {
+            Moshi
+                .Builder()
+                .add(KotlinJsonAdapterFactory())
+                .build()
+        }
+
+        // API Services
+        single {
+            Retrofit
+                .Builder()
+                .baseUrl("https://api.cosmos.bluesoft.com.br/")
+                .client(get())
+                .addConverterFactory(MoshiConverterFactory.create(get()))
+                .build()
+                .create(CosmosApiService::class.java)
+        }
+
+        single {
+            Retrofit
+                .Builder()
+                .baseUrl("https://world.openfoodfacts.org/")
+                .client(get())
+                .addConverterFactory(MoshiConverterFactory.create(get()))
+                .build()
+                .create(OpenFoodFactsApiService::class.java)
+        }
+
+        // API Data Source (real ou mock)
+        single {
+            if (BuildConfig.BACKEND_TYPE == "MOCK") {
+                null // Mock não usa API externa
+            } else {
+                ProductApiDataSource(get(), get())
+            }
+        }
+
         // Data Sources (apenas quando não for MOCK)
         single { TasksRemoteDataSource(get(), get()) }
-        single { InventoryRemoteDataSource(get(), get(), get()) }
+        single { InventoryRemoteDataSource(get(), get(), get(), get()) }
 
         // Repositories - usa implementação mock ou real baseado no BuildConfig
         single<TasksRepository> {
@@ -83,6 +141,7 @@ val appModule =
         factory { GetProductByIdUseCase(get()) }
         factory { GetProductsNeedingReplenishmentUseCase(get()) }
         factory { UploadProductImageUseCase(get()) }
+        factory { GetProductInfoFromBarcodeUseCase(get()) }
 
         // Use Cases - Shopping
         factory { GetShoppingItemsUseCase(get()) }
@@ -90,6 +149,6 @@ val appModule =
 
         // ViewModels
         viewModel { TasksViewModel(get(), get(), get()) }
-        viewModel { InventoryViewModel(get(), get(), get(), get()) }
+        viewModel { InventoryViewModel(get(), get(), get(), get(), get(), get()) }
         viewModel { BarcodeScannerViewModel() }
     }
