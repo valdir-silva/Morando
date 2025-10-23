@@ -6,12 +6,12 @@ import com.alunando.morando.domain.repository.InventoryRepository
 import io.mockk.coEvery
 import io.mockk.coVerify
 import io.mockk.mockk
-import java.util.Date
 import kotlinx.coroutines.test.runTest
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertTrue
 import org.junit.Before
 import org.junit.Test
+import java.util.Date
 
 class AddProductUseCaseTest {
     private lateinit var useCase: AddProductUseCase
@@ -23,7 +23,7 @@ class AddProductUseCaseTest {
             nome = "Produto 1",
             categoria = "Categoria 1",
             valor = 10.0,
-            createdAt = Date()
+            createdAt = Date(),
         )
 
     @Before
@@ -63,4 +63,3 @@ class AddProductUseCaseTest {
             coVerify { repository.addProduct(mockProduct) }
         }
 }
-

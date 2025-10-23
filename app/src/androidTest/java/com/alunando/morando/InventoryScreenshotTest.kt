@@ -2,7 +2,6 @@ package com.alunando.morando
 
 import androidx.compose.ui.test.junit4.createComposeRule
 import androidx.compose.ui.test.onNodeWithContentDescription
-import androidx.compose.ui.test.onNodeWithText
 import androidx.compose.ui.test.performClick
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import com.alunando.morando.domain.model.Product
@@ -14,8 +13,6 @@ import com.alunando.morando.feature.inventory.presentation.InventoryViewModel
 import com.alunando.morando.feature.inventory.ui.InventoryScreen
 import io.mockk.every
 import io.mockk.mockk
-import java.util.Calendar
-import java.util.Date
 import kotlinx.coroutines.flow.flowOf
 import org.junit.Before
 import org.junit.ClassRule
@@ -25,6 +22,8 @@ import org.junit.runner.RunWith
 import tools.fastlane.screengrab.Screengrab
 import tools.fastlane.screengrab.UiAutomatorScreenshotStrategy
 import tools.fastlane.screengrab.locale.LocaleTestRule
+import java.util.Calendar
+import java.util.Date
 
 /**
  * Testes de screenshots para Fastlane Screengrab
@@ -53,7 +52,7 @@ class InventoryScreenshotTest {
                 detalhes = "Leite integral 1L",
                 dataVencimento = Calendar.getInstance().apply { add(Calendar.DAY_OF_MONTH, 3) }.time,
                 diasParaAcabar = 5,
-                createdAt = Date()
+                createdAt = Date(),
             ),
             Product(
                 id = "2",
@@ -66,7 +65,7 @@ class InventoryScreenshotTest {
                 detalhes = "Arroz branco tipo 1, 5kg",
                 dataVencimento = Calendar.getInstance().apply { add(Calendar.MONTH, 6) }.time,
                 diasParaAcabar = 15,
-                createdAt = Date()
+                createdAt = Date(),
             ),
             Product(
                 id = "3",
@@ -79,7 +78,7 @@ class InventoryScreenshotTest {
                 detalhes = "Feijão preto 1kg",
                 dataVencimento = Calendar.getInstance().apply { add(Calendar.MONTH, 12) }.time,
                 diasParaAcabar = 20,
-                createdAt = Date()
+                createdAt = Date(),
             ),
             Product(
                 id = "4",
@@ -91,7 +90,7 @@ class InventoryScreenshotTest {
                 detalhes = "Tomate fresco 1kg",
                 dataVencimento = Calendar.getInstance().apply { add(Calendar.DAY_OF_MONTH, 5) }.time,
                 diasParaAcabar = 3,
-                createdAt = Date()
+                createdAt = Date(),
             ),
             Product(
                 id = "5",
@@ -104,8 +103,8 @@ class InventoryScreenshotTest {
                 detalhes = "Pão de forma integral 500g",
                 dataVencimento = Calendar.getInstance().apply { add(Calendar.DAY_OF_MONTH, 2) }.time,
                 diasParaAcabar = 2,
-                createdAt = Date()
-            )
+                createdAt = Date(),
+            ),
         )
 
     companion object {
@@ -132,7 +131,7 @@ class InventoryScreenshotTest {
                 getProductsUseCase,
                 addProductUseCase,
                 updateProductUseCase,
-                deleteProductUseCase
+                deleteProductUseCase,
             )
 
         // When
@@ -156,7 +155,7 @@ class InventoryScreenshotTest {
                 getProductsUseCase,
                 addProductUseCase,
                 updateProductUseCase,
-                deleteProductUseCase
+                deleteProductUseCase,
             )
 
         // When
@@ -180,7 +179,7 @@ class InventoryScreenshotTest {
                 getProductsUseCase,
                 addProductUseCase,
                 updateProductUseCase,
-                deleteProductUseCase
+                deleteProductUseCase,
             )
 
         // When
@@ -214,7 +213,7 @@ class InventoryScreenshotTest {
                 getProductsUseCase,
                 addProductUseCase,
                 updateProductUseCase,
-                deleteProductUseCase
+                deleteProductUseCase,
             )
 
         // When
@@ -238,7 +237,7 @@ class InventoryScreenshotTest {
                 getProductsUseCase,
                 addProductUseCase,
                 updateProductUseCase,
-                deleteProductUseCase
+                deleteProductUseCase,
             )
 
         // When
@@ -258,4 +257,3 @@ class InventoryScreenshotTest {
         Screengrab.screenshot("05_inventory_empty_with_fab")
     }
 }
-

@@ -11,7 +11,6 @@ import io.mockk.coEvery
 import io.mockk.coVerify
 import io.mockk.every
 import io.mockk.mockk
-import java.util.Date
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.flowOf
@@ -26,6 +25,7 @@ import org.junit.Assert.assertFalse
 import org.junit.Assert.assertTrue
 import org.junit.Before
 import org.junit.Test
+import java.util.Date
 
 @OptIn(ExperimentalCoroutinesApi::class)
 class InventoryViewModelTest {
@@ -44,15 +44,15 @@ class InventoryViewModelTest {
                 nome = "Produto 1",
                 categoria = "Categoria 1",
                 valor = 10.0,
-                createdAt = Date()
+                createdAt = Date(),
             ),
             Product(
                 id = "2",
                 nome = "Produto 2",
                 categoria = "Categoria 2",
                 valor = 20.0,
-                createdAt = Date()
-            )
+                createdAt = Date(),
+            ),
         )
 
     @Before
@@ -82,7 +82,7 @@ class InventoryViewModelTest {
                     getProductsUseCase,
                     addProductUseCase,
                     updateProductUseCase,
-                    deleteProductUseCase
+                    deleteProductUseCase,
                 )
 
             // When
@@ -104,7 +104,7 @@ class InventoryViewModelTest {
                     nome = "Novo Produto",
                     categoria = "Nova Categoria",
                     valor = 30.0,
-                    createdAt = Date()
+                    createdAt = Date(),
                 )
             coEvery { addProductUseCase(any()) } returns Result.Success(newProduct)
             viewModel =
@@ -112,7 +112,7 @@ class InventoryViewModelTest {
                     getProductsUseCase,
                     addProductUseCase,
                     updateProductUseCase,
-                    deleteProductUseCase
+                    deleteProductUseCase,
                 )
             advanceUntilIdle()
 
@@ -139,7 +139,7 @@ class InventoryViewModelTest {
                     nome = "Novo Produto",
                     categoria = "Nova Categoria",
                     valor = 30.0,
-                    createdAt = Date()
+                    createdAt = Date(),
                 )
             coEvery { addProductUseCase(any()) } returns Result.Error(Exception("Erro ao adicionar"))
             viewModel =
@@ -147,7 +147,7 @@ class InventoryViewModelTest {
                     getProductsUseCase,
                     addProductUseCase,
                     updateProductUseCase,
-                    deleteProductUseCase
+                    deleteProductUseCase,
                 )
             advanceUntilIdle()
 
@@ -174,7 +174,7 @@ class InventoryViewModelTest {
                     getProductsUseCase,
                     addProductUseCase,
                     updateProductUseCase,
-                    deleteProductUseCase
+                    deleteProductUseCase,
                 )
             advanceUntilIdle()
 
@@ -200,7 +200,7 @@ class InventoryViewModelTest {
                     getProductsUseCase,
                     addProductUseCase,
                     updateProductUseCase,
-                    deleteProductUseCase
+                    deleteProductUseCase,
                 )
             advanceUntilIdle()
 
@@ -221,7 +221,7 @@ class InventoryViewModelTest {
                     getProductsUseCase,
                     addProductUseCase,
                     updateProductUseCase,
-                    deleteProductUseCase
+                    deleteProductUseCase,
                 )
             advanceUntilIdle()
             viewModel.handleIntent(InventoryIntent.OpenAddDialog)
@@ -244,7 +244,7 @@ class InventoryViewModelTest {
                     getProductsUseCase,
                     addProductUseCase,
                     updateProductUseCase,
-                    deleteProductUseCase
+                    deleteProductUseCase,
                 )
             advanceUntilIdle()
 
@@ -259,4 +259,3 @@ class InventoryViewModelTest {
             }
         }
 }
-

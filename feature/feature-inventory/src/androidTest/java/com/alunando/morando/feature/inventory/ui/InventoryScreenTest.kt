@@ -14,11 +14,11 @@ import com.alunando.morando.domain.usecase.UpdateProductUseCase
 import com.alunando.morando.feature.inventory.presentation.InventoryViewModel
 import io.mockk.every
 import io.mockk.mockk
-import java.util.Date
 import kotlinx.coroutines.flow.flowOf
 import org.junit.Before
 import org.junit.Rule
 import org.junit.Test
+import java.util.Date
 
 class InventoryScreenTest {
     @get:Rule
@@ -37,15 +37,15 @@ class InventoryScreenTest {
                 nome = "Leite Integral",
                 categoria = "Laticínios",
                 valor = 4.50,
-                createdAt = Date()
+                createdAt = Date(),
             ),
             Product(
                 id = "2",
                 nome = "Arroz Branco",
                 categoria = "Grãos",
                 valor = 25.90,
-                createdAt = Date()
-            )
+                createdAt = Date(),
+            ),
         )
 
     @Before
@@ -65,7 +65,7 @@ class InventoryScreenTest {
                 getProductsUseCase,
                 addProductUseCase,
                 updateProductUseCase,
-                deleteProductUseCase
+                deleteProductUseCase,
             )
 
         // When
@@ -91,7 +91,7 @@ class InventoryScreenTest {
                 getProductsUseCase,
                 addProductUseCase,
                 updateProductUseCase,
-                deleteProductUseCase
+                deleteProductUseCase,
             )
 
         // When
@@ -117,7 +117,7 @@ class InventoryScreenTest {
                 getProductsUseCase,
                 addProductUseCase,
                 updateProductUseCase,
-                deleteProductUseCase
+                deleteProductUseCase,
             )
 
         // When
@@ -146,7 +146,7 @@ class InventoryScreenTest {
                 getProductsUseCase,
                 addProductUseCase,
                 updateProductUseCase,
-                deleteProductUseCase
+                deleteProductUseCase,
             )
 
         // When
@@ -178,7 +178,7 @@ class InventoryScreenTest {
                 getProductsUseCase,
                 addProductUseCase,
                 updateProductUseCase,
-                deleteProductUseCase
+                deleteProductUseCase,
             )
 
         // When
@@ -204,7 +204,7 @@ class InventoryScreenTest {
                 getProductsUseCase,
                 addProductUseCase,
                 updateProductUseCase,
-                deleteProductUseCase
+                deleteProductUseCase,
             )
 
         // When
@@ -224,4 +224,3 @@ class InventoryScreenTest {
             .assertIsDisplayed()
     }
 }
-

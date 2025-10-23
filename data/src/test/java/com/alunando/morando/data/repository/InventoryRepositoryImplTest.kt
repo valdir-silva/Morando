@@ -8,7 +8,6 @@ import io.mockk.coVerify
 import io.mockk.every
 import io.mockk.mockk
 import io.mockk.verify
-import java.util.Date
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.flowOf
 import kotlinx.coroutines.test.runTest
@@ -16,6 +15,7 @@ import org.junit.Assert.assertEquals
 import org.junit.Assert.assertTrue
 import org.junit.Before
 import org.junit.Test
+import java.util.Date
 
 class InventoryRepositoryImplTest {
     private lateinit var repository: InventoryRepositoryImpl
@@ -28,15 +28,15 @@ class InventoryRepositoryImplTest {
                 nome = "Produto 1",
                 categoria = "Categoria 1",
                 valor = 10.0,
-                createdAt = Date()
+                createdAt = Date(),
             ),
             Product(
                 id = "2",
                 nome = "Produto 2",
                 categoria = "Categoria 2",
                 valor = 20.0,
-                createdAt = Date()
-            )
+                createdAt = Date(),
+            ),
         )
 
     @Before
@@ -193,4 +193,3 @@ class InventoryRepositoryImplTest {
             coVerify { remoteDataSource.uploadProductImage(productId, imageData) }
         }
 }
-

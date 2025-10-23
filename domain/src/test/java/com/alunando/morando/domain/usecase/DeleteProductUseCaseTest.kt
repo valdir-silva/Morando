@@ -53,4 +53,3 @@ class DeleteProductUseCaseTest {
             coVerify { repository.deleteProduct(productId) }
         }
 }
-
