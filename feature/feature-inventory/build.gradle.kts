@@ -38,13 +38,6 @@ android {
         compose = true
     }
 
-    packaging {
-        resources {
-            excludes += "META-INF/LICENSE.md"
-            excludes += "META-INF/LICENSE-notice.md"
-        }
-    }
-
     compileOptions {
         sourceCompatibility = JavaVersion.VERSION_17
         targetCompatibility = JavaVersion.VERSION_17
@@ -82,6 +75,4 @@ dependencies {
 
     // Testing
     testImplementation(libs.bundles.testing)
-    androidTestImplementation(libs.androidx.compose.ui.test.junit4)
-    androidTestImplementation("io.mockk:mockk-android:1.13.8")
 }
