@@ -1,6 +1,7 @@
 plugins {
     alias(libs.plugins.android.library)
     alias(libs.plugins.kotlin.android)
+    alias(libs.plugins.kotlin.compose)
 }
 
 android {
@@ -10,6 +11,10 @@ android {
     defaultConfig {
         minSdk = 24
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
+    }
+
+    buildFeatures {
+        compose = true
     }
 
     buildTypes {
@@ -39,6 +44,17 @@ android {
 dependencies {
     // Kotlin
     implementation(libs.bundles.kotlin.coroutines)
+
+    // Compose
+    implementation(platform(libs.androidx.compose.bom))
+    implementation(libs.bundles.compose)
+    implementation(libs.androidx.activity.compose)
+
+    // Coil for image loading
+    implementation(libs.coil.compose)
+
+    // ExifInterface for image rotation
+    implementation("androidx.exifinterface:exifinterface:1.3.7")
 
     // Testing
     testImplementation(libs.bundles.testing)
