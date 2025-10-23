@@ -9,8 +9,10 @@ import androidx.compose.ui.test.performTextInput
 import com.alunando.morando.domain.model.Product
 import com.alunando.morando.domain.usecase.AddProductUseCase
 import com.alunando.morando.domain.usecase.DeleteProductUseCase
+import com.alunando.morando.domain.usecase.GetProductInfoFromBarcodeUseCase
 import com.alunando.morando.domain.usecase.GetProductsUseCase
 import com.alunando.morando.domain.usecase.UpdateProductUseCase
+import com.alunando.morando.domain.usecase.UploadProductImageUseCase
 import com.alunando.morando.feature.inventory.presentation.InventoryViewModel
 import io.mockk.every
 import io.mockk.mockk
@@ -28,6 +30,8 @@ class InventoryScreenTest {
     private lateinit var addProductUseCase: AddProductUseCase
     private lateinit var updateProductUseCase: UpdateProductUseCase
     private lateinit var deleteProductUseCase: DeleteProductUseCase
+    private lateinit var uploadProductImageUseCase: UploadProductImageUseCase
+    private lateinit var getProductInfoFromBarcodeUseCase: GetProductInfoFromBarcodeUseCase
     private lateinit var viewModel: InventoryViewModel
 
     private val mockProducts =
@@ -54,6 +58,8 @@ class InventoryScreenTest {
         addProductUseCase = mockk()
         updateProductUseCase = mockk()
         deleteProductUseCase = mockk()
+        uploadProductImageUseCase = mockk()
+        getProductInfoFromBarcodeUseCase = mockk()
     }
 
     @Test
@@ -66,6 +72,8 @@ class InventoryScreenTest {
                 addProductUseCase,
                 updateProductUseCase,
                 deleteProductUseCase,
+                uploadProductImageUseCase,
+                getProductInfoFromBarcodeUseCase,
             )
 
         // When
@@ -92,6 +100,8 @@ class InventoryScreenTest {
                 addProductUseCase,
                 updateProductUseCase,
                 deleteProductUseCase,
+                uploadProductImageUseCase,
+                getProductInfoFromBarcodeUseCase,
             )
 
         // When
@@ -118,6 +128,8 @@ class InventoryScreenTest {
                 addProductUseCase,
                 updateProductUseCase,
                 deleteProductUseCase,
+                uploadProductImageUseCase,
+                getProductInfoFromBarcodeUseCase,
             )
 
         // When
@@ -147,6 +159,8 @@ class InventoryScreenTest {
                 addProductUseCase,
                 updateProductUseCase,
                 deleteProductUseCase,
+                uploadProductImageUseCase,
+                getProductInfoFromBarcodeUseCase,
             )
 
         // When
@@ -179,6 +193,8 @@ class InventoryScreenTest {
                 addProductUseCase,
                 updateProductUseCase,
                 deleteProductUseCase,
+                uploadProductImageUseCase,
+                getProductInfoFromBarcodeUseCase,
             )
 
         // When
@@ -205,6 +221,8 @@ class InventoryScreenTest {
                 addProductUseCase,
                 updateProductUseCase,
                 deleteProductUseCase,
+                uploadProductImageUseCase,
+                getProductInfoFromBarcodeUseCase,
             )
 
         // When

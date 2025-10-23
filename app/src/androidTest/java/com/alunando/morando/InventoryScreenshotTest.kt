@@ -7,8 +7,10 @@ import androidx.test.ext.junit.runners.AndroidJUnit4
 import com.alunando.morando.domain.model.Product
 import com.alunando.morando.domain.usecase.AddProductUseCase
 import com.alunando.morando.domain.usecase.DeleteProductUseCase
+import com.alunando.morando.domain.usecase.GetProductInfoFromBarcodeUseCase
 import com.alunando.morando.domain.usecase.GetProductsUseCase
 import com.alunando.morando.domain.usecase.UpdateProductUseCase
+import com.alunando.morando.domain.usecase.UploadProductImageUseCase
 import com.alunando.morando.feature.inventory.presentation.InventoryViewModel
 import com.alunando.morando.feature.inventory.ui.InventoryScreen
 import io.mockk.every
@@ -38,6 +40,8 @@ class InventoryScreenshotTest {
     private lateinit var addProductUseCase: AddProductUseCase
     private lateinit var updateProductUseCase: UpdateProductUseCase
     private lateinit var deleteProductUseCase: DeleteProductUseCase
+    private lateinit var uploadProductImageUseCase: UploadProductImageUseCase
+    private lateinit var getProductInfoFromBarcodeUseCase: GetProductInfoFromBarcodeUseCase
 
     private val mockProducts =
         listOf(
@@ -120,6 +124,8 @@ class InventoryScreenshotTest {
         addProductUseCase = mockk()
         updateProductUseCase = mockk()
         deleteProductUseCase = mockk()
+        uploadProductImageUseCase = mockk()
+        getProductInfoFromBarcodeUseCase = mockk()
     }
 
     @Test
@@ -132,6 +138,8 @@ class InventoryScreenshotTest {
                 addProductUseCase,
                 updateProductUseCase,
                 deleteProductUseCase,
+                uploadProductImageUseCase,
+                getProductInfoFromBarcodeUseCase,
             )
 
         // When
@@ -156,6 +164,8 @@ class InventoryScreenshotTest {
                 addProductUseCase,
                 updateProductUseCase,
                 deleteProductUseCase,
+                uploadProductImageUseCase,
+                getProductInfoFromBarcodeUseCase,
             )
 
         // When
@@ -180,6 +190,8 @@ class InventoryScreenshotTest {
                 addProductUseCase,
                 updateProductUseCase,
                 deleteProductUseCase,
+                uploadProductImageUseCase,
+                getProductInfoFromBarcodeUseCase,
             )
 
         // When
@@ -214,6 +226,8 @@ class InventoryScreenshotTest {
                 addProductUseCase,
                 updateProductUseCase,
                 deleteProductUseCase,
+                uploadProductImageUseCase,
+                getProductInfoFromBarcodeUseCase,
             )
 
         // When
@@ -238,6 +252,8 @@ class InventoryScreenshotTest {
                 addProductUseCase,
                 updateProductUseCase,
                 deleteProductUseCase,
+                uploadProductImageUseCase,
+                getProductInfoFromBarcodeUseCase,
             )
 
         // When
