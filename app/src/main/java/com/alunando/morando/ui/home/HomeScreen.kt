@@ -33,6 +33,7 @@ fun HomeScreen(
     onNavigateToTasks: () -> Unit,
     onNavigateToInventory: () -> Unit,
     onNavigateToShopping: () -> Unit,
+    onNavigateToCooking: () -> Unit,
     modifier: Modifier = Modifier,
 ) {
     val features =
@@ -54,6 +55,12 @@ fun HomeScreen(
                 description = "Organize suas compras",
                 iconRes = R.drawable.ic_shopping,
                 onClick = onNavigateToShopping,
+            ),
+            FeatureCard(
+                title = "Cozinhando",
+                description = "Receitas e parceiro de cozinha",
+                iconRes = R.drawable.ic_cooking,
+                onClick = onNavigateToCooking,
             ),
         )
 
