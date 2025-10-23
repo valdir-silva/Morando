@@ -11,32 +11,24 @@ import kotlinx.coroutines.flow.flowOf
  * Implementar com Firebase Firestore
  */
 class ShoppingRepositoryImpl : ShoppingRepository {
+    override fun getShoppingItems(): Flow<List<ShoppingItem>> = flowOf(emptyList())
 
-    override fun getShoppingItems(): Flow<List<ShoppingItem>> {
-        return flowOf(emptyList())
-    }
+    override suspend fun getShoppingItemById(itemId: String): Result<ShoppingItem> =
+        Result.Error(Exception("Not implemented yet"))
 
-    override suspend fun getShoppingItemById(itemId: String): Result<ShoppingItem> {
-        return Result.Error(Exception("Not implemented yet"))
-    }
+    override suspend fun addShoppingItem(item: ShoppingItem): Result<ShoppingItem> =
+        Result.Error(Exception("Not implemented yet"))
 
-    override suspend fun addShoppingItem(item: ShoppingItem): Result<ShoppingItem> {
-        return Result.Error(Exception("Not implemented yet"))
-    }
+    override suspend fun updateShoppingItem(item: ShoppingItem): Result<Unit> =
+        Result.Error(Exception("Not implemented yet"))
 
-    override suspend fun updateShoppingItem(item: ShoppingItem): Result<Unit> {
-        return Result.Error(Exception("Not implemented yet"))
-    }
+    override suspend fun deleteShoppingItem(itemId: String): Result<Unit> =
+        Result.Error(Exception("Not implemented yet"))
 
-    override suspend fun deleteShoppingItem(itemId: String): Result<Unit> {
-        return Result.Error(Exception("Not implemented yet"))
-    }
+    override suspend fun markItemPurchased(
+        itemId: String,
+        purchased: Boolean,
+    ): Result<Unit> = Result.Error(Exception("Not implemented yet"))
 
-    override suspend fun markItemPurchased(itemId: String, purchased: Boolean): Result<Unit> {
-        return Result.Error(Exception("Not implemented yet"))
-    }
-
-    override suspend fun clearPurchasedItems(): Result<Unit> {
-        return Result.Error(Exception("Not implemented yet"))
-    }
+    override suspend fun clearPurchasedItems(): Result<Unit> = Result.Error(Exception("Not implemented yet"))
 }

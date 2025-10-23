@@ -4,10 +4,10 @@ import com.alunando.morando.core.Result
 import com.alunando.morando.domain.model.Task
 import com.alunando.morando.domain.model.TaskType
 import com.alunando.morando.domain.repository.TasksRepository
-import java.util.Date
-import java.util.UUID
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.flowOf
+import java.util.Date
+import java.util.UUID
 
 /**
  * Implementação mock do TasksRepository para desenvolvimento sem Firebase
@@ -22,7 +22,7 @@ class TasksRepositoryMock : TasksRepository {
                 tipo = TaskType.DIARIA,
                 completa = false,
                 userId = "mock-user",
-                createdAt = Date()
+                createdAt = Date(),
             ),
             Task(
                 id = UUID.randomUUID().toString(),
@@ -31,7 +31,7 @@ class TasksRepositoryMock : TasksRepository {
                 tipo = TaskType.DIARIA,
                 completa = true,
                 userId = "mock-user",
-                createdAt = Date()
+                createdAt = Date(),
             ),
             Task(
                 id = UUID.randomUUID().toString(),
@@ -40,7 +40,7 @@ class TasksRepositoryMock : TasksRepository {
                 tipo = TaskType.SEMANAL,
                 completa = false,
                 userId = "mock-user",
-                createdAt = Date()
+                createdAt = Date(),
             ),
             Task(
                 id = UUID.randomUUID().toString(),
@@ -49,8 +49,8 @@ class TasksRepositoryMock : TasksRepository {
                 tipo = TaskType.SEMANAL,
                 completa = false,
                 userId = "mock-user",
-                createdAt = Date()
-            )
+                createdAt = Date(),
+            ),
         )
 
     override fun getTasks(): Flow<List<Task>> = flowOf(mockTasks)
@@ -75,6 +75,6 @@ class TasksRepositoryMock : TasksRepository {
 
     override suspend fun markTaskComplete(
         taskId: String,
-        complete: Boolean
+        complete: Boolean,
     ): Result<Unit> = Result.Success(Unit)
 }

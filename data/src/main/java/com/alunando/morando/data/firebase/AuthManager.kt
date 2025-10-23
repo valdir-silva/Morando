@@ -11,19 +11,20 @@ import kotlinx.coroutines.tasks.await
  * Gerenciador de autenticação Firebase
  */
 class AuthManager(
-    private val firebaseAuth: FirebaseAuth
+    private val firebaseAuth: FirebaseAuth,
 ) {
-
     /**
      * Flow do usuário atual
      */
-    val currentUserFlow: Flow<FirebaseUser?> = callbackFlow {
-        val listener = FirebaseAuth.AuthStateListener { auth ->
-            trySend(auth.currentUser)
+    val currentUserFlow: Flow<FirebaseUser?> =
+        callbackFlow {
+            val listener =
+                FirebaseAuth.AuthStateListener { auth ->
+                    trySend(auth.currentUser)
+                }
+            firebaseAuth.addAuthStateListener(listener)
+            awaitClose { firebaseAuth.removeAuthStateListener(listener) }
         }
-        firebaseAuth.addAuthStateListener(listener)
-        awaitClose { firebaseAuth.removeAuthStateListener(listener) }
-    }
 
     /**
      * Usuário atual (snapshot)
@@ -47,8 +48,8 @@ class AuthManager(
      * Faz login anônimo
      */
     @Suppress("TooGenericExceptionCaught")
-    suspend fun signInAnonymously(): Result<FirebaseUser> {
-        return try {
+    suspend fun signInAnonymously(): Result<FirebaseUser> =
+        try {
             val result = firebaseAuth.signInAnonymously().await()
             result.user?.let {
                 Result.success(it)
@@ -56,14 +57,16 @@ class AuthManager(
         } catch (e: Exception) {
             Result.failure(e)
         }
-    }
 
     /**
      * Faz login com email e senha
      */
     @Suppress("TooGenericExceptionCaught")
-    suspend fun signInWithEmailPassword(email: String, password: String): Result<FirebaseUser> {
-        return try {
+    suspend fun signInWithEmailPassword(
+        email: String,
+        password: String,
+    ): Result<FirebaseUser> =
+        try {
             val result = firebaseAuth.signInWithEmailAndPassword(email, password).await()
             result.user?.let {
                 Result.success(it)
@@ -71,14 +74,16 @@ class AuthManager(
         } catch (e: Exception) {
             Result.failure(e)
         }
-    }
 
     /**
      * Registra novo usuário
      */
     @Suppress("TooGenericExceptionCaught")
-    suspend fun registerWithEmailPassword(email: String, password: String): Result<FirebaseUser> {
-        return try {
+    suspend fun registerWithEmailPassword(
+        email: String,
+        password: String,
+    ): Result<FirebaseUser> =
+        try {
             val result = firebaseAuth.createUserWithEmailAndPassword(email, password).await()
             result.user?.let {
                 Result.success(it)
@@ -86,7 +91,6 @@ class AuthManager(
         } catch (e: Exception) {
             Result.failure(e)
         }
-    }
 
     /**
      * Faz logout
@@ -98,7 +102,6 @@ class AuthManager(
     /**
      * Garante que há usuário autenticado (cria anônimo se necessário)
      */
-    suspend fun ensureAuthenticated(): Result<FirebaseUser> {
-        return currentUser?.let { Result.success(it) } ?: signInAnonymously()
-    }
+    suspend fun ensureAuthenticated(): Result<FirebaseUser> =
+        currentUser?.let { Result.success(it) } ?: signInAnonymously()
 }

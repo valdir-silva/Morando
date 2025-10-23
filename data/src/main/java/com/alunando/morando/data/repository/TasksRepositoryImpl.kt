@@ -11,20 +11,15 @@ import kotlinx.coroutines.flow.Flow
  * Implementação do repositório de tarefas
  */
 class TasksRepositoryImpl(
-    private val remoteDataSource: TasksRemoteDataSource
+    private val remoteDataSource: TasksRemoteDataSource,
 ) : TasksRepository {
+    override fun getTasks(): Flow<List<Task>> = remoteDataSource.getTasks()
 
-    override fun getTasks(): Flow<List<Task>> {
-        return remoteDataSource.getTasks()
-    }
-
-    override fun getTasksByType(type: TaskType): Flow<List<Task>> {
-        return remoteDataSource.getTasksByType(type)
-    }
+    override fun getTasksByType(type: TaskType): Flow<List<Task>> = remoteDataSource.getTasksByType(type)
 
     @Suppress("TooGenericExceptionCaught")
-    override suspend fun getTaskById(taskId: String): Result<Task> {
-        return try {
+    override suspend fun getTaskById(taskId: String): Result<Task> =
+        try {
             val task = remoteDataSource.getTaskById(taskId)
             if (task != null) {
                 Result.Success(task)
@@ -34,45 +29,43 @@ class TasksRepositoryImpl(
         } catch (e: Exception) {
             Result.Error(e)
         }
-    }
 
     @Suppress("TooGenericExceptionCaught")
-    override suspend fun addTask(task: Task): Result<Task> {
-        return try {
+    override suspend fun addTask(task: Task): Result<Task> =
+        try {
             val newTask = remoteDataSource.addTask(task)
             Result.Success(newTask)
         } catch (e: Exception) {
             Result.Error(e)
         }
-    }
 
     @Suppress("TooGenericExceptionCaught")
-    override suspend fun updateTask(task: Task): Result<Unit> {
-        return try {
+    override suspend fun updateTask(task: Task): Result<Unit> =
+        try {
             remoteDataSource.updateTask(task)
             Result.Success(Unit)
         } catch (e: Exception) {
             Result.Error(e)
         }
-    }
 
     @Suppress("TooGenericExceptionCaught")
-    override suspend fun deleteTask(taskId: String): Result<Unit> {
-        return try {
+    override suspend fun deleteTask(taskId: String): Result<Unit> =
+        try {
             remoteDataSource.deleteTask(taskId)
             Result.Success(Unit)
         } catch (e: Exception) {
             Result.Error(e)
         }
-    }
 
     @Suppress("TooGenericExceptionCaught")
-    override suspend fun markTaskComplete(taskId: String, complete: Boolean): Result<Unit> {
-        return try {
+    override suspend fun markTaskComplete(
+        taskId: String,
+        complete: Boolean,
+    ): Result<Unit> =
+        try {
             remoteDataSource.markTaskComplete(taskId, complete)
             Result.Success(Unit)
         } catch (e: Exception) {
             Result.Error(e)
         }
-    }
 }

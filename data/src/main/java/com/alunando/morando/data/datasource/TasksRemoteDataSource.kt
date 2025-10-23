@@ -6,18 +6,18 @@ import com.alunando.morando.domain.model.Task
 import com.alunando.morando.domain.model.TaskType
 import com.google.firebase.firestore.FirebaseFirestore
 import com.google.firebase.firestore.Query
-import java.util.Date
 import kotlinx.coroutines.channels.awaitClose
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.callbackFlow
 import kotlinx.coroutines.tasks.await
+import java.util.Date
 
 /**
  * Data source remoto para tarefas (Firestore)
  */
 class TasksRemoteDataSource(
     private val firestore: FirebaseFirestore,
-    private val authManager: AuthManager
+    private val authManager: AuthManager,
 ) {
     private fun getUserTasksCollection() =
         authManager.currentUserId.let { userId ->
@@ -142,7 +142,7 @@ class TasksRemoteDataSource(
      */
     suspend fun markTaskComplete(
         taskId: String,
-        complete: Boolean
+        complete: Boolean,
     ) {
         getUserTasksCollection()
             .document(taskId)
@@ -161,7 +161,7 @@ class TasksRemoteDataSource(
                 tipo = TaskType.fromString(getString("tipo") ?: "diaria"),
                 completa = getBoolean("completa") ?: false,
                 userId = getString("userId") ?: "",
-                createdAt = getTimestamp("createdAt")?.toDate() ?: Date()
+                createdAt = getTimestamp("createdAt")?.toDate() ?: Date(),
             )
         } catch (e: Exception) {
             null
@@ -176,6 +176,6 @@ class TasksRemoteDataSource(
             "userId" to userId,
             "createdAt" to
                 com.google.firebase.Timestamp
-                    .now()
+                    .now(),
         )
 }
