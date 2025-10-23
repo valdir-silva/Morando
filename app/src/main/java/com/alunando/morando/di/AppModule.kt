@@ -7,29 +7,40 @@ import com.alunando.morando.data.api.ProductApiDataSource
 import com.alunando.morando.data.datasource.InventoryRemoteDataSource
 import com.alunando.morando.data.datasource.TasksRemoteDataSource
 import com.alunando.morando.data.firebase.AuthManager
+import com.alunando.morando.data.repository.CookingRepositoryMock
 import com.alunando.morando.data.repository.InventoryRepositoryImpl
 import com.alunando.morando.data.repository.InventoryRepositoryMock
 import com.alunando.morando.data.repository.ShoppingRepositoryImpl
 import com.alunando.morando.data.repository.TasksRepositoryImpl
 import com.alunando.morando.data.repository.TasksRepositoryMock
+import com.alunando.morando.domain.repository.CookingRepository
 import com.alunando.morando.domain.repository.InventoryRepository
 import com.alunando.morando.domain.repository.ShoppingRepository
 import com.alunando.morando.domain.repository.TasksRepository
 import com.alunando.morando.domain.usecase.AddProductUseCase
+import com.alunando.morando.domain.usecase.AddRecipeUseCase
 import com.alunando.morando.domain.usecase.AddTaskUseCase
+import com.alunando.morando.domain.usecase.CheckIngredientsAvailabilityUseCase
 import com.alunando.morando.domain.usecase.DeleteProductUseCase
+import com.alunando.morando.domain.usecase.DeleteRecipeUseCase
 import com.alunando.morando.domain.usecase.GenerateShoppingListUseCase
 import com.alunando.morando.domain.usecase.GetDailyTasksUseCase
 import com.alunando.morando.domain.usecase.GetProductByIdUseCase
 import com.alunando.morando.domain.usecase.GetProductInfoFromBarcodeUseCase
 import com.alunando.morando.domain.usecase.GetProductsNeedingReplenishmentUseCase
 import com.alunando.morando.domain.usecase.GetProductsUseCase
+import com.alunando.morando.domain.usecase.GetRecipeByIdUseCase
+import com.alunando.morando.domain.usecase.GetRecipesUseCase
 import com.alunando.morando.domain.usecase.GetShoppingItemsUseCase
+import com.alunando.morando.domain.usecase.GetUserStovePreferenceUseCase
 import com.alunando.morando.domain.usecase.GetWeeklyTasksUseCase
 import com.alunando.morando.domain.usecase.MarkTaskCompleteUseCase
+import com.alunando.morando.domain.usecase.SaveUserStovePreferenceUseCase
 import com.alunando.morando.domain.usecase.UpdateProductUseCase
+import com.alunando.morando.domain.usecase.UpdateRecipeUseCase
 import com.alunando.morando.domain.usecase.UploadProductImageUseCase
 import com.alunando.morando.feature.barcode.presentation.BarcodeScannerViewModel
+import com.alunando.morando.feature.cooking.presentation.CookingViewModel
 import com.alunando.morando.feature.inventory.presentation.InventoryViewModel
 import com.alunando.morando.feature.tasks.presentation.TasksViewModel
 import com.google.firebase.auth.FirebaseAuth
@@ -126,6 +137,7 @@ val appModule =
             }
         }
         single<ShoppingRepository> { ShoppingRepositoryImpl() }
+        single<CookingRepository> { CookingRepositoryMock(get()) }
 
         // Use Cases - Tasks
         factory { GetDailyTasksUseCase(get()) }
@@ -147,8 +159,19 @@ val appModule =
         factory { GetShoppingItemsUseCase(get()) }
         factory { GenerateShoppingListUseCase(get(), get()) }
 
+        // Use Cases - Cooking
+        factory { GetRecipesUseCase(get()) }
+        factory { GetRecipeByIdUseCase(get()) }
+        factory { AddRecipeUseCase(get()) }
+        factory { UpdateRecipeUseCase(get()) }
+        factory { DeleteRecipeUseCase(get()) }
+        factory { CheckIngredientsAvailabilityUseCase(get()) }
+        factory { GetUserStovePreferenceUseCase(get()) }
+        factory { SaveUserStovePreferenceUseCase(get()) }
+
         // ViewModels
         viewModel { TasksViewModel(get(), get(), get()) }
         viewModel { InventoryViewModel(get(), get(), get(), get(), get(), get()) }
         viewModel { BarcodeScannerViewModel() }
+        viewModel { CookingViewModel(get(), get(), get(), get(), get(), get(), get(), get()) }
     }
