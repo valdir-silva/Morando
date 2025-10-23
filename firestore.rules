@@ -2,6 +2,41 @@ rules_version = '2';
 
 service cloud.firestore {
   match /databases/{database}/documents {
+    // Função auxiliar para verificar se o usuário está autenticado (incluindo anônimos)
+    function isAuthenticated() {
+      return request.auth != null;
+    }
+    
+    // Função auxiliar para verificar se é o próprio usuário
+    function isOwner(userId) {
+      return isAuthenticated() && request.auth.uid == userId;
+    }
+    
+    // Regras para dados dos usuários
+    match /users/{userId} {
+      // Permite leitura apenas para o próprio usuário
+      allow read: if isOwner(userId);
+      
+      // Permite escrita apenas para o próprio usuário
+      allow write: if isOwner(userId);
+      
+      // Regras para subcoleções (tasks, products, shopping_list, etc)
+      match /{collection}/{document=**} {
+        // Permite leitura e escrita apenas para o próprio usuário
+        allow read, write: if isOwner(userId);
+      }
+    }
+    
+    // Regras para configurações de UI (SDUI)
+    match /ui_configs/{configId} {
+      // Permite leitura para todos autenticados
+      allow read: if isAuthenticated();
+      
+      // Apenas administradores podem escrever (adicione lógica de admin se necessário)
+      allow write: if false;
+    }
+    
+    // Nega acesso a qualquer outro caminho
     match /{document=**} {
       allow read, write: if false;
     }
