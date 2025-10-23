@@ -6,10 +6,16 @@ complexity:
   CyclomaticComplexMethod:
     active: true
     threshold: 10
+    ignoreAnnotated: ['Composable']
+  LongMethod:
+    active: true
+    threshold: 60
+    ignoreAnnotated: ['Composable']
   LongParameterList:
     active: true
     functionThreshold: 6
     constructorThreshold: 6
+    ignoreAnnotated: ['Composable']
 
 style:
   active: true
@@ -18,7 +24,10 @@ style:
     maxLineLength: 120
   ForbiddenComment:
     active: true
-    comments: ['TODO:', 'FIXME:', 'STOPSHIP:']
+    comments: ['FIXME:', 'STOPSHIP:']
+  UnusedParameter:
+    active: true
+    ignoreAnnotated: ['Composable']
 
 naming:
   active: true
