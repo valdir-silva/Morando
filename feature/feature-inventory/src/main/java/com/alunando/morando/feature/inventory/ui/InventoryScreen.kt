@@ -72,7 +72,7 @@ import java.util.Locale
 fun InventoryScreen(
     modifier: Modifier = Modifier,
     viewModel: InventoryViewModel = koinViewModel(),
-    onNavigateToBarcodeScanner: () -> Unit = {},
+    onNavigateToAddProduct: () -> Unit = {},
 ) {
     val state by viewModel.state.collectAsState()
     val snackbarHostState = remember { SnackbarHostState() }
@@ -90,7 +90,7 @@ fun InventoryScreen(
                 }
 
                 is InventoryEffect.NavigateToBarcodeScanner -> {
-                    onNavigateToBarcodeScanner()
+                    // Não usado mais, removido
                 }
             }
         }
@@ -101,7 +101,7 @@ fun InventoryScreen(
         snackbarHost = { SnackbarHost(snackbarHostState) },
         floatingActionButton = {
             FloatingActionButton(
-                onClick = { viewModel.handleIntent(InventoryIntent.OpenAddDialog) },
+                onClick = onNavigateToAddProduct,
             ) {
                 Icon(Icons.Default.Add, contentDescription = "Adicionar produto")
             }
