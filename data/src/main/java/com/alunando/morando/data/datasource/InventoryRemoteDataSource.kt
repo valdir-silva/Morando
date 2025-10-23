@@ -35,14 +35,16 @@ class InventoryRemoteDataSource(
     /**
      * Busca todos os produtos do usuário
      */
-    @Suppress("MagicNumber")
     fun getProducts(): Flow<List<Product>> =
         callbackFlow {
-            // Aguarda até que o usuário esteja autenticado
-            while (authManager.currentUserId.isEmpty()) {
-                kotlinx.coroutines.delay(100)
+            // Se não estiver autenticado, retorna lista vazia
+            if (authManager.currentUserId.isEmpty()) {
+                trySend(emptyList())
+                awaitClose { }
+                return@callbackFlow
             }
 
+            // Usuário autenticado, configura listener
             val listener =
                 getUserProductsCollection()
                     .orderBy(FirebaseConfig.FIELD_CREATED_AT, Query.Direction.DESCENDING)
@@ -66,12 +68,13 @@ class InventoryRemoteDataSource(
     /**
      * Busca produtos por categoria
      */
-    @Suppress("MagicNumber")
     fun getProductsByCategory(category: String): Flow<List<Product>> =
         callbackFlow {
-            // Aguarda até que o usuário esteja autenticado
-            while (authManager.currentUserId.isEmpty()) {
-                kotlinx.coroutines.delay(100)
+            // Verifica se está autenticado, senão retorna lista vazia
+            if (authManager.currentUserId.isEmpty()) {
+                trySend(emptyList())
+                awaitClose { }
+                return@callbackFlow
             }
 
             val listener =
@@ -98,12 +101,13 @@ class InventoryRemoteDataSource(
     /**
      * Busca produtos que estão acabando (vencimento próximo ou vencidos)
      */
-    @Suppress("MagicNumber")
     fun getProductsNeedingReplenishment(): Flow<List<Product>> =
         callbackFlow {
-            // Aguarda até que o usuário esteja autenticado
-            while (authManager.currentUserId.isEmpty()) {
-                kotlinx.coroutines.delay(100)
+            // Verifica se está autenticado, senão retorna lista vazia
+            if (authManager.currentUserId.isEmpty()) {
+                trySend(emptyList())
+                awaitClose { }
+                return@callbackFlow
             }
 
             val listener =
@@ -116,9 +120,11 @@ class InventoryRemoteDataSource(
                         }
 
                         val products =
-                            snapshot?.documents?.mapNotNull { doc ->
-                                doc.toProduct()
-                            }?.filter { it.isProximoVencimento() || it.isVencido() } ?: emptyList()
+                            snapshot
+                                ?.documents
+                                ?.mapNotNull { doc ->
+                                    doc.toProduct()
+                                }?.filter { it.isProximoVencimento() || it.isVencido() } ?: emptyList()
 
                         trySend(products)
                     }
@@ -163,9 +169,16 @@ class InventoryRemoteDataSource(
      * Adiciona novo produto
      */
     suspend fun addProduct(product: Product): Product {
+        // Aguarda autenticação antes de tentar adicionar
+        android.util.Log.d("InventoryDataSource", "Tentando adicionar produto: ${product.nome}")
+        val userId = authManager.waitForAuthentication()
+        android.util.Log.d("InventoryDataSource", "Autenticado como: $userId")
+
         val docRef = getUserProductsCollection().document()
         val productMap = product.toMap(authManager.currentUserId)
+        android.util.Log.d("InventoryDataSource", "Salvando no Firestore...")
         docRef.set(productMap).await()
+        android.util.Log.d("InventoryDataSource", "✅ Produto salvo com ID: ${docRef.id}")
         return product.copy(id = docRef.id)
     }
 
@@ -173,6 +186,9 @@ class InventoryRemoteDataSource(
      * Atualiza produto
      */
     suspend fun updateProduct(product: Product) {
+        // Aguarda autenticação antes de tentar atualizar
+        authManager.waitForAuthentication()
+
         getUserProductsCollection()
             .document(product.id)
             .set(product.toMap(authManager.currentUserId))
@@ -183,6 +199,9 @@ class InventoryRemoteDataSource(
      * Deleta produto
      */
     suspend fun deleteProduct(productId: String) {
+        // Aguarda autenticação antes de tentar deletar
+        authManager.waitForAuthentication()
+
         getUserProductsCollection()
             .document(productId)
             .delete()
@@ -196,8 +215,8 @@ class InventoryRemoteDataSource(
         productId: String,
         imageData: ByteArray,
     ): String {
-        val userId = authManager.currentUserId
-        check(userId.isNotEmpty()) { "Usuário não autenticado" }
+        // Aguarda autenticação antes de fazer upload
+        val userId = authManager.waitForAuthentication()
 
         val fileName = "${UUID.randomUUID()}.jpg"
         val path =
