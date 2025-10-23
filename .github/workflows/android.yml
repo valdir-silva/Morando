@@ -32,7 +32,7 @@ jobs:
         run: ./gradlew detekt
 
       - name: Run unit tests
-        run: ./gradlew testMockUnitTest
+        run: ./gradlew testMockDebugUnitTest
 
       - name: Upload test reports
         if: always()
@@ -81,7 +81,7 @@ jobs:
           api-level: ${{ matrix.api-level }}
           target: google_apis
           arch: x86_64
-          script: ./gradlew connectedMockAndroidTest
+          script: ./gradlew connectedMockDebugAndroidTest
 
       - name: Upload instrumented test reports
         if: always()
@@ -109,14 +109,14 @@ jobs:
       - name: Grant execute permission for gradlew
         run: chmod +x gradlew
 
-      - name: Build mock APK
-        run: ./gradlew assembleMock
+      - name: Build mock debug APK
+        run: ./gradlew assembleMockDebug
 
-      - name: Upload mock APK
+      - name: Upload mock debug APK
         uses: actions/upload-artifact@v4
         with:
-          name: app-mock
-          path: app/build/outputs/apk/mock/*.apk
+          name: app-mock-debug
+          path: app/build/outputs/apk/mock/debug/*.apk
 
       - name: Build mock release APK
         if: github.ref == 'refs/heads/main'
@@ -127,4 +127,4 @@ jobs:
         uses: actions/upload-artifact@v4
         with:
           name: app-mock-release
-          path: app/build/outputs/apk/mockRelease/*.apk
+          path: app/build/outputs/apk/mock/release/*.apk

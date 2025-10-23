@@ -26,14 +26,6 @@ android {
         debug {
             isMinifyEnabled = false
             applicationIdSuffix = ".debug"
-            buildConfigField("String", "BACKEND_TYPE", "\"FIREBASE\"")
-        }
-
-        create("mock") {
-            initWith(getByName("debug"))
-            isMinifyEnabled = false
-            applicationIdSuffix = ".mock"
-            buildConfigField("String", "BACKEND_TYPE", "\"MOCK\"")
         }
 
         release {
@@ -43,6 +35,19 @@ android {
                 getDefaultProguardFile("proguard-android-optimize.txt"),
                 "proguard-rules.pro",
             )
+        }
+    }
+
+    flavorDimensions += "backend"
+    productFlavors {
+        create("mock") {
+            dimension = "backend"
+            applicationIdSuffix = ".mock"
+            buildConfigField("String", "BACKEND_TYPE", "\"MOCK\"")
+        }
+
+        create("firebase") {
+            dimension = "backend"
             buildConfigField("String", "BACKEND_TYPE", "\"FIREBASE\"")
         }
     }
@@ -113,7 +118,16 @@ dependencies {
 }
 
 // Aplicar plugin do Google Services apenas se o arquivo google-services.json existir
-// Isso evita falha no build variant mock que não precisa do Firebase
+// Com product flavors, o Firebase só é necessário para o flavor "firebase"
 if (file("google-services.json").exists()) {
     apply(plugin = libs.plugins.google.services.get().pluginId)
+}
+
+// Desabilitar o processamento do Google Services para o flavor "mock"
+tasks.configureEach {
+    if (name.contains("MockDebug") || name.contains("MockRelease")) {
+        if (name.contains("GoogleServices")) {
+            enabled = false
+        }
+    }
 }

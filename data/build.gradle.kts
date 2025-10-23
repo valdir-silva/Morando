@@ -17,12 +17,19 @@ android {
             isMinifyEnabled = false
         }
 
-        create("mock") {
-            isMinifyEnabled = false
-        }
-
         release {
             isMinifyEnabled = false
+        }
+    }
+
+    flavorDimensions += "backend"
+    productFlavors {
+        create("mock") {
+            dimension = "backend"
+        }
+
+        create("firebase") {
+            dimension = "backend"
         }
     }
 
