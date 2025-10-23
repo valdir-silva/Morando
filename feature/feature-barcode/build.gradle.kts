@@ -52,6 +52,7 @@ dependencies {
     // Compose
     implementation(platform(libs.androidx.compose.bom))
     implementation(libs.bundles.compose)
+    implementation(libs.androidx.activity.compose)
 
     // ML Kit Barcode Scanning
     implementation(libs.mlkit.barcode.scanning)
