@@ -4,7 +4,7 @@ package com.alunando.morando.navigation
  * Rotas de navegação do app
  */
 sealed class AppRoute(
-    val route: String
+    val route: String,
 ) {
     data object Home : AppRoute("home")
 

@@ -20,32 +20,33 @@ import androidx.compose.ui.unit.dp
 fun ShoppingScreen(modifier: Modifier = Modifier) {
     Box(
         modifier = modifier.fillMaxSize(),
-        contentAlignment = Alignment.Center
+        contentAlignment = Alignment.Center,
     ) {
         Column(
             horizontalAlignment = Alignment.CenterHorizontally,
-            modifier = Modifier.padding(32.dp)
+            modifier = Modifier.padding(32.dp),
         ) {
             Text(
                 text = "🛒 Lista de Compras",
                 style = MaterialTheme.typography.headlineMedium,
                 textAlign = TextAlign.Center,
-                modifier = Modifier.padding(bottom = 16.dp)
+                modifier = Modifier.padding(bottom = 16.dp),
             )
             Text(
                 text = "Módulo em desenvolvimento",
                 style = MaterialTheme.typography.bodyLarge,
                 color = MaterialTheme.colorScheme.onSurfaceVariant,
-                textAlign = TextAlign.Center
+                textAlign = TextAlign.Center,
             )
             Text(
-                text = "\nEm breve você poderá:\n• Criar lista de compras manual\n" +
-                    "• Gerar lista automaticamente\n• Marcar itens como comprados\n" +
-                    "• Ver histórico de compras",
+                text =
+                    "\nEm breve você poderá:\n• Criar lista de compras manual\n" +
+                        "• Gerar lista automaticamente\n• Marcar itens como comprados\n" +
+                        "• Ver histórico de compras",
                 style = MaterialTheme.typography.bodyMedium,
                 color = MaterialTheme.colorScheme.onSurfaceVariant,
                 textAlign = TextAlign.Center,
-                modifier = Modifier.padding(top = 16.dp)
+                modifier = Modifier.padding(top = 16.dp),
             )
         }
     }

@@ -33,7 +33,7 @@ fun HomeScreen(
     onNavigateToTasks: () -> Unit,
     onNavigateToInventory: () -> Unit,
     onNavigateToShopping: () -> Unit,
-    modifier: Modifier = Modifier
+    modifier: Modifier = Modifier,
 ) {
     val features =
         listOf(
@@ -41,40 +41,40 @@ fun HomeScreen(
                 title = "Tarefas Diárias/Semanais",
                 description = "Gerencie suas tarefas do dia a dia",
                 iconRes = R.drawable.ic_tasks,
-                onClick = onNavigateToTasks
+                onClick = onNavigateToTasks,
             ),
             FeatureCard(
                 title = "Estoque de Produtos",
                 description = "Controle produtos e vencimentos",
                 iconRes = R.drawable.ic_inventory,
-                onClick = onNavigateToInventory
+                onClick = onNavigateToInventory,
             ),
             FeatureCard(
                 title = "Lista de Compras",
                 description = "Organize suas compras",
                 iconRes = R.drawable.ic_shopping,
-                onClick = onNavigateToShopping
-            )
+                onClick = onNavigateToShopping,
+            ),
         )
 
     Column(
         modifier =
-        modifier
-            .fillMaxSize()
-            .padding(16.dp),
-        horizontalAlignment = Alignment.CenterHorizontally
+            modifier
+                .fillMaxSize()
+                .padding(16.dp),
+        horizontalAlignment = Alignment.CenterHorizontally,
     ) {
         Text(
             text = "Morando",
             style = MaterialTheme.typography.headlineLarge,
-            modifier = Modifier.padding(vertical = 24.dp)
+            modifier = Modifier.padding(vertical = 24.dp),
         )
 
         LazyVerticalGrid(
             columns = GridCells.Fixed(1),
             contentPadding = PaddingValues(8.dp),
             verticalArrangement = Arrangement.spacedBy(16.dp),
-            horizontalArrangement = Arrangement.spacedBy(16.dp)
+            horizontalArrangement = Arrangement.spacedBy(16.dp),
         ) {
             items(features) { feature ->
                 FeatureCardItem(feature = feature)
@@ -89,35 +89,35 @@ private fun FeatureCardItem(feature: FeatureCard) {
     Card(
         onClick = feature.onClick,
         modifier = Modifier.fillMaxWidth(),
-        elevation = CardDefaults.cardElevation(defaultElevation = 4.dp)
+        elevation = CardDefaults.cardElevation(defaultElevation = 4.dp),
     ) {
         Column(
             modifier =
-            Modifier
-                .fillMaxWidth()
-                .padding(24.dp),
+                Modifier
+                    .fillMaxWidth()
+                    .padding(24.dp),
             horizontalAlignment = Alignment.CenterHorizontally,
-            verticalArrangement = Arrangement.spacedBy(12.dp)
+            verticalArrangement = Arrangement.spacedBy(12.dp),
         ) {
             Icon(
                 painter = painterResource(id = feature.iconRes),
                 contentDescription = feature.title,
                 tint = MaterialTheme.colorScheme.primary,
                 modifier =
-                Modifier
-                    .size(48.dp)
-                    .padding(8.dp)
+                    Modifier
+                        .size(48.dp)
+                        .padding(8.dp),
             )
             Text(
                 text = feature.title,
                 style = MaterialTheme.typography.titleLarge,
-                textAlign = TextAlign.Center
+                textAlign = TextAlign.Center,
             )
             Text(
                 text = feature.description,
                 style = MaterialTheme.typography.bodyMedium,
                 color = MaterialTheme.colorScheme.onSurfaceVariant,
-                textAlign = TextAlign.Center
+                textAlign = TextAlign.Center,
             )
         }
     }
@@ -127,5 +127,5 @@ private data class FeatureCard(
     val title: String,
     val description: String,
     @DrawableRes val iconRes: Int,
-    val onClick: () -> Unit
+    val onClick: () -> Unit,
 )

@@ -33,7 +33,7 @@ import com.alunando.morando.feature.tasks.presentation.TasksViewModel
 @Composable
 fun TasksScreen(
     viewModel: TasksViewModel,
-    modifier: Modifier = Modifier
+    modifier: Modifier = Modifier,
 ) {
     val state by viewModel.state.collectAsState()
 
@@ -48,12 +48,12 @@ fun TasksScreen(
             Tab(
                 selected = state.selectedType == TaskType.DIARIA,
                 onClick = { viewModel.handleIntent(TasksIntent.SelectTaskType(TaskType.DIARIA)) },
-                text = { Text("Diárias") }
+                text = { Text("Diárias") },
             )
             Tab(
                 selected = state.selectedType == TaskType.SEMANAL,
                 onClick = { viewModel.handleIntent(TasksIntent.SelectTaskType(TaskType.SEMANAL)) },
-                text = { Text("Semanais") }
+                text = { Text("Semanais") },
             )
         }
 
@@ -61,26 +61,26 @@ fun TasksScreen(
         if (state.isLoading) {
             Box(
                 modifier = Modifier.fillMaxSize(),
-                contentAlignment = Alignment.Center
+                contentAlignment = Alignment.Center,
             ) {
                 CircularProgressIndicator()
             }
         } else {
             LazyColumn(
                 modifier =
-                Modifier
-                    .fillMaxSize()
-                    .padding(16.dp),
-                verticalArrangement = Arrangement.spacedBy(8.dp)
+                    Modifier
+                        .fillMaxSize()
+                        .padding(16.dp),
+                verticalArrangement = Arrangement.spacedBy(8.dp),
             ) {
                 items(state.tasks) { task ->
                     TaskItem(
                         task = task,
                         onToggleComplete = { complete ->
                             viewModel.handleIntent(
-                                TasksIntent.ToggleTaskComplete(task.id, complete)
+                                TasksIntent.ToggleTaskComplete(task.id, complete),
                             )
-                        }
+                        },
                     )
                 }
             }
@@ -91,36 +91,36 @@ fun TasksScreen(
 @Composable
 fun TaskItem(
     task: Task,
-    onToggleComplete: (Boolean) -> Unit
+    onToggleComplete: (Boolean) -> Unit,
 ) {
     Card(
-        modifier = Modifier.fillMaxWidth()
+        modifier = Modifier.fillMaxWidth(),
     ) {
         Row(
             modifier =
-            Modifier
-                .fillMaxWidth()
-                .padding(16.dp),
+                Modifier
+                    .fillMaxWidth()
+                    .padding(16.dp),
             horizontalArrangement = Arrangement.SpaceBetween,
-            verticalAlignment = Alignment.CenterVertically
+            verticalAlignment = Alignment.CenterVertically,
         ) {
             Column(modifier = Modifier.weight(1f)) {
                 Text(
                     text = task.titulo,
-                    style = MaterialTheme.typography.titleMedium
+                    style = MaterialTheme.typography.titleMedium,
                 )
                 if (task.descricao.isNotEmpty()) {
                     Text(
                         text = task.descricao,
                         style = MaterialTheme.typography.bodySmall,
-                        color = MaterialTheme.colorScheme.onSurfaceVariant
+                        color = MaterialTheme.colorScheme.onSurfaceVariant,
                     )
                 }
             }
 
             Checkbox(
                 checked = task.completa,
-                onCheckedChange = onToggleComplete
+                onCheckedChange = onToggleComplete,
             )
         }
     }

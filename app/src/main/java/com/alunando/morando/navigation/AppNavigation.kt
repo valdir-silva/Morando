@@ -20,12 +20,12 @@ import org.koin.androidx.compose.koinViewModel
 fun AppNavigation(
     modifier: Modifier = Modifier,
     navController: NavHostController = rememberNavController(),
-    startDestination: String = AppRoute.Home.route
+    startDestination: String = AppRoute.Home.route,
 ) {
     NavHost(
         navController = navController,
         startDestination = startDestination,
-        modifier = modifier
+        modifier = modifier,
     ) {
         // Tela inicial
         composable(AppRoute.Home.route) {
@@ -38,33 +38,55 @@ fun AppNavigation(
                 },
                 onNavigateToShopping = {
                     navController.navigate(AppRoute.Shopping.route)
-                }
+                },
             )
         }
 
         // Tarefas
         composable(AppRoute.Tasks.route) {
             TasksScreen(
-                viewModel = koinViewModel()
+                viewModel = koinViewModel(),
             )
         }
 
         // Estoque
         composable(AppRoute.Inventory.route) {
+            val viewModel: com.alunando.morando.feature.inventory.presentation.InventoryViewModel =
+                koinViewModel()
+
+            // Recebe o código de barras escaneado
+            navController.currentBackStackEntry
+                ?.savedStateHandle
+                ?.get<String>("scanned_barcode")
+                ?.let { barcode ->
+                    viewModel.handleIntent(
+                        com.alunando.morando.feature.inventory.presentation.InventoryIntent.OnBarcodeScanned(
+                            barcode,
+                        ),
+                    )
+                    // Remove o valor após processar
+                    navController.currentBackStackEntry?.savedStateHandle?.remove<String>("scanned_barcode")
+                }
+
             InventoryScreen(
-                viewModel = koinViewModel(),
+                viewModel = viewModel,
                 onNavigateToBarcodeScanner = {
                     navController.navigate(AppRoute.BarcodeScanner.route)
-                }
+                },
             )
         }
 
         // Scanner de código de barras
         composable(AppRoute.BarcodeScanner.route) {
             BarcodeScannerScreen(
+                onBarcodeScanned = { barcode ->
+                    navController.previousBackStackEntry
+                        ?.savedStateHandle
+                        ?.set("scanned_barcode", barcode)
+                },
                 onNavigateBack = {
                     navController.popBackStack()
-                }
+                },
             )
         }
 
