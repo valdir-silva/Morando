@@ -16,6 +16,7 @@ import com.alunando.morando.domain.usecase.GetRecipesUseCase
 import com.alunando.morando.domain.usecase.GetUserStovePreferenceUseCase
 import com.alunando.morando.domain.usecase.SaveUserStovePreferenceUseCase
 import com.alunando.morando.domain.usecase.UpdateRecipeUseCase
+import com.alunando.morando.domain.usecase.cooking.UploadRecipeImageUseCase
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.channels.Channel
 import kotlinx.coroutines.delay
@@ -40,6 +41,7 @@ class CookingViewModel(
     private val checkIngredientsAvailabilityUseCase: CheckIngredientsAvailabilityUseCase,
     private val getUserStovePreferenceUseCase: GetUserStovePreferenceUseCase,
     private val saveUserStovePreferenceUseCase: SaveUserStovePreferenceUseCase,
+    private val uploadRecipeImageUseCase: UploadRecipeImageUseCase,
 ) : ViewModel() {
     private val _state = MutableStateFlow(CookingState())
     val state: StateFlow<CookingState> = _state.asStateFlow()
@@ -75,8 +77,8 @@ class CookingViewModel(
             is CookingIntent.StopTimer -> stopTimer()
             is CookingIntent.TickTimer -> tickTimer()
             is CookingIntent.StopCooking -> stopCooking()
-            is CookingIntent.CreateRecipe -> createRecipe(intent.recipe)
-            is CookingIntent.UpdateRecipe -> updateRecipe(intent.recipe)
+            is CookingIntent.CreateRecipe -> createRecipe(intent.recipe, intent.imageData)
+            is CookingIntent.UpdateRecipe -> updateRecipe(intent.recipe, intent.imageData)
             is CookingIntent.DeleteRecipe -> deleteRecipe(intent.id)
             is CookingIntent.SelectStoveType -> selectStoveType(intent.type)
             is CookingIntent.LoadStovePreference -> loadStovePreference()
@@ -129,26 +131,53 @@ class CookingViewModel(
         _state.value = _state.value.copy(selectedRecipe = null, ingredientsAvailability = emptyMap())
     }
 
-    private fun createRecipe(recipe: Recipe) {
+    private fun createRecipe(
+        recipe: Recipe,
+        imageData: ByteArray?,
+    ) {
         viewModelScope.launch {
-            val result = addRecipeUseCase(recipe)
+            // Se tiver imagem, faz upload primeiro e cria receita com a URL
+            var recipeToAdd = recipe
+            if (imageData != null) {
+                // Gera ID temporário para upload
+                val tempId = java.util.UUID.randomUUID().toString()
+                val uploadResult = uploadRecipeImageUseCase(tempId, imageData)
+                uploadResult.onSuccess { imageUrl ->
+                    recipeToAdd = recipe.copy(fotoUrl = imageUrl)
+                }
+            }
+
+            // Adiciona a receita
+            val result = addRecipeUseCase(recipeToAdd)
             result
                 .onSuccess {
-                    sendEffect(CookingEffect.ShowToast("Receita adicionada com sucesso"))
-                    sendEffect(CookingEffect.NavigateBack)
+                    sendEffect(CookingEffect.ShowToast("✅ Receita criada com sucesso!"))
+                    sendEffect(CookingEffect.NavigateToCookingList)
                 }.onError {
                     sendEffect(CookingEffect.ShowError("Erro ao adicionar receita"))
                 }
         }
     }
 
-    private fun updateRecipe(recipe: Recipe) {
+    private fun updateRecipe(
+        recipe: Recipe,
+        imageData: ByteArray?,
+    ) {
         viewModelScope.launch {
-            val result = updateRecipeUseCase(recipe)
+            // Se tiver nova imagem, faz upload primeiro
+            var updatedRecipe = recipe
+            if (imageData != null) {
+                val uploadResult = uploadRecipeImageUseCase(recipe.id, imageData)
+                uploadResult.onSuccess { imageUrl ->
+                    updatedRecipe = recipe.copy(fotoUrl = imageUrl)
+                }
+            }
+
+            val result = updateRecipeUseCase(updatedRecipe)
             result
                 .onSuccess {
-                    sendEffect(CookingEffect.ShowToast("Receita atualizada com sucesso"))
-                    sendEffect(CookingEffect.NavigateBack)
+                    sendEffect(CookingEffect.ShowToast("✅ Receita atualizada com sucesso!"))
+                    sendEffect(CookingEffect.NavigateToCookingList)
                 }.onError {
                     sendEffect(CookingEffect.ShowError("Erro ao atualizar receita"))
                 }
