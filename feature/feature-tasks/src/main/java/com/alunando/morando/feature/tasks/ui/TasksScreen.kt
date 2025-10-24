@@ -14,9 +14,11 @@ import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
-import androidx.compose.material.icons.filled.ArrowBack
-import androidx.compose.material.icons.filled.ArrowForward
 import androidx.compose.material.icons.filled.Delete
+import androidx.compose.material.icons.filled.Edit
+import androidx.compose.material3.AlertDialog
+import androidx.compose.material3.Button
+import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.Checkbox
@@ -34,7 +36,6 @@ import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextDecoration
 import androidx.compose.ui.unit.dp
@@ -73,48 +74,55 @@ fun TasksScreen(
             }
         },
     ) { paddingValues ->
-        Column(
-            modifier =
-                Modifier
-                    .fillMaxSize()
-                    .padding(paddingValues),
-        ) {
-            // Header com navegação de data
-            DateNavigationHeader(
-                selectedDate = state.selectedDate,
-                onPrevDay = { viewModel.handleIntent(TasksIntent.NavigateToPrevDay) },
-                onNextDay = { viewModel.handleIntent(TasksIntent.NavigateToNextDay) },
-                onToday = { viewModel.handleIntent(TasksIntent.NavigateToToday) },
-            )
+        // Lista de tarefas com scroll infinito
+        if (state.isLoading) {
+            Box(
+                modifier =
+                    Modifier
+                        .fillMaxSize()
+                        .padding(paddingValues),
+                contentAlignment = Alignment.Center,
+            ) {
+                CircularProgressIndicator()
+            }
+        } else if (state.tasksByDate.isEmpty()) {
+            Box(
+                modifier =
+                    Modifier
+                        .fillMaxSize()
+                        .padding(paddingValues),
+                contentAlignment = Alignment.Center,
+            ) {
+                Text(
+                    text = "Nenhuma tarefa agendada",
+                    style = MaterialTheme.typography.bodyLarge,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant,
+                )
+            }
+        } else {
+            LazyColumn(
+                modifier =
+                    Modifier
+                        .fillMaxSize()
+                        .padding(paddingValues)
+                        .padding(horizontal = 16.dp),
+                verticalArrangement = Arrangement.spacedBy(8.dp),
+            ) {
+                // Itera por cada data no mapa
+                state.tasksByDate.forEach { (date, tasksForDate) ->
+                    // Header de data
+                    item(key = "header_${date.time}") {
+                        DateHeader(
+                            date = date,
+                            isToday = isSameDay(date, Date()),
+                        )
+                    }
 
-            // Lista de tarefas
-            if (state.isLoading) {
-                Box(
-                    modifier = Modifier.fillMaxSize(),
-                    contentAlignment = Alignment.Center,
-                ) {
-                    CircularProgressIndicator()
-                }
-            } else if (state.tasks.isEmpty()) {
-                Box(
-                    modifier = Modifier.fillMaxSize(),
-                    contentAlignment = Alignment.Center,
-                ) {
-                    Text(
-                        text = "Nenhuma tarefa para este dia",
-                        style = MaterialTheme.typography.bodyLarge,
-                        color = MaterialTheme.colorScheme.onSurfaceVariant,
-                    )
-                }
-            } else {
-                LazyColumn(
-                    modifier =
-                        Modifier
-                            .fillMaxSize()
-                            .padding(horizontal = 16.dp),
-                    verticalArrangement = Arrangement.spacedBy(8.dp),
-                ) {
-                    items(state.tasks) { task ->
+                    // Tarefas da data
+                    items(
+                        items = tasksForDate,
+                        key = { task -> "${date.time}_${task.id}" },
+                    ) { task ->
                         if (task.tipo == TaskType.COMMITMENT) {
                             CommitmentCard(
                                 commitment = task,
@@ -124,8 +132,11 @@ fun TasksScreen(
                                         TasksIntent.ToggleTaskComplete(taskId, complete),
                                     )
                                 },
+                                onEdit = {
+                                    viewModel.handleIntent(TasksIntent.EditTask(task))
+                                },
                                 onDelete = {
-                                    viewModel.handleIntent(TasksIntent.DeleteTask(task.id))
+                                    viewModel.handleIntent(TasksIntent.ShowDeleteConfirmation(task))
                                 },
                             )
                         } else {
@@ -136,17 +147,20 @@ fun TasksScreen(
                                         TasksIntent.ToggleTaskComplete(task.id, complete),
                                     )
                                 },
+                                onEdit = {
+                                    viewModel.handleIntent(TasksIntent.EditTask(task))
+                                },
                                 onDelete = {
-                                    viewModel.handleIntent(TasksIntent.DeleteTask(task.id))
+                                    viewModel.handleIntent(TasksIntent.ShowDeleteConfirmation(task))
                                 },
                             )
                         }
                     }
+                }
 
-                    // Espaçamento no final para o FAB
-                    item {
-                        Spacer(modifier = Modifier.height(80.dp))
-                    }
+                // Espaçamento no final para o FAB
+                item {
+                    Spacer(modifier = Modifier.height(80.dp))
                 }
             }
         }
@@ -162,73 +176,101 @@ fun TasksScreen(
                 onSaveCommitment = { commitment, subTasks ->
                     viewModel.handleIntent(TasksIntent.CreateCommitment(commitment, subTasks))
                 },
+                onUpdateTask = { task ->
+                    viewModel.handleIntent(TasksIntent.UpdateTask(task))
+                },
+                onUpdateCommitment = { commitment, subTasks ->
+                    viewModel.handleIntent(TasksIntent.UpdateCommitment(commitment, subTasks))
+                },
                 existingTask = state.editingTask,
+                existingSubTasks = state.editingTask?.let { task ->
+                    if (task.tipo == TaskType.COMMITMENT) {
+                        state.subTasksMap[task.id] ?: emptyList()
+                    } else {
+                        emptyList()
+                    }
+                } ?: emptyList(),
             )
+        }
+
+        // Dialog de confirmação de exclusão
+        state.taskToDelete?.let { taskToDelete ->
+            if (state.showDeleteDialog) {
+                AlertDialog(
+                    onDismissRequest = { viewModel.handleIntent(TasksIntent.HideDeleteConfirmation) },
+                    title = { Text("Confirmar exclusão") },
+                    text = {
+                        Text(
+                            if (taskToDelete.tipo == TaskType.COMMITMENT) {
+                                "Tem certeza que deseja excluir este compromisso? " +
+                                    "Todas as sub-tarefas também serão excluídas."
+                            } else {
+                                "Tem certeza que deseja excluir esta tarefa?"
+                            },
+                        )
+                    },
+                    confirmButton = {
+                        Button(
+                            onClick = { viewModel.handleIntent(TasksIntent.ConfirmDelete) },
+                            colors =
+                                ButtonDefaults.buttonColors(
+                                    containerColor = MaterialTheme.colorScheme.error,
+                                ),
+                        ) {
+                            Text("Excluir")
+                        }
+                    },
+                    dismissButton = {
+                        TextButton(onClick = { viewModel.handleIntent(TasksIntent.HideDeleteConfirmation) }) {
+                            Text("Cancelar")
+                        }
+                    },
+                )
+            }
         }
     }
 }
 
 @Composable
-fun DateNavigationHeader(
-    selectedDate: Date,
-    onPrevDay: () -> Unit,
-    onNextDay: () -> Unit,
-    onToday: () -> Unit,
+fun DateHeader(
+    date: Date,
+    isToday: Boolean,
     modifier: Modifier = Modifier,
 ) {
     val dateFormatter = SimpleDateFormat("EEEE, dd 'de' MMMM", Locale("pt", "BR"))
-    val isToday = isSameDay(selectedDate, Date())
 
     Card(
         modifier = modifier.fillMaxWidth(),
         colors =
             CardDefaults.cardColors(
-                containerColor = MaterialTheme.colorScheme.primaryContainer,
+                containerColor =
+                    if (isToday) {
+                        MaterialTheme.colorScheme.primaryContainer
+                    } else {
+                        MaterialTheme.colorScheme.surfaceVariant
+                    },
             ),
     ) {
-        Column(
-            modifier = Modifier.padding(16.dp),
+        Row(
+            modifier = Modifier.padding(12.dp),
+            verticalAlignment = Alignment.CenterVertically,
         ) {
-            Row(
-                modifier = Modifier.fillMaxWidth(),
-                horizontalArrangement = Arrangement.SpaceBetween,
-                verticalAlignment = Alignment.CenterVertically,
-            ) {
-                IconButton(onClick = onPrevDay) {
-                    Icon(
-                        Icons.Default.ArrowBack,
-                        contentDescription = "Dia anterior",
-                        tint = MaterialTheme.colorScheme.onPrimaryContainer,
-                    )
-                }
-
-                Column(horizontalAlignment = Alignment.CenterHorizontally) {
-                    Text(
-                        text = dateFormatter.format(selectedDate).replaceFirstChar { it.uppercase() },
-                        style = MaterialTheme.typography.titleLarge,
-                        color = MaterialTheme.colorScheme.onPrimaryContainer,
-                        fontWeight = FontWeight.Bold,
-                    )
-                    if (!isToday) {
-                        TextButton(onClick = onToday) {
-                            Icon(
-                                painter = painterResource(id = com.alunando.morando.feature.tasks.R.drawable.ic_today),
-                                contentDescription = null,
-                                modifier = Modifier.padding(end = 4.dp),
-                            )
-                            Text("Hoje")
-                        }
-                    }
-                }
-
-                IconButton(onClick = onNextDay) {
-                    Icon(
-                        Icons.Default.ArrowForward,
-                        contentDescription = "Próximo dia",
-                        tint = MaterialTheme.colorScheme.onPrimaryContainer,
-                    )
-                }
-            }
+            Text(
+                text =
+                    if (isToday) {
+                        "Hoje - ${dateFormatter.format(date).replaceFirstChar { it.uppercase() }}"
+                    } else {
+                        dateFormatter.format(date).replaceFirstChar { it.uppercase() }
+                    },
+                style = MaterialTheme.typography.titleMedium,
+                color =
+                    if (isToday) {
+                        MaterialTheme.colorScheme.onPrimaryContainer
+                    } else {
+                        MaterialTheme.colorScheme.onSurfaceVariant
+                    },
+                fontWeight = if (isToday) FontWeight.Bold else FontWeight.Normal,
+            )
         }
     }
 }
@@ -237,6 +279,7 @@ fun DateNavigationHeader(
 fun TaskCard(
     task: Task,
     onToggleComplete: (Boolean) -> Unit,
+    onEdit: () -> Unit,
     onDelete: () -> Unit,
     modifier: Modifier = Modifier,
 ) {
@@ -283,12 +326,21 @@ fun TaskCard(
                     }
                 }
             }
-            IconButton(onClick = onDelete) {
-                Icon(
-                    Icons.Default.Delete,
-                    contentDescription = "Excluir",
-                    tint = MaterialTheme.colorScheme.error,
-                )
+            Row {
+                IconButton(onClick = onEdit) {
+                    Icon(
+                        Icons.Default.Edit,
+                        contentDescription = "Editar",
+                        tint = MaterialTheme.colorScheme.primary,
+                    )
+                }
+                IconButton(onClick = onDelete) {
+                    Icon(
+                        Icons.Default.Delete,
+                        contentDescription = "Excluir",
+                        tint = MaterialTheme.colorScheme.error,
+                    )
+                }
             }
         }
     }
@@ -299,6 +351,7 @@ fun CommitmentCard(
     commitment: Task,
     subTasks: List<Task>,
     onToggleComplete: (String, Boolean) -> Unit,
+    onEdit: () -> Unit,
     onDelete: () -> Unit,
     modifier: Modifier = Modifier,
 ) {
@@ -360,12 +413,21 @@ fun CommitmentCard(
                         )
                     }
                 }
-                IconButton(onClick = onDelete) {
-                    Icon(
-                        Icons.Default.Delete,
-                        contentDescription = "Excluir compromisso",
-                        tint = MaterialTheme.colorScheme.error,
-                    )
+                Row {
+                    IconButton(onClick = onEdit) {
+                        Icon(
+                            Icons.Default.Edit,
+                            contentDescription = "Editar compromisso",
+                            tint = MaterialTheme.colorScheme.primary,
+                        )
+                    }
+                    IconButton(onClick = onDelete) {
+                        Icon(
+                            Icons.Default.Delete,
+                            contentDescription = "Excluir compromisso",
+                            tint = MaterialTheme.colorScheme.error,
+                        )
+                    }
                 }
             }
 

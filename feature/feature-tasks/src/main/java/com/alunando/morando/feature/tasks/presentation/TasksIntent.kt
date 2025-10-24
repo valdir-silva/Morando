@@ -33,8 +33,29 @@ sealed interface TasksIntent {
         val subTasks: List<Task>,
     ) : TasksIntent
 
+    data class ShowDeleteConfirmation(
+        val task: Task,
+    ) : TasksIntent
+
+    data object HideDeleteConfirmation : TasksIntent
+
+    data object ConfirmDelete : TasksIntent
+
     data class DeleteTask(
         val taskId: String,
+    ) : TasksIntent
+
+    data class EditTask(
+        val task: Task,
+    ) : TasksIntent
+
+    data class UpdateTask(
+        val task: Task,
+    ) : TasksIntent
+
+    data class UpdateCommitment(
+        val commitment: Task,
+        val subTasks: List<Task>,
     ) : TasksIntent
 
     data object ShowCreateDialog : TasksIntent

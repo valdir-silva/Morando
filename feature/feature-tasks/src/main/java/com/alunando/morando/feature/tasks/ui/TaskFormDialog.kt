@@ -58,7 +58,10 @@ fun TaskFormDialog(
     onDismiss: () -> Unit,
     onSaveTask: (Task) -> Unit,
     onSaveCommitment: (Task, List<Task>) -> Unit,
+    onUpdateTask: (Task) -> Unit = {},
+    onUpdateCommitment: (Task, List<Task>) -> Unit = { _, _ -> },
     existingTask: Task? = null,
+    existingSubTasks: List<Task> = emptyList(),
     modifier: Modifier = Modifier,
 ) {
     var isCommitment by remember {
@@ -74,7 +77,23 @@ fun TaskFormDialog(
     var showDatePicker by remember { mutableStateOf(false) }
 
     // Sub-tarefas (apenas para compromissos)
-    val subTasks = remember { mutableStateListOf<SubTaskData>() }
+    val subTasks =
+        remember(existingTask) {
+            mutableStateListOf<SubTaskData>().apply {
+                // Carrega sub-tarefas existentes se estiver editando um compromisso
+                if (existingTask?.tipo == TaskType.COMMITMENT) {
+                    addAll(
+                        existingSubTasks.map { task ->
+                            SubTaskData(
+                                id = task.id,
+                                titulo = task.titulo,
+                                descricao = task.descricao,
+                            )
+                        },
+                    )
+                }
+            }
+        }
 
     val dateFormatter = remember { SimpleDateFormat("dd/MM/yyyy", Locale("pt", "BR")) }
 
@@ -214,7 +233,7 @@ fun TaskFormDialog(
 
                     // Botão adicionar sub-tarefa
                     OutlinedButton(
-                        onClick = { subTasks.add(SubTaskData("", "")) },
+                        onClick = { subTasks.add(SubTaskData(id = "", titulo = "", descricao = "")) },
                         modifier = Modifier.fillMaxWidth(),
                     ) {
                         Icon(Icons.Default.Add, contentDescription = null)
@@ -246,7 +265,7 @@ fun TaskFormDialog(
                                     .filter { it.titulo.isNotBlank() }
                                     .map { subTaskData ->
                                         Task(
-                                            id = UUID.randomUUID().toString(),
+                                            id = subTaskData.id.ifEmpty { UUID.randomUUID().toString() },
                                             titulo = subTaskData.titulo,
                                             descricao = subTaskData.descricao,
                                             tipo = TaskType.NORMAL,
@@ -258,7 +277,12 @@ fun TaskFormDialog(
                                             scheduledDate = null,
                                         )
                                     }
-                            onSaveCommitment(commitment, subTasksList)
+                            // Chama update ou save dependendo se está editando
+                            if (existingTask != null) {
+                                onUpdateCommitment(commitment, subTasksList)
+                            } else {
+                                onSaveCommitment(commitment, subTasksList)
+                            }
                         } else {
                             val task =
                                 Task(
@@ -273,7 +297,12 @@ fun TaskFormDialog(
                                     parentTaskId = null,
                                     scheduledDate = taskDate,
                                 )
-                            onSaveTask(task)
+                            // Chama update ou save dependendo se está editando
+                            if (existingTask != null) {
+                                onUpdateTask(task)
+                            } else {
+                                onSaveTask(task)
+                            }
                         }
                     }
                 },
@@ -371,6 +400,7 @@ private fun getRecurrenceLabel(recurrence: RecurrenceType): String =
  * Data class para gerenciar sub-tarefas no formulário
  */
 private data class SubTaskData(
+    val id: String = "",
     val titulo: String,
     val descricao: String,
 )
