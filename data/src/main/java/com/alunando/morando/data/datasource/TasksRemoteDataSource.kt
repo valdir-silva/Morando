@@ -231,7 +231,7 @@ class TasksRemoteDataSource(
         authManager.waitForAuthentication()
 
         val docRef = getUserTasksCollection().document()
-        
+
         // Garantir que compromissos não têm parent
         val taskToSave =
             if (task.tipo == TaskType.COMMITMENT) {
@@ -239,7 +239,7 @@ class TasksRemoteDataSource(
             } else {
                 task
             }
-        
+
         val taskMap = taskToSave.toMap(authManager.currentUserId)
         docRef.set(taskMap).await()
         return taskToSave.copy(id = docRef.id)
@@ -311,15 +311,18 @@ class TasksRemoteDataSource(
                 // Tarefa sem recorrência: mostra apenas na data agendada
                 isSameDay(taskCal, targetCal)
             }
+
             RecurrenceType.DAILY -> {
                 // Tarefa diária: mostra se a data alvo >= data inicial
                 !targetCal.before(taskCal)
             }
+
             RecurrenceType.WEEKLY -> {
                 // Tarefa semanal: mostra se é o mesmo dia da semana e data alvo >= data inicial
                 !targetCal.before(taskCal) &&
                     taskCal.get(Calendar.DAY_OF_WEEK) == targetCal.get(Calendar.DAY_OF_WEEK)
             }
+
             RecurrenceType.MONTHLY -> {
                 // Tarefa mensal: mostra se é o mesmo dia do mês e data alvo >= data inicial
                 !targetCal.before(taskCal) &&
@@ -353,6 +356,7 @@ class TasksRemoteDataSource(
                 // Tarefa sem recorrência: verifica se está no período
                 !taskCal.before(startCal) && !taskCal.after(endCal)
             }
+
             RecurrenceType.DAILY, RecurrenceType.WEEKLY, RecurrenceType.MONTHLY -> {
                 // Tarefas recorrentes: mostra se começou antes ou durante o período
                 !taskCal.after(endCal)
@@ -388,7 +392,9 @@ class TasksRemoteDataSource(
             "recurrence" to recurrence.name.lowercase(),
             "completa" to completa,
             "userId" to userId,
-            "createdAt" to com.google.firebase.Timestamp.now(),
+            "createdAt" to
+                com.google.firebase.Timestamp
+                    .now(),
             "parentTaskId" to parentTaskId,
             "scheduledDate" to
                 scheduledDate?.let {
