@@ -6,6 +6,7 @@ import com.alunando.morando.domain.model.Task
 import com.alunando.morando.domain.model.TaskType
 import com.alunando.morando.domain.repository.TasksRepository
 import kotlinx.coroutines.flow.Flow
+import java.util.Date
 
 /**
  * Implementação do repositório de tarefas
@@ -16,6 +17,10 @@ class TasksRepositoryImpl(
     override fun getTasks(): Flow<List<Task>> = remoteDataSource.getTasks()
 
     override fun getTasksByType(type: TaskType): Flow<List<Task>> = remoteDataSource.getTasksByType(type)
+
+    override fun getTasksForDate(date: Date): Flow<List<Task>> = remoteDataSource.getTasksForDate(date)
+
+    override fun getSubTasks(parentTaskId: String): Flow<List<Task>> = remoteDataSource.getSubTasks(parentTaskId)
 
     @Suppress("TooGenericExceptionCaught")
     override suspend fun getTaskById(taskId: String): Result<Task> =

@@ -3,25 +3,44 @@ package com.alunando.morando.feature.tasks.ui
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Add
+import androidx.compose.material.icons.filled.Delete
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Button
+import androidx.compose.material3.Card
+import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.ExposedDropdownMenuBox
 import androidx.compose.material3.ExposedDropdownMenuDefaults
+import androidx.compose.material3.Icon
+import androidx.compose.material3.IconButton
+import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.OutlinedTextField
+import androidx.compose.material3.SegmentedButton
+import androidx.compose.material3.SegmentedButtonDefaults
+import androidx.compose.material3.SingleChoiceSegmentedButtonRow
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableIntStateOf
+import androidx.compose.runtime.mutableStateListOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
+import com.alunando.morando.domain.model.RecurrenceType
 import com.alunando.morando.domain.model.Task
 import com.alunando.morando.domain.model.TaskType
 import java.text.SimpleDateFormat
@@ -31,31 +50,46 @@ import java.util.Locale
 import java.util.UUID
 
 /**
- * Dialog para criar/editar tarefas
+ * Dialog para criar/editar tarefas ou compromissos
  */
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun TaskFormDialog(
+    selectedDate: Date,
     onDismiss: () -> Unit,
-    onSave: (Task) -> Unit,
+    onSaveTask: (Task) -> Unit,
+    onSaveCommitment: (Task, List<Task>) -> Unit,
     existingTask: Task? = null,
-    commitments: List<Task> = emptyList(),
     modifier: Modifier = Modifier,
 ) {
+    var isCommitment by remember {
+        mutableStateOf(existingTask?.tipo == TaskType.COMMITMENT)
+    }
     var titulo by remember { mutableStateOf(existingTask?.titulo ?: "") }
     var descricao by remember { mutableStateOf(existingTask?.descricao ?: "") }
-    var tipo by remember { mutableStateOf(existingTask?.tipo ?: TaskType.DIARIA) }
-    var selectedDate by remember { mutableStateOf(existingTask?.scheduledDate ?: Date()) }
-    var selectedParentId by remember { mutableStateOf(existingTask?.parentTaskId) }
-    var expandedTypeMenu by remember { mutableStateOf(false) }
-    var expandedParentMenu by remember { mutableStateOf(false) }
+    var recurrence by remember {
+        mutableStateOf(existingTask?.recurrence ?: RecurrenceType.NONE)
+    }
+    var taskDate by remember { mutableStateOf(existingTask?.scheduledDate ?: selectedDate) }
+    var expandedRecurrenceMenu by remember { mutableStateOf(false) }
     var showDatePicker by remember { mutableStateOf(false) }
 
-    val dateFormatter = remember { SimpleDateFormat("dd/MM/yyyy HH:mm", Locale.getDefault()) }
+    // Sub-tarefas (apenas para compromissos)
+    val subTasks = remember { mutableStateListOf<SubTaskData>() }
+
+    val dateFormatter = remember { SimpleDateFormat("dd/MM/yyyy", Locale("pt", "BR")) }
 
     AlertDialog(
         onDismissRequest = onDismiss,
-        title = { Text(if (existingTask == null) "Nova Tarefa" else "Editar Tarefa") },
+        title = {
+            Text(
+                if (existingTask == null) {
+                    if (isCommitment) "Novo Compromisso" else "Nova Tarefa"
+                } else {
+                    if (isCommitment) "Editar Compromisso" else "Editar Tarefa"
+                },
+            )
+        },
         text = {
             Column(
                 modifier =
@@ -64,11 +98,33 @@ fun TaskFormDialog(
                         .verticalScroll(rememberScrollState()),
                 verticalArrangement = Arrangement.spacedBy(12.dp),
             ) {
+                // Seletor de tipo (Tarefa / Compromisso)
+                if (existingTask == null) {
+                    SingleChoiceSegmentedButtonRow(
+                        modifier = Modifier.fillMaxWidth(),
+                    ) {
+                        SegmentedButton(
+                            selected = !isCommitment,
+                            onClick = { isCommitment = false },
+                            shape = SegmentedButtonDefaults.itemShape(index = 0, count = 2),
+                        ) {
+                            Text("Tarefa")
+                        }
+                        SegmentedButton(
+                            selected = isCommitment,
+                            onClick = { isCommitment = true },
+                            shape = SegmentedButtonDefaults.itemShape(index = 1, count = 2),
+                        ) {
+                            Text("Compromisso")
+                        }
+                    }
+                }
+
                 // Título
                 OutlinedTextField(
                     value = titulo,
                     onValueChange = { titulo = it },
-                    label = { Text("Título") },
+                    label = { Text(if (isCommitment) "Nome do Compromisso" else "Nome da Tarefa") },
                     modifier = Modifier.fillMaxWidth(),
                     singleLine = true,
                 )
@@ -79,103 +135,91 @@ fun TaskFormDialog(
                     onValueChange = { descricao = it },
                     label = { Text("Descrição (opcional)") },
                     modifier = Modifier.fillMaxWidth(),
-                    minLines = 3,
-                    maxLines = 5,
+                    minLines = 2,
+                    maxLines = 4,
                 )
 
-                // Tipo de tarefa
+                // Data
+                OutlinedTextField(
+                    value = dateFormatter.format(taskDate),
+                    onValueChange = {},
+                    readOnly = true,
+                    label = { Text(if (isCommitment) "Data do Compromisso" else "Data da Tarefa") },
+                    modifier = Modifier.fillMaxWidth(),
+                    trailingIcon = {
+                        TextButton(onClick = { showDatePicker = true }) {
+                            Text("Alterar")
+                        }
+                    },
+                )
+
+                // Recorrência
                 ExposedDropdownMenuBox(
-                    expanded = expandedTypeMenu,
-                    onExpandedChange = { expandedTypeMenu = !expandedTypeMenu },
+                    expanded = expandedRecurrenceMenu,
+                    onExpandedChange = { expandedRecurrenceMenu = !expandedRecurrenceMenu },
                 ) {
                     OutlinedTextField(
-                        value = tipo.name,
+                        value = getRecurrenceLabel(recurrence),
                         onValueChange = {},
                         readOnly = true,
-                        label = { Text("Tipo") },
-                        trailingIcon = { ExposedDropdownMenuDefaults.TrailingIcon(expanded = expandedTypeMenu) },
+                        label = { Text("Recorrência") },
+                        trailingIcon = {
+                            ExposedDropdownMenuDefaults.TrailingIcon(
+                                expanded = expandedRecurrenceMenu,
+                            )
+                        },
                         modifier =
                             Modifier
                                 .fillMaxWidth()
                                 .menuAnchor(),
                     )
                     ExposedDropdownMenu(
-                        expanded = expandedTypeMenu,
-                        onDismissRequest = { expandedTypeMenu = false },
+                        expanded = expandedRecurrenceMenu,
+                        onDismissRequest = { expandedRecurrenceMenu = false },
                     ) {
-                        TaskType.entries.forEach { taskType ->
+                        RecurrenceType.entries.forEach { type ->
                             DropdownMenuItem(
-                                text = { Text(taskType.name) },
+                                text = { Text(getRecurrenceLabel(type)) },
                                 onClick = {
-                                    tipo = taskType
-                                    expandedTypeMenu = false
+                                    recurrence = type
+                                    expandedRecurrenceMenu = false
                                 },
                             )
                         }
                     }
                 }
 
-                // Se for COMPROMISSO, mostrar seletor de data/hora
-                if (tipo == TaskType.COMPROMISSO) {
-                    OutlinedTextField(
-                        value = dateFormatter.format(selectedDate),
-                        onValueChange = {},
-                        readOnly = true,
-                        label = { Text("Data e Hora") },
-                        modifier = Modifier.fillMaxWidth(),
-                        trailingIcon = {
-                            TextButton(onClick = { showDatePicker = true }) {
-                                Text("Alterar")
-                            }
-                        },
+                // Sub-tarefas (apenas para compromissos)
+                if (isCommitment) {
+                    Spacer(modifier = Modifier.height(8.dp))
+                    Text(
+                        text = "Tarefas do Compromisso",
+                        style = MaterialTheme.typography.titleMedium,
+                    )
+                    Text(
+                        text = "Adicione as tarefas que devem ser concluídas até a data do compromisso",
+                        style = MaterialTheme.typography.bodySmall,
+                        color = MaterialTheme.colorScheme.onSurfaceVariant,
                     )
 
-                    // Seletor de compromisso pai (para sub-tarefas)
-                    if (commitments.isNotEmpty()) {
-                        ExposedDropdownMenuBox(
-                            expanded = expandedParentMenu,
-                            onExpandedChange = { expandedParentMenu = !expandedParentMenu },
-                        ) {
-                            OutlinedTextField(
-                                value =
-                                    selectedParentId?.let { parentId ->
-                                        commitments.find { it.id == parentId }?.titulo ?: "Nenhum"
-                                    } ?: "Nenhum",
-                                onValueChange = {},
-                                readOnly = true,
-                                label = { Text("Compromisso Pai (opcional)") },
-                                trailingIcon = {
-                                    ExposedDropdownMenuDefaults.TrailingIcon(
-                                        expanded = expandedParentMenu,
-                                    )
-                                },
-                                modifier =
-                                    Modifier
-                                        .fillMaxWidth()
-                                        .menuAnchor(),
-                            )
-                            ExposedDropdownMenu(
-                                expanded = expandedParentMenu,
-                                onDismissRequest = { expandedParentMenu = false },
-                            ) {
-                                DropdownMenuItem(
-                                    text = { Text("Nenhum") },
-                                    onClick = {
-                                        selectedParentId = null
-                                        expandedParentMenu = false
-                                    },
-                                )
-                                commitments.forEach { commitment ->
-                                    DropdownMenuItem(
-                                        text = { Text(commitment.titulo) },
-                                        onClick = {
-                                            selectedParentId = commitment.id
-                                            expandedParentMenu = false
-                                        },
-                                    )
-                                }
-                            }
-                        }
+                    // Lista de sub-tarefas
+                    subTasks.forEachIndexed { index, subTask ->
+                        SubTaskInput(
+                            titulo = subTask.titulo,
+                            descricao = subTask.descricao,
+                            onTituloChange = { subTasks[index] = subTask.copy(titulo = it) },
+                            onDescricaoChange = { subTasks[index] = subTask.copy(descricao = it) },
+                            onDelete = { subTasks.removeAt(index) },
+                        )
+                    }
+
+                    // Botão adicionar sub-tarefa
+                    OutlinedButton(
+                        onClick = { subTasks.add(SubTaskData("", "")) },
+                        modifier = Modifier.fillMaxWidth(),
+                    ) {
+                        Icon(Icons.Default.Add, contentDescription = null)
+                        Text("Adicionar Tarefa")
                     }
                 }
             }
@@ -184,19 +228,54 @@ fun TaskFormDialog(
             Button(
                 onClick = {
                     if (titulo.isNotBlank()) {
-                        val task =
-                            Task(
-                                id = existingTask?.id ?: UUID.randomUUID().toString(),
-                                titulo = titulo,
-                                descricao = descricao,
-                                tipo = tipo,
-                                completa = existingTask?.completa ?: false,
-                                userId = existingTask?.userId ?: "",
-                                createdAt = existingTask?.createdAt ?: Date(),
-                                parentTaskId = if (tipo == TaskType.COMPROMISSO) selectedParentId else null,
-                                scheduledDate = if (tipo == TaskType.COMPROMISSO) selectedDate else null,
-                            )
-                        onSave(task)
+                        if (isCommitment) {
+                            val commitment =
+                                Task(
+                                    id = existingTask?.id ?: UUID.randomUUID().toString(),
+                                    titulo = titulo,
+                                    descricao = descricao,
+                                    tipo = TaskType.COMMITMENT,
+                                    recurrence = recurrence,
+                                    completa = existingTask?.completa ?: false,
+                                    userId = existingTask?.userId ?: "",
+                                    createdAt = existingTask?.createdAt ?: Date(),
+                                    parentTaskId = null,
+                                    scheduledDate = taskDate,
+                                )
+                            val subTasksList =
+                                subTasks
+                                    .filter { it.titulo.isNotBlank() }
+                                    .map { subTaskData ->
+                                        Task(
+                                            id = UUID.randomUUID().toString(),
+                                            titulo = subTaskData.titulo,
+                                            descricao = subTaskData.descricao,
+                                            tipo = TaskType.NORMAL,
+                                            recurrence = RecurrenceType.NONE,
+                                            completa = false,
+                                            userId = "",
+                                            createdAt = Date(),
+                                            parentTaskId = null, // Será definido no ViewModel
+                                            scheduledDate = null,
+                                        )
+                                    }
+                            onSaveCommitment(commitment, subTasksList)
+                        } else {
+                            val task =
+                                Task(
+                                    id = existingTask?.id ?: UUID.randomUUID().toString(),
+                                    titulo = titulo,
+                                    descricao = descricao,
+                                    tipo = TaskType.NORMAL,
+                                    recurrence = recurrence,
+                                    completa = existingTask?.completa ?: false,
+                                    userId = existingTask?.userId ?: "",
+                                    createdAt = existingTask?.createdAt ?: Date(),
+                                    parentTaskId = null,
+                                    scheduledDate = taskDate,
+                                )
+                            onSaveTask(task)
+                        }
                     }
                 },
                 enabled = titulo.isNotBlank(),
@@ -211,12 +290,12 @@ fun TaskFormDialog(
         },
     )
 
-    // Date picker simplificado (usando um diálogo básico por hora)
+    // Date picker
     if (showDatePicker) {
         SimpleDatePickerDialog(
-            currentDate = selectedDate,
+            currentDate = taskDate,
             onDateSelected = { date ->
-                selectedDate = date
+                taskDate = date
                 showDatePicker = false
             },
             onDismiss = { showDatePicker = false },
@@ -224,9 +303,81 @@ fun TaskFormDialog(
     }
 }
 
+@Composable
+private fun SubTaskInput(
+    titulo: String,
+    descricao: String,
+    onTituloChange: (String) -> Unit,
+    onDescricaoChange: (String) -> Unit,
+    onDelete: () -> Unit,
+    modifier: Modifier = Modifier,
+) {
+    Card(
+        modifier = modifier.fillMaxWidth(),
+        colors =
+            CardDefaults.cardColors(
+                containerColor = MaterialTheme.colorScheme.surfaceVariant,
+            ),
+    ) {
+        Column(
+            modifier = Modifier.padding(12.dp),
+        ) {
+            Row(
+                modifier = Modifier.fillMaxWidth(),
+                horizontalArrangement = Arrangement.SpaceBetween,
+                verticalAlignment = Alignment.CenterVertically,
+            ) {
+                Text(
+                    text = "Tarefa",
+                    style = MaterialTheme.typography.labelMedium,
+                    modifier = Modifier.weight(1f),
+                )
+                IconButton(onClick = onDelete) {
+                    Icon(
+                        Icons.Default.Delete,
+                        contentDescription = "Remover tarefa",
+                        tint = MaterialTheme.colorScheme.error,
+                    )
+                }
+            }
+            OutlinedTextField(
+                value = titulo,
+                onValueChange = onTituloChange,
+                label = { Text("Nome") },
+                modifier = Modifier.fillMaxWidth(),
+                singleLine = true,
+            )
+            Spacer(modifier = Modifier.height(8.dp))
+            OutlinedTextField(
+                value = descricao,
+                onValueChange = onDescricaoChange,
+                label = { Text("Descrição (opcional)") },
+                modifier = Modifier.fillMaxWidth(),
+                minLines = 2,
+                maxLines = 3,
+            )
+        }
+    }
+}
+
+private fun getRecurrenceLabel(recurrence: RecurrenceType): String =
+    when (recurrence) {
+        RecurrenceType.NONE -> "Nenhuma"
+        RecurrenceType.DAILY -> "Diária"
+        RecurrenceType.WEEKLY -> "Semanal"
+        RecurrenceType.MONTHLY -> "Mensal"
+    }
+
 /**
- * Dialog simplificado para seleção de data/hora
- * TODO: Usar Material3 DatePicker quando disponível
+ * Data class para gerenciar sub-tarefas no formulário
+ */
+private data class SubTaskData(
+    val titulo: String,
+    val descricao: String,
+)
+
+/**
+ * Dialog simplificado para seleção de data
  */
 @Composable
 private fun SimpleDatePickerDialog(
@@ -238,56 +389,33 @@ private fun SimpleDatePickerDialog(
     var day by remember { mutableStateOf(calendar.get(Calendar.DAY_OF_MONTH).toString()) }
     var month by remember { mutableStateOf((calendar.get(Calendar.MONTH) + 1).toString()) }
     var year by remember { mutableStateOf(calendar.get(Calendar.YEAR).toString()) }
-    var hour by remember { mutableStateOf(calendar.get(Calendar.HOUR_OF_DAY).toString()) }
-    var minute by remember { mutableStateOf(calendar.get(Calendar.MINUTE).toString()) }
 
     AlertDialog(
         onDismissRequest = onDismiss,
-        title = { Text("Selecionar Data e Hora") },
+        title = { Text("Selecionar Data") },
         text = {
-            Column(
-                verticalArrangement = Arrangement.spacedBy(8.dp),
+            Row(
+                modifier = Modifier.fillMaxWidth(),
+                horizontalArrangement = Arrangement.spacedBy(8.dp),
             ) {
-                Row(
-                    modifier = Modifier.fillMaxWidth(),
-                    horizontalArrangement = Arrangement.spacedBy(8.dp),
-                ) {
-                    OutlinedTextField(
-                        value = day,
-                        onValueChange = { day = it },
-                        label = { Text("Dia") },
-                        modifier = Modifier.weight(1f),
-                    )
-                    OutlinedTextField(
-                        value = month,
-                        onValueChange = { month = it },
-                        label = { Text("Mês") },
-                        modifier = Modifier.weight(1f),
-                    )
-                    OutlinedTextField(
-                        value = year,
-                        onValueChange = { year = it },
-                        label = { Text("Ano") },
-                        modifier = Modifier.weight(1f),
-                    )
-                }
-                Row(
-                    modifier = Modifier.fillMaxWidth(),
-                    horizontalArrangement = Arrangement.spacedBy(8.dp),
-                ) {
-                    OutlinedTextField(
-                        value = hour,
-                        onValueChange = { hour = it },
-                        label = { Text("Hora") },
-                        modifier = Modifier.weight(1f),
-                    )
-                    OutlinedTextField(
-                        value = minute,
-                        onValueChange = { minute = it },
-                        label = { Text("Min") },
-                        modifier = Modifier.weight(1f),
-                    )
-                }
+                OutlinedTextField(
+                    value = day,
+                    onValueChange = { if (it.length <= 2) day = it },
+                    label = { Text("Dia") },
+                    modifier = Modifier.weight(1f),
+                )
+                OutlinedTextField(
+                    value = month,
+                    onValueChange = { if (it.length <= 2) month = it },
+                    label = { Text("Mês") },
+                    modifier = Modifier.weight(1f),
+                )
+                OutlinedTextField(
+                    value = year,
+                    onValueChange = { if (it.length <= 4) year = it },
+                    label = { Text("Ano") },
+                    modifier = Modifier.weight(1f),
+                )
             }
         },
         confirmButton = {
@@ -299,9 +427,10 @@ private fun SimpleDatePickerDialog(
                                 set(Calendar.YEAR, year.toInt())
                                 set(Calendar.MONTH, month.toInt() - 1)
                                 set(Calendar.DAY_OF_MONTH, day.toInt())
-                                set(Calendar.HOUR_OF_DAY, hour.toInt())
-                                set(Calendar.MINUTE, minute.toInt())
+                                set(Calendar.HOUR_OF_DAY, 0)
+                                set(Calendar.MINUTE, 0)
                                 set(Calendar.SECOND, 0)
+                                set(Calendar.MILLISECOND, 0)
                             }
                         onDateSelected(newCalendar.time)
                     } catch (e: Exception) {

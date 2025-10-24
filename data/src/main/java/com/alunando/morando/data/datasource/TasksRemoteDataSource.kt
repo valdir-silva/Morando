@@ -2,6 +2,7 @@ package com.alunando.morando.data.datasource
 
 import com.alunando.morando.data.firebase.AuthManager
 import com.alunando.morando.data.firebase.FirebaseConfig
+import com.alunando.morando.domain.model.RecurrenceType
 import com.alunando.morando.domain.model.Task
 import com.alunando.morando.domain.model.TaskType
 import com.google.firebase.firestore.FirebaseFirestore
@@ -10,6 +11,7 @@ import kotlinx.coroutines.channels.awaitClose
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.callbackFlow
 import kotlinx.coroutines.tasks.await
+import java.util.Calendar
 import java.util.Date
 
 /**
@@ -94,6 +96,77 @@ class TasksRemoteDataSource(
         }
 
     /**
+     * Busca tarefas para uma data específica, incluindo recorrentes
+     */
+    fun getTasksForDate(date: Date): Flow<List<Task>> =
+        callbackFlow {
+            // Verifica se está autenticado, senão retorna lista vazia
+            if (authManager.currentUserId.isEmpty()) {
+                trySend(emptyList())
+                awaitClose { }
+                return@callbackFlow
+            }
+
+            val listener =
+                getUserTasksCollection()
+                    .whereEqualTo("parentTaskId", null)
+                    .addSnapshotListener { snapshot, error ->
+                        if (error != null) {
+                            close(error)
+                            return@addSnapshotListener
+                        }
+
+                        val allTasks =
+                            snapshot?.documents?.mapNotNull { doc ->
+                                doc.toTask()
+                            } ?: emptyList()
+
+                        // Filtra tarefas para a data
+                        val tasksForDate =
+                            allTasks.filter { task ->
+                                shouldShowTaskOnDate(task, date)
+                            }
+
+                        trySend(tasksForDate)
+                    }
+
+            awaitClose { listener.remove() }
+        }
+
+    /**
+     * Busca sub-tarefas de um compromisso
+     */
+    fun getSubTasks(parentTaskId: String): Flow<List<Task>> =
+        callbackFlow {
+            // Verifica se está autenticado, senão retorna lista vazia
+            if (authManager.currentUserId.isEmpty()) {
+                trySend(emptyList())
+                awaitClose { }
+                return@callbackFlow
+            }
+
+            val listener =
+                getUserTasksCollection()
+                    .whereEqualTo("parentTaskId", parentTaskId)
+                    .orderBy(FirebaseConfig.FIELD_CREATED_AT, Query.Direction.ASCENDING)
+                    .addSnapshotListener { snapshot, error ->
+                        if (error != null) {
+                            close(error)
+                            return@addSnapshotListener
+                        }
+
+                        val subTasks =
+                            snapshot?.documents?.mapNotNull { doc ->
+                                doc.toTask()
+                            } ?: emptyList()
+
+                        trySend(subTasks)
+                    }
+
+            awaitClose { listener.remove() }
+        }
+
+    /**
      * Busca tarefa por ID
      */
     @Suppress("TooGenericExceptionCaught", "SwallowedException")
@@ -164,6 +237,46 @@ class TasksRemoteDataSource(
             .await()
     }
 
+    /**
+     * Verifica se uma tarefa deve ser exibida em uma data específica
+     */
+    private fun shouldShowTaskOnDate(
+        task: Task,
+        date: Date,
+    ): Boolean {
+        val taskDate = task.scheduledDate ?: return false
+        val targetCal = Calendar.getInstance().apply { time = date }
+        val taskCal = Calendar.getInstance().apply { time = taskDate }
+
+        return when (task.recurrence) {
+            RecurrenceType.NONE -> {
+                // Tarefa sem recorrência: mostra apenas na data agendada
+                isSameDay(taskCal, targetCal)
+            }
+            RecurrenceType.DAILY -> {
+                // Tarefa diária: mostra se a data alvo >= data inicial
+                !targetCal.before(taskCal)
+            }
+            RecurrenceType.WEEKLY -> {
+                // Tarefa semanal: mostra se é o mesmo dia da semana e data alvo >= data inicial
+                !targetCal.before(taskCal) &&
+                    taskCal.get(Calendar.DAY_OF_WEEK) == targetCal.get(Calendar.DAY_OF_WEEK)
+            }
+            RecurrenceType.MONTHLY -> {
+                // Tarefa mensal: mostra se é o mesmo dia do mês e data alvo >= data inicial
+                !targetCal.before(taskCal) &&
+                    taskCal.get(Calendar.DAY_OF_MONTH) == targetCal.get(Calendar.DAY_OF_MONTH)
+            }
+        }
+    }
+
+    private fun isSameDay(
+        cal1: Calendar,
+        cal2: Calendar,
+    ): Boolean =
+        cal1.get(Calendar.YEAR) == cal2.get(Calendar.YEAR) &&
+            cal1.get(Calendar.DAY_OF_YEAR) == cal2.get(Calendar.DAY_OF_YEAR)
+
     // Extension functions
     @Suppress("TooGenericExceptionCaught", "SwallowedException")
     private fun com.google.firebase.firestore.DocumentSnapshot.toTask(): Task? =
@@ -172,10 +285,13 @@ class TasksRemoteDataSource(
                 id = id,
                 titulo = getString("titulo") ?: "",
                 descricao = getString("descricao") ?: "",
-                tipo = TaskType.fromString(getString("tipo") ?: "diaria"),
+                tipo = TaskType.fromString(getString("tipo") ?: "normal"),
+                recurrence = RecurrenceType.fromString(getString("recurrence") ?: "none"),
                 completa = getBoolean("completa") ?: false,
                 userId = getString("userId") ?: "",
                 createdAt = getTimestamp("createdAt")?.toDate() ?: Date(),
+                parentTaskId = getString("parentTaskId"),
+                scheduledDate = getTimestamp("scheduledDate")?.toDate(),
             )
         } catch (e: Exception) {
             null
@@ -186,10 +302,14 @@ class TasksRemoteDataSource(
             "titulo" to titulo,
             "descricao" to descricao,
             "tipo" to tipo.name.lowercase(),
+            "recurrence" to recurrence.name.lowercase(),
             "completa" to completa,
             "userId" to userId,
-            "createdAt" to
-                com.google.firebase.Timestamp
-                    .now(),
+            "createdAt" to com.google.firebase.Timestamp.now(),
+            "parentTaskId" to parentTaskId,
+            "scheduledDate" to
+                scheduledDate?.let {
+                    com.google.firebase.Timestamp(it)
+                },
         )
 }

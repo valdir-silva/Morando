@@ -1,6 +1,7 @@
 package com.alunando.morando.feature.tasks.presentation
 
 import com.alunando.morando.domain.model.Task
+import java.util.Date
 
 /**
  * Intenções (ações) da tela de tarefas
@@ -13,19 +14,26 @@ sealed interface TasksIntent {
         val complete: Boolean,
     ) : TasksIntent
 
-    data class SelectTaskType(
-        val type: com.alunando.morando.domain.model.TaskType,
+    data class SelectDate(
+        val date: Date,
     ) : TasksIntent
+
+    data object NavigateToToday : TasksIntent
+
+    data object NavigateToNextDay : TasksIntent
+
+    data object NavigateToPrevDay : TasksIntent
 
     data class CreateTask(
         val task: Task,
     ) : TasksIntent
 
-    data class DeleteTask(
-        val taskId: String,
+    data class CreateCommitment(
+        val commitment: Task,
+        val subTasks: List<Task>,
     ) : TasksIntent
 
-    data class ExpandCommitment(
+    data class DeleteTask(
         val taskId: String,
     ) : TasksIntent
 

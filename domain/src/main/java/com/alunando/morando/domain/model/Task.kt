@@ -13,6 +13,7 @@ data class Task(
     val titulo: String,
     val descricao: String = "",
     val tipo: TaskType,
+    val recurrence: RecurrenceType = RecurrenceType.NONE,
     val completa: Boolean = false,
     val userId: String = "",
     val createdAt: Date = Date(),
@@ -24,18 +25,38 @@ data class Task(
  * Tipo de tarefa
  */
 enum class TaskType {
-    DIARIA,
-    SEMANAL,
-    COMPROMISSO,
+    NORMAL,
+    COMMITMENT,
     ;
 
     companion object {
         fun fromString(value: String): TaskType =
             when (value.lowercase()) {
-                "diaria" -> DIARIA
-                "semanal" -> SEMANAL
-                "compromisso" -> COMPROMISSO
-                else -> DIARIA
+                "normal" -> NORMAL
+                "commitment", "compromisso" -> COMMITMENT
+                else -> NORMAL
+            }
+    }
+}
+
+/**
+ * Tipo de recorrência da tarefa
+ */
+enum class RecurrenceType {
+    NONE,
+    DAILY,
+    WEEKLY,
+    MONTHLY,
+    ;
+
+    companion object {
+        fun fromString(value: String): RecurrenceType =
+            when (value.lowercase()) {
+                "none", "nenhuma" -> NONE
+                "daily", "diaria" -> DAILY
+                "weekly", "semanal" -> WEEKLY
+                "monthly", "mensal" -> MONTHLY
+                else -> NONE
             }
     }
 }

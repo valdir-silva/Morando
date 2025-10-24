@@ -4,12 +4,13 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.alunando.morando.core.onError
 import com.alunando.morando.core.onSuccess
+import com.alunando.morando.domain.model.Task
 import com.alunando.morando.domain.model.TaskType
 import com.alunando.morando.domain.repository.TasksRepository
 import com.alunando.morando.domain.usecase.AddTaskUseCase
 import com.alunando.morando.domain.usecase.DeleteTaskUseCase
-import com.alunando.morando.domain.usecase.GetDailyTasksUseCase
-import com.alunando.morando.domain.usecase.GetWeeklyTasksUseCase
+import com.alunando.morando.domain.usecase.GetSubTasksUseCase
+import com.alunando.morando.domain.usecase.GetTasksForDateUseCase
 import com.alunando.morando.domain.usecase.MarkTaskCompleteUseCase
 import kotlinx.coroutines.channels.Channel
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -19,13 +20,15 @@ import kotlinx.coroutines.flow.launchIn
 import kotlinx.coroutines.flow.onEach
 import kotlinx.coroutines.flow.receiveAsFlow
 import kotlinx.coroutines.launch
+import java.util.Calendar
+import java.util.Date
 
 /**
  * ViewModel para tela de tarefas (MVI)
  */
 class TasksViewModel(
-    private val getDailyTasksUseCase: GetDailyTasksUseCase,
-    private val getWeeklyTasksUseCase: GetWeeklyTasksUseCase,
+    private val getTasksForDateUseCase: GetTasksForDateUseCase,
+    private val getSubTasksUseCase: GetSubTasksUseCase,
     private val markTaskCompleteUseCase: MarkTaskCompleteUseCase,
     private val addTaskUseCase: AddTaskUseCase,
     private val deleteTaskUseCase: DeleteTaskUseCase,
@@ -49,10 +52,13 @@ class TasksViewModel(
         when (intent) {
             is TasksIntent.LoadTasks -> loadTasks()
             is TasksIntent.ToggleTaskComplete -> toggleTaskComplete(intent.taskId, intent.complete)
-            is TasksIntent.SelectTaskType -> selectTaskType(intent.type)
+            is TasksIntent.SelectDate -> selectDate(intent.date)
+            is TasksIntent.NavigateToToday -> navigateToToday()
+            is TasksIntent.NavigateToNextDay -> navigateToNextDay()
+            is TasksIntent.NavigateToPrevDay -> navigateToPrevDay()
             is TasksIntent.CreateTask -> createTask(intent.task)
+            is TasksIntent.CreateCommitment -> createCommitment(intent.commitment, intent.subTasks)
             is TasksIntent.DeleteTask -> deleteTask(intent.taskId)
-            is TasksIntent.ExpandCommitment -> toggleExpanded(intent.taskId)
             is TasksIntent.ShowCreateDialog -> showCreateDialog()
             is TasksIntent.HideCreateDialog -> hideCreateDialog()
         }
@@ -61,27 +67,27 @@ class TasksViewModel(
     private fun loadTasks() {
         _state.value = _state.value.copy(isLoading = true)
 
-        when (_state.value.selectedType) {
-            TaskType.DIARIA -> getDailyTasksUseCase()
-            TaskType.SEMANAL -> getWeeklyTasksUseCase()
-            TaskType.COMPROMISSO -> {
-                // Para compromissos, buscamos todas as tarefas e filtramos
-                getDailyTasksUseCase() // Pode precisar de um novo use case específico
-            }
-        }.onEach { tasks ->
-            val filteredTasks =
-                if (_state.value.selectedType == TaskType.COMPROMISSO) {
-                    tasks.filter { it.tipo == TaskType.COMPROMISSO && it.parentTaskId == null }
-                } else {
-                    tasks
-                }
-            _state.value =
-                _state.value.copy(
-                    tasks = filteredTasks,
-                    isLoading = false,
-                    error = null,
-                )
-        }.launchIn(viewModelScope)
+        getTasksForDateUseCase(_state.value.selectedDate)
+            .onEach { tasks ->
+                // Carrega sub-tarefas para cada compromisso
+                val subTasksMap = mutableMapOf<String, List<Task>>()
+                tasks
+                    .filter { it.tipo == TaskType.COMMITMENT }
+                    .forEach { commitment ->
+                        getSubTasksUseCase(commitment.id)
+                            .onEach { subTasks ->
+                                subTasksMap[commitment.id] = subTasks
+                            }.launchIn(viewModelScope)
+                    }
+
+                _state.value =
+                    _state.value.copy(
+                        tasks = tasks,
+                        subTasksMap = subTasksMap,
+                        isLoading = false,
+                        error = null,
+                    )
+            }.launchIn(viewModelScope)
     }
 
     private fun toggleTaskComplete(
@@ -119,9 +125,31 @@ class TasksViewModel(
         }
     }
 
-    private fun selectTaskType(type: TaskType) {
-        _state.value = _state.value.copy(selectedType = type)
+    private fun selectDate(date: Date) {
+        _state.value = _state.value.copy(selectedDate = date)
         loadTasks()
+    }
+
+    private fun navigateToToday() {
+        selectDate(Date())
+    }
+
+    private fun navigateToNextDay() {
+        val calendar =
+            Calendar.getInstance().apply {
+                time = _state.value.selectedDate
+                add(Calendar.DAY_OF_MONTH, 1)
+            }
+        selectDate(calendar.time)
+    }
+
+    private fun navigateToPrevDay() {
+        val calendar =
+            Calendar.getInstance().apply {
+                time = _state.value.selectedDate
+                add(Calendar.DAY_OF_MONTH, -1)
+            }
+        selectDate(calendar.time)
     }
 
     private fun createTask(task: com.alunando.morando.domain.model.Task) {
@@ -138,6 +166,29 @@ class TasksViewModel(
         }
     }
 
+    private fun createCommitment(
+        commitment: com.alunando.morando.domain.model.Task,
+        subTasks: List<com.alunando.morando.domain.model.Task>,
+    ) {
+        viewModelScope.launch {
+            // Cria o compromisso primeiro
+            val commitmentResult = addTaskUseCase(commitment)
+            commitmentResult
+                .onSuccess { createdCommitment ->
+                    // Cria as sub-tarefas com o parentTaskId do compromisso
+                    subTasks.forEach { subTask ->
+                        val subTaskWithParent = subTask.copy(parentTaskId = createdCommitment.id)
+                        addTaskUseCase(subTaskWithParent)
+                    }
+                    sendEffect(TasksEffect.ShowToast("Compromisso criado com sucesso"))
+                    _state.value = _state.value.copy(showCreateDialog = false)
+                    loadTasks()
+                }.onError {
+                    sendEffect(TasksEffect.ShowError("Erro ao criar compromisso"))
+                }
+        }
+    }
+
     private fun deleteTask(taskId: String) {
         viewModelScope.launch {
             val result = deleteTaskUseCase(taskId)
@@ -149,19 +200,6 @@ class TasksViewModel(
                     sendEffect(TasksEffect.ShowError("Erro ao excluir tarefa"))
                 }
         }
-    }
-
-    private fun toggleExpanded(taskId: String) {
-        val expanded = _state.value.expandedCommitments
-        _state.value =
-            _state.value.copy(
-                expandedCommitments =
-                    if (expanded.contains(taskId)) {
-                        expanded - taskId
-                    } else {
-                        expanded + taskId
-                    },
-            )
     }
 
     private fun showCreateDialog() {
