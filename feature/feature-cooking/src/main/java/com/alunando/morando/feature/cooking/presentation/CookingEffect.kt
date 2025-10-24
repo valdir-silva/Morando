@@ -10,6 +10,8 @@ sealed class CookingEffect {
 
     data object NavigateBack : CookingEffect()
 
+    data object NavigateToCookingList : CookingEffect()
+
     data class NavigateToRecipeDetail(val recipeId: String) : CookingEffect()
 
     data class NavigateToCookingSession(val recipeId: String) : CookingEffect()
