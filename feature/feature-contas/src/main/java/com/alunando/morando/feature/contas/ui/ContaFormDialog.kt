@@ -309,7 +309,7 @@ private fun SimpleDatePickerDialog(
                                 set(Calendar.MILLISECOND, 0)
                             }
                         onDateSelected(newCalendar.time)
-                    } catch (e: Exception) {
+                    } catch (_: Exception) {
                         // Ignorar erro de parsing
                     }
                 },
@@ -324,4 +324,3 @@ private fun SimpleDatePickerDialog(
         },
     )
 }
-

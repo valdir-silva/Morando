@@ -15,4 +15,3 @@ class GetContasByMonthUseCase(
         month: Int,
     ): Flow<List<Conta>> = repository.getContasByMonth(year, month)
 }
-

@@ -12,4 +12,3 @@ class GetContasPendentesUseCase(
 ) {
     operator fun invoke(): Flow<List<Conta>> = repository.getContasPendentes()
 }
-

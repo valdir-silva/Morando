@@ -12,4 +12,3 @@ sealed interface ContasEffect {
         val message: String,
     ) : ContasEffect
 }
-

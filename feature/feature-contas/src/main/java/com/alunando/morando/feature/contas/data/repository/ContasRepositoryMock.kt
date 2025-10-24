@@ -16,6 +16,7 @@ import java.util.UUID
 /**
  * Implementação mock do ContasRepository para desenvolvimento
  */
+@Suppress("MagicNumber")
 class ContasRepositoryMock : ContasRepository {
     private val contas =
         MutableStateFlow(
@@ -243,4 +244,3 @@ class ContasRepositoryMock : ContasRepository {
         return calendar.time
     }
 }
-

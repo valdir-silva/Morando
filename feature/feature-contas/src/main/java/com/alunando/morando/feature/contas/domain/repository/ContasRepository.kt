@@ -84,4 +84,3 @@ data class ContaTotais(
     val totalAtrasado: Double = 0.0,
     val totalGeral: Double = 0.0,
 )
-

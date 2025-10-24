@@ -24,8 +24,7 @@ data class Conta(
     /**
      * Verifica se a conta está atrasada
      */
-    fun isAtrasada(): Boolean =
-        status == ContaStatus.PENDENTE && dataVencimento.before(Date())
+    fun isAtrasada(): Boolean = status == ContaStatus.PENDENTE && dataVencimento.before(Date())
 
     /**
      * Calcula dias até o vencimento (negativo se atrasada)
@@ -103,4 +102,3 @@ enum class ContaRecorrencia {
             }
     }
 }
-

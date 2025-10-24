@@ -14,4 +14,3 @@ class MarkContaPagaUseCase(
         dataPagamento: Date = Date(),
     ) = repository.markContaPaga(contaId, dataPagamento)
 }
-

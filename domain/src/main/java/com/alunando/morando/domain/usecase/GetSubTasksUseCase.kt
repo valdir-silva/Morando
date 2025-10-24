@@ -12,4 +12,3 @@ class GetSubTasksUseCase(
 ) {
     operator fun invoke(parentTaskId: String): Flow<List<Task>> = repository.getSubTasks(parentTaskId)
 }
-

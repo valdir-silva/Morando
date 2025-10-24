@@ -65,10 +65,11 @@ fun HomeScreen(
                 iconRes = R.drawable.ic_cooking,
                 onClick = onNavigateToCooking,
             ),
+            // TODO: criar ícone específico para contas
             FeatureCard(
                 title = "Contas",
                 description = "Gerencie suas contas e despesas",
-                iconRes = R.drawable.ic_tasks, // TODO: criar ícone específico para contas
+                iconRes = R.drawable.ic_tasks,
                 onClick = onNavigateToContas,
             ),
         )

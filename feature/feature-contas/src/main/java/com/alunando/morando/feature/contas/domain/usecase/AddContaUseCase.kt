@@ -11,4 +11,3 @@ class AddContaUseCase(
 ) {
     suspend operator fun invoke(conta: Conta): Conta = repository.addConta(conta)
 }
-

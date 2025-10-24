@@ -10,4 +10,3 @@ class DeleteContaUseCase(
 ) {
     suspend operator fun invoke(contaId: String) = repository.deleteConta(contaId)
 }
-

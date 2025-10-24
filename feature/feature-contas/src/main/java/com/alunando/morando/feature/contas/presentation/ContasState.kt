@@ -17,4 +17,3 @@ data class ContasState(
     val showCreateDialog: Boolean = false,
     val editingConta: Conta? = null,
 )
-

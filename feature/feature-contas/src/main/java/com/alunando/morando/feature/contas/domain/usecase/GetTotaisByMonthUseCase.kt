@@ -14,4 +14,3 @@ class GetTotaisByMonthUseCase(
         month: Int,
     ): ContaTotais = repository.getTotaisByMonth(year, month)
 }
-

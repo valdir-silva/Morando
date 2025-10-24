@@ -39,4 +39,3 @@ sealed interface ContasIntent {
         val conta: Conta,
     ) : ContasIntent
 }
-

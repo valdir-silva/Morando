@@ -14,4 +14,3 @@ class GetTasksForDateUseCase(
 ) {
     operator fun invoke(date: Date): Flow<List<Task>> = repository.getTasksForDate(date)
 }
-

@@ -16,11 +16,11 @@ import kotlinx.coroutines.flow.launchIn
 import kotlinx.coroutines.flow.onEach
 import kotlinx.coroutines.flow.receiveAsFlow
 import kotlinx.coroutines.launch
-import java.util.Calendar
 
 /**
  * ViewModel para tela de contas (MVI)
  */
+@Suppress("TooManyFunctions")
 class ContasViewModel(
     private val getContasByMonthUseCase: GetContasByMonthUseCase,
     private val getTotaisByMonthUseCase: GetTotaisByMonthUseCase,
@@ -81,7 +81,7 @@ class ContasViewModel(
                         _state.value.selectedMonth,
                     )
                 _state.value = _state.value.copy(totais = totais)
-            } catch (e: Exception) {
+            } catch (_: Exception) {
                 // Ignorar erro de totais
             }
         }
@@ -166,4 +166,3 @@ class ContasViewModel(
         }
     }
 }
-
