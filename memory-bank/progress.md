@@ -1,7 +1,7 @@
 # Progress: Morando
-*Version: 1.2*
+*Version: 1.4*
 *Created: 2025-10-21*
-*Last Updated: 2025-10-22*
+*Last Updated: 2025-10-24*
 
 ## ✅ Completed Tasks
 
@@ -79,7 +79,9 @@
 - [ ] Testes unitários para repositories
 
 ### Features
-- [ ] feature-tasks: Adicionar/remover tarefas e agrupamento
+- [x] feature-tasks: Refatoração completa para timeline/agenda ✅
+- [ ] feature-tasks: Integração com Google Calendar API
+- [x] feature-contas: Esqueleto completo criado ✅
 - [ ] feature-inventory: Implementação completa com MVI expandido
 - [ ] feature-barcode: Integração ML Kit + CameraX
 - [ ] feature-shopping: Implementação completa com MVI
@@ -107,19 +109,70 @@
 - [x] Fix: Ícones corrigidos (substituídos por emojis onde necessário)
 - [x] Enhancement: Temperatura adicionada em TODOS os tipos de fogão (indução, gás, elétrico, lenha)
 
+### Feature Tasks - Refatoração Timeline/Agenda (100%) ✅ COMPLETO
+- [x] Domain: Adicionado enum RecurrenceType (NONE, DAILY, WEEKLY, MONTHLY)
+- [x] Domain: TaskType simplificado para NORMAL e COMMITMENT
+- [x] Domain: Campo recurrence adicionado ao modelo Task
+- [x] Domain: Novos métodos no TasksRepository (getTasksForDate, getSubTasks)
+- [x] Domain: Novos Use Cases (GetTasksForDateUseCase, GetSubTasksUseCase)
+- [x] Data: Lógica de recorrência implementada em TasksRemoteDataSource
+- [x] Data: Métodos getTasksForDate e getSubTasks implementados
+- [x] Data: TasksRepositoryMock atualizado com dados de exemplo
+- [x] Feature: State atualizado para trabalhar com data selecionada
+- [x] Feature: Intent atualizado com navegação de datas
+- [x] Feature: ViewModel refatorado para timeline
+- [x] Feature: TasksScreen redesenhado como timeline/agenda
+- [x] Feature: DateNavigationHeader com navegação entre dias
+- [x] Feature: CommitmentCard sempre exibindo sub-tarefas
+- [x] Feature: TaskFormDialog com seleção de tipo e recorrência
+- [x] Feature: Gestão dinâmica de sub-tarefas em compromissos
+- [x] App: DI atualizado com novos use cases
+
+### Feature Contas - Esqueleto Completo (100%) ✅ COMPLETO
+- [x] Domain: Models (Conta, ContaCategoria, ContaStatus, ContaRecorrencia, ContaTotais)
+- [x] Domain: ContasRepository interface com métodos CRUD e filtros
+- [x] Domain: Use Cases (8 use cases: Get, Add, Update, Delete, MarkPaga, GetByMonth, GetPendentes, GetTotais)
+- [x] Data: ContasRepositoryMock com 10 contas de exemplo
+- [x] Presentation: MVI completo (Intent, State, Effect, ViewModel)
+- [x] UI: ContasScreen com lista de contas e card de totais
+- [x] UI: ContaFormDialog com formulário completo
+- [x] Build: build.gradle.kts e AndroidManifest.xml
+- [x] Integration: Módulo adicionado ao settings.gradle.kts
+- [x] Integration: Dependência adicionada ao app/build.gradle.kts
+- [x] Integration: DI configurado no AppModule (repository + 8 use cases + ViewModel)
+- [x] Integration: Rota de navegação adicionada (AppRoute.Contas)
+- [x] Integration: Card adicionado no HomeScreen
+
 ## 📋 Next Tasks
 
 ### Milestone 2: Core Features (Expandido) (12-18 dias)
 
 #### High Priority
-1. **Tasks Expandidas** (2 dias)
-   - Adicionar e remover tarefas via UI
-   - Agrupar tarefas por categorias/tags
-   - Filtros e ordenação por grupo
-   - Domain: campo `category` no modelo Task
-   - Use Cases: AddTaskUseCase, RemoveTaskUseCase, GetTasksByCategoryUseCase
+1. **Integração Google Calendar API** (3 dias) 🆕
+   - Configurar Google Calendar API no projeto
+   - Autenticação OAuth2 para Google
+   - Sincronização de compromissos com Google Calendar
+   - Leitura de eventos do calendário
+   - Escrita de compromissos no calendário
+   - Configuração de permissões e scopes
+   - UI para conectar/desconectar conta Google
+   - Domain: Use Cases para sincronização
+   - Data: GoogleCalendarDataSource
 
-2. **Inventário Expandido** (5 dias)
+2. **Internacionalização (i18n)** (3 dias) 🆕
+   - Configurar suporte multi-idioma no projeto Android
+   - Criar resources strings.xml para português (pt-BR) (padrão)
+   - Criar resources strings.xml para inglês (en)
+   - Migrar todas as strings hardcoded do código para resources
+   - Implementar seletor de idioma nas configurações do app
+   - Adicionar preferência de idioma no DataStore
+   - Traduzir todas as telas e componentes para inglês
+   - Traduzir labels de enums e constantes exibidas ao usuário
+   - Traduzir mensagens de erro e toasts
+   - Testar app em ambos os idiomas (pt-BR e en)
+   - Documentar processo de adição de novos idiomas
+
+3. **Inventário Expandido** (5 dias)
    - Grupos/categorias de produtos
    - Cache de nomes por código de barras (Firestore collection)
    - Campos: data de vencimento, quantidade
@@ -278,44 +331,45 @@
 
 ## 📊 Metrics
 
-### Overall Progress: ~55% ✅
+### Overall Progress: ~65% ✅
 
 | Component | Status | Progress |
 |-----------|--------|----------|
 | Foundation | ✅ Complete | 100% |
 | Core | ✅ Complete | 100% |
-| Domain | 🚧 In Progress | 85% |
-| Data | 🚧 In Progress | 60% |
+| Domain | 🚧 In Progress | 92% |
+| Data | 🚧 In Progress | 68% |
 | SDUI | 🚧 In Progress | 60% |
-| Features | 🚧 In Progress | 40% |
+| Features | 🚧 In Progress | 55% |
 | Navigation | ✅ Complete | 100% |
 | App Module | ✅ Complete | 100% |
 | CI/CD | ✅ Complete | 100% |
 | Documentation | ✅ Complete | 100% |
 | Tests | 📋 TODO | 0% |
 | IA Integration | 📋 TODO | 0% |
+| i18n | 📋 TODO | 0% |
 
 ### Code Statistics
-- **Modules**: 11 (app + 10 libraries: core, domain, data, sdui, feature-tasks, feature-barcode, feature-inventory, feature-shopping, feature-ai-assistant, feature-cooking)
-- **Kotlin Files**: ~35+ (expandindo para ~60+ com novos módulos)
-- **Lines of Code**: ~3500+ (projetado para ~7000+ com novas features)
+- **Modules**: 12 (app + 11 libraries: core, domain, data, sdui, feature-tasks, feature-barcode, feature-inventory, feature-shopping, feature-ai-assistant, feature-cooking, feature-contas)
+- **Kotlin Files**: ~60+ (expandindo para ~80+ com novos módulos)
+- **Lines of Code**: ~6000+ (projetado para ~10000+ com novas features)
 - **Test Coverage**: 0% (TODO)
 
 ## 🎯 Immediate Next Steps
 
 1. ~~Implementar navegação básica~~ ✅ **COMPLETO**
 2. ~~Criar placeholders para features vazias~~ ✅ **COMPLETO**
-3. Adicionar `google-services.json` ou configurar modo mock completo
-4. **Expandir Domain Layer** para suportar novos campos (categorias, vencimento, quantidade)
-5. **Implementar Tasks Expandidas** (adicionar/remover/agrupar)
-6. **Implementar Inventário Expandido** com novos campos
-7. **Implementar InventoryRemoteDataSource** com cache de barcode
-8. **Completar feature-inventory** (MVI completo expandido)
-9. **Implementar barcode scanner** com ML Kit e lookup de produtos
-10. **Completar lista de compras** (MVI completo)
-11. **Criar módulo feature-ai-assistant** com abstração de providers
-12. **Integrar Google Gemini** como provider padrão
-13. **Criar módulo feature-cooking** para receitas
+3. ~~Refatorar feature-tasks para timeline/agenda~~ ✅ **COMPLETO**
+4. **Integrar Google Calendar API** para sincronização de compromissos
+5. Adicionar `google-services.json` ou configurar modo mock completo
+6. **Expandir Domain Layer** para suportar novos campos (categorias, vencimento, quantidade)
+7. **Implementar Inventário Expandido** com novos campos
+8. **Implementar InventoryRemoteDataSource** com cache de barcode
+9. **Completar feature-inventory** (MVI completo expandido)
+10. **Implementar barcode scanner** com ML Kit e lookup de produtos
+11. **Completar lista de compras** (MVI completo)
+12. **Criar módulo feature-ai-assistant** com abstração de providers
+13. **Integrar Google Gemini** como provider padrão
 14. **Implementar previsão de estoque por IA**
 15. Adicionar testes unitários básicos
 
@@ -326,11 +380,12 @@
 - [ ] Barcode scanner apenas placeholder
 - [ ] Inventory e Shopping features com tela placeholder (implementação MVI pendente)
 - [ ] Nenhum teste implementado ainda
-- [ ] Domain models precisam ser expandidos (Task, Product, ShoppingItem)
+- [ ] Domain models precisam ser expandidos (Product, ShoppingItem)
 - [ ] Não há sistema de tracking de uso de produtos
 - [ ] Não há cache de código de barras para produtos
 - [ ] Não há integração com IA
-- [ ] Módulos feature-ai-assistant e feature-cooking não existem ainda
+- [ ] Módulo feature-ai-assistant não existe ainda
+- [ ] Não há integração com Google Calendar API
 
 ## 📝 Notes
 
@@ -344,6 +399,12 @@
 - **Novo**: Sistema de previsão de estoque baseado em ML/histórico de uso
 - **Novo**: Cache de produtos por código de barras para agilizar cadastro
 - **Novo**: Suporte a conversação com IA para manipular dados (com confirmação)
+- **Novo**: Sistema de tarefas refatorado como timeline/agenda com recorrência
+- **Novo**: Compromissos com sub-tarefas que devem ser concluídas até a data do compromisso
+- **Novo**: Módulo feature-contas para gerenciamento de contas/despesas
+- **Novo**: Sistema de contas com categorização, recorrência e totais por mês
+- **Preparado**: Estrutura pronta para integração com Google Calendar API
+- **Preparado**: Tarefa de internacionalização (i18n) documentada para suporte a inglês
 
 ---
 

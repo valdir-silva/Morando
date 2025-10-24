@@ -22,6 +22,8 @@ sealed class AppRoute(
 
     data object Cooking : AppRoute("cooking")
 
+    data object Contas : AppRoute("contas")
+
     data object RecipeDetail : AppRoute("cooking/recipe/{recipeId}") {
         fun createRoute(recipeId: String) = "cooking/recipe/$recipeId"
     }

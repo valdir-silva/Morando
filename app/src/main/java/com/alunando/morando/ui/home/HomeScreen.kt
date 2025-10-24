@@ -16,12 +16,14 @@ import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.style.TextAlign
+import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import com.alunando.morando.R
 
@@ -34,6 +36,7 @@ fun HomeScreen(
     onNavigateToInventory: () -> Unit,
     onNavigateToShopping: () -> Unit,
     onNavigateToCooking: () -> Unit,
+    onNavigateToContas: () -> Unit,
     modifier: Modifier = Modifier,
 ) {
     val features =
@@ -45,7 +48,7 @@ fun HomeScreen(
                 onClick = onNavigateToTasks,
             ),
             FeatureCard(
-                title = "Estoque de Produtos",
+                title = "Estoques",
                 description = "Controle produtos e vencimentos",
                 iconRes = R.drawable.ic_inventory,
                 onClick = onNavigateToInventory,
@@ -62,6 +65,12 @@ fun HomeScreen(
                 iconRes = R.drawable.ic_cooking,
                 onClick = onNavigateToCooking,
             ),
+            FeatureCard(
+                title = "Contas",
+                description = "Gerencie suas contas e despesas",
+                iconRes = R.drawable.ic_tasks, // TODO: criar ícone específico para contas
+                onClick = onNavigateToContas,
+            ),
         )
 
     Column(
@@ -74,14 +83,15 @@ fun HomeScreen(
         Text(
             text = "Morando",
             style = MaterialTheme.typography.headlineLarge,
-            modifier = Modifier.padding(vertical = 24.dp),
+            color = MaterialTheme.colorScheme.primary,
+            modifier = Modifier.padding(top = 16.dp, bottom = 24.dp),
         )
 
         LazyVerticalGrid(
-            columns = GridCells.Fixed(1),
+            columns = GridCells.Fixed(2),
             contentPadding = PaddingValues(8.dp),
-            verticalArrangement = Arrangement.spacedBy(16.dp),
-            horizontalArrangement = Arrangement.spacedBy(16.dp),
+            verticalArrangement = Arrangement.spacedBy(12.dp),
+            horizontalArrangement = Arrangement.spacedBy(12.dp),
         ) {
             items(features) { feature ->
                 FeatureCardItem(feature = feature)
@@ -96,33 +106,30 @@ private fun FeatureCardItem(feature: FeatureCard) {
     Card(
         onClick = feature.onClick,
         modifier = Modifier.fillMaxWidth(),
-        elevation = CardDefaults.cardElevation(defaultElevation = 4.dp),
+        elevation = CardDefaults.cardElevation(defaultElevation = 2.dp),
     ) {
         Column(
             modifier =
                 Modifier
                     .fillMaxWidth()
-                    .padding(24.dp),
+                    .padding(16.dp),
             horizontalAlignment = Alignment.CenterHorizontally,
-            verticalArrangement = Arrangement.spacedBy(12.dp),
+            verticalArrangement = Arrangement.spacedBy(8.dp),
         ) {
             Icon(
                 painter = painterResource(id = feature.iconRes),
                 contentDescription = feature.title,
                 tint = MaterialTheme.colorScheme.primary,
-                modifier =
-                    Modifier
-                        .size(48.dp)
-                        .padding(8.dp),
+                modifier = Modifier.size(40.dp),
             )
             Text(
                 text = feature.title,
-                style = MaterialTheme.typography.titleLarge,
+                style = MaterialTheme.typography.titleMedium,
                 textAlign = TextAlign.Center,
             )
             Text(
                 text = feature.description,
-                style = MaterialTheme.typography.bodyMedium,
+                style = MaterialTheme.typography.bodySmall,
                 color = MaterialTheme.colorScheme.onSurfaceVariant,
                 textAlign = TextAlign.Center,
             )
@@ -136,3 +143,19 @@ private data class FeatureCard(
     @DrawableRes val iconRes: Int,
     val onClick: () -> Unit,
 )
+
+@Preview(showBackground = true)
+@Composable
+private fun HomeScreenPreview() {
+    MaterialTheme {
+        Surface {
+            HomeScreen(
+                onNavigateToTasks = {},
+                onNavigateToInventory = {},
+                onNavigateToShopping = {},
+                onNavigateToCooking = {},
+                onNavigateToContas = {},
+            )
+        }
+    }
+}

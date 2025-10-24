@@ -9,6 +9,7 @@ import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
 import androidx.navigation.navArgument
 import com.alunando.morando.feature.barcode.ui.BarcodeScannerScreen
+import com.alunando.morando.feature.contas.ui.ContasScreen
 import com.alunando.morando.feature.cooking.ui.CookingListScreen
 import com.alunando.morando.feature.cooking.ui.CookingSessionScreen
 import com.alunando.morando.feature.cooking.ui.RecipeDetailScreen
@@ -60,6 +61,9 @@ fun AppNavigation(
                 },
                 onNavigateToCooking = {
                     navController.navigate(AppRoute.Cooking.route)
+                },
+                onNavigateToContas = {
+                    navController.navigate(AppRoute.Contas.route)
                 },
             )
         }
@@ -134,6 +138,13 @@ fun AppNavigation(
         // Lista de compras
         composable(AppRoute.Shopping.route) {
             ShoppingScreen()
+        }
+
+        // Contas
+        composable(AppRoute.Contas.route) {
+            ContasScreen(
+                viewModel = koinViewModel(),
+            )
         }
 
         // ==================== COOKING ====================

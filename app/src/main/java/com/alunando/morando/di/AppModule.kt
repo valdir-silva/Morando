@@ -25,7 +25,6 @@ import com.alunando.morando.domain.usecase.DeleteProductUseCase
 import com.alunando.morando.domain.usecase.DeleteRecipeUseCase
 import com.alunando.morando.domain.usecase.DeleteTaskUseCase
 import com.alunando.morando.domain.usecase.GenerateShoppingListUseCase
-import com.alunando.morando.domain.usecase.GetDailyTasksUseCase
 import com.alunando.morando.domain.usecase.GetProductByIdUseCase
 import com.alunando.morando.domain.usecase.GetProductInfoFromBarcodeUseCase
 import com.alunando.morando.domain.usecase.GetProductsNeedingReplenishmentUseCase
@@ -33,14 +32,26 @@ import com.alunando.morando.domain.usecase.GetProductsUseCase
 import com.alunando.morando.domain.usecase.GetRecipeByIdUseCase
 import com.alunando.morando.domain.usecase.GetRecipesUseCase
 import com.alunando.morando.domain.usecase.GetShoppingItemsUseCase
+import com.alunando.morando.domain.usecase.GetSubTasksUseCase
+import com.alunando.morando.domain.usecase.GetTasksForDateUseCase
 import com.alunando.morando.domain.usecase.GetUserStovePreferenceUseCase
-import com.alunando.morando.domain.usecase.GetWeeklyTasksUseCase
 import com.alunando.morando.domain.usecase.MarkTaskCompleteUseCase
 import com.alunando.morando.domain.usecase.SaveUserStovePreferenceUseCase
 import com.alunando.morando.domain.usecase.UpdateProductUseCase
 import com.alunando.morando.domain.usecase.UpdateRecipeUseCase
 import com.alunando.morando.domain.usecase.UploadProductImageUseCase
 import com.alunando.morando.feature.barcode.presentation.BarcodeScannerViewModel
+import com.alunando.morando.feature.contas.data.repository.ContasRepositoryMock
+import com.alunando.morando.feature.contas.domain.repository.ContasRepository
+import com.alunando.morando.feature.contas.domain.usecase.AddContaUseCase
+import com.alunando.morando.feature.contas.domain.usecase.DeleteContaUseCase
+import com.alunando.morando.feature.contas.domain.usecase.GetContasByMonthUseCase
+import com.alunando.morando.feature.contas.domain.usecase.GetContasPendentesUseCase
+import com.alunando.morando.feature.contas.domain.usecase.GetContasUseCase
+import com.alunando.morando.feature.contas.domain.usecase.GetTotaisByMonthUseCase
+import com.alunando.morando.feature.contas.domain.usecase.MarkContaPagaUseCase
+import com.alunando.morando.feature.contas.domain.usecase.UpdateContaUseCase
+import com.alunando.morando.feature.contas.presentation.ContasViewModel
 import com.alunando.morando.feature.cooking.presentation.CookingViewModel
 import com.alunando.morando.feature.inventory.presentation.InventoryViewModel
 import com.alunando.morando.feature.tasks.presentation.TasksViewModel
@@ -139,10 +150,11 @@ val appModule =
         }
         single<ShoppingRepository> { ShoppingRepositoryImpl() }
         single<CookingRepository> { CookingRepositoryMock(get()) }
+        single<ContasRepository> { ContasRepositoryMock() }
 
         // Use Cases - Tasks
-        factory { GetDailyTasksUseCase(get()) }
-        factory { GetWeeklyTasksUseCase(get()) }
+        factory { GetTasksForDateUseCase(get()) }
+        factory { GetSubTasksUseCase(get()) }
         factory { MarkTaskCompleteUseCase(get()) }
         factory { AddTaskUseCase(get()) }
         factory { DeleteTaskUseCase(get()) }
@@ -171,10 +183,21 @@ val appModule =
         factory { GetUserStovePreferenceUseCase(get()) }
         factory { SaveUserStovePreferenceUseCase(get()) }
 
+        // Use Cases - Contas
+        factory { GetContasUseCase(get()) }
+        factory { GetContasByMonthUseCase(get()) }
+        factory { GetContasPendentesUseCase(get()) }
+        factory { AddContaUseCase(get()) }
+        factory { UpdateContaUseCase(get()) }
+        factory { DeleteContaUseCase(get()) }
+        factory { MarkContaPagaUseCase(get()) }
+        factory { GetTotaisByMonthUseCase(get()) }
+
         // ViewModels
         viewModel { TasksViewModel(get(), get(), get(), get(), get(), get()) }
         viewModel { InventoryViewModel(get(), get(), get(), get(), get(), get()) }
         viewModel { BarcodeScannerViewModel() }
         viewModel { CookingViewModel(get(), get(), get(), get(), get(), get(), get(), get()) }
+        viewModel { ContasViewModel(get(), get(), get(), get(), get(), get()) }
         viewModel { com.alunando.morando.ui.login.LoginViewModel(get()) }
     }
