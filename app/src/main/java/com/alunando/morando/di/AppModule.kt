@@ -33,6 +33,7 @@ import com.alunando.morando.domain.usecase.GetRecipeByIdUseCase
 import com.alunando.morando.domain.usecase.GetRecipesUseCase
 import com.alunando.morando.domain.usecase.GetShoppingItemsUseCase
 import com.alunando.morando.domain.usecase.GetSubTasksUseCase
+import com.alunando.morando.domain.usecase.GetTasksForDateRangeUseCase
 import com.alunando.morando.domain.usecase.GetTasksForDateUseCase
 import com.alunando.morando.domain.usecase.GetUserStovePreferenceUseCase
 import com.alunando.morando.domain.usecase.MarkTaskCompleteUseCase
@@ -154,6 +155,7 @@ val appModule =
 
         // Use Cases - Tasks
         factory { GetTasksForDateUseCase(get()) }
+        factory { GetTasksForDateRangeUseCase(get()) }
         factory { GetSubTasksUseCase(get()) }
         factory { MarkTaskCompleteUseCase(get()) }
         factory { AddTaskUseCase(get()) }
@@ -194,7 +196,7 @@ val appModule =
         factory { GetTotaisByMonthUseCase(get()) }
 
         // ViewModels
-        viewModel { TasksViewModel(get(), get(), get(), get(), get(), get()) }
+        viewModel { TasksViewModel(get(), get(), get(), get(), get(), get(), get()) }
         viewModel { InventoryViewModel(get(), get(), get(), get(), get(), get()) }
         viewModel { BarcodeScannerViewModel() }
         viewModel { CookingViewModel(get(), get(), get(), get(), get(), get(), get(), get()) }

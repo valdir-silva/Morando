@@ -26,6 +26,14 @@ interface TasksRepository {
     fun getTasksForDate(date: Date): Flow<List<Task>>
 
     /**
+     * Busca tarefas para um período de datas, incluindo recorrentes
+     */
+    fun getTasksForDateRange(
+        startDate: Date,
+        endDate: Date,
+    ): Flow<List<Task>>
+
+    /**
      * Busca sub-tarefas de um compromisso
      */
     fun getSubTasks(parentTaskId: String): Flow<List<Task>>

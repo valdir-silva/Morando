@@ -194,6 +194,18 @@ class TasksRepositoryMock : TasksRepository {
                 }
         }
 
+    override fun getTasksForDateRange(
+        startDate: Date,
+        endDate: Date,
+    ): Flow<List<Task>> =
+        tasks.map { taskList ->
+            taskList
+                .filter { it.parentTaskId == null }
+                .filter { task ->
+                    shouldShowTaskInDateRange(task, startDate, endDate)
+                }
+        }
+
     override fun getSubTasks(parentTaskId: String): Flow<List<Task>> =
         tasks.map { taskList ->
             taskList.filter { it.parentTaskId == parentTaskId }
@@ -282,4 +294,29 @@ class TasksRepositoryMock : TasksRepository {
     ): Boolean =
         cal1.get(Calendar.YEAR) == cal2.get(Calendar.YEAR) &&
             cal1.get(Calendar.DAY_OF_YEAR) == cal2.get(Calendar.DAY_OF_YEAR)
+
+    /**
+     * Verifica se uma tarefa deve aparecer em algum dia do período
+     */
+    private fun shouldShowTaskInDateRange(
+        task: Task,
+        startDate: Date,
+        endDate: Date,
+    ): Boolean {
+        val taskDate = task.scheduledDate ?: return false
+        val startCal = Calendar.getInstance().apply { time = startDate }
+        val endCal = Calendar.getInstance().apply { time = endDate }
+        val taskCal = Calendar.getInstance().apply { time = taskDate }
+
+        return when (task.recurrence) {
+            RecurrenceType.NONE -> {
+                // Tarefa sem recorrência: verifica se está no período
+                !taskCal.before(startCal) && !taskCal.after(endCal)
+            }
+            RecurrenceType.DAILY, RecurrenceType.WEEKLY, RecurrenceType.MONTHLY -> {
+                // Tarefas recorrentes: mostra se começou antes ou durante o período
+                !taskCal.after(endCal)
+            }
+        }
+    }
 }

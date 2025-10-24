@@ -10,12 +10,14 @@ import com.alunando.morando.domain.repository.TasksRepository
 import com.alunando.morando.domain.usecase.AddTaskUseCase
 import com.alunando.morando.domain.usecase.DeleteTaskUseCase
 import com.alunando.morando.domain.usecase.GetSubTasksUseCase
+import com.alunando.morando.domain.usecase.GetTasksForDateRangeUseCase
 import com.alunando.morando.domain.usecase.GetTasksForDateUseCase
 import com.alunando.morando.domain.usecase.MarkTaskCompleteUseCase
 import kotlinx.coroutines.channels.Channel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.launchIn
 import kotlinx.coroutines.flow.onEach
 import kotlinx.coroutines.flow.receiveAsFlow
@@ -27,6 +29,7 @@ import java.util.Date
  * ViewModel para tela de tarefas (MVI)
  */
 class TasksViewModel(
+    private val getTasksForDateRangeUseCase: GetTasksForDateRangeUseCase,
     private val getTasksForDateUseCase: GetTasksForDateUseCase,
     private val getSubTasksUseCase: GetSubTasksUseCase,
     private val markTaskCompleteUseCase: MarkTaskCompleteUseCase,
@@ -58,6 +61,12 @@ class TasksViewModel(
             is TasksIntent.NavigateToPrevDay -> navigateToPrevDay()
             is TasksIntent.CreateTask -> createTask(intent.task)
             is TasksIntent.CreateCommitment -> createCommitment(intent.commitment, intent.subTasks)
+            is TasksIntent.EditTask -> editTask(intent.task)
+            is TasksIntent.UpdateTask -> updateTask(intent.task)
+            is TasksIntent.UpdateCommitment -> updateCommitment(intent.commitment, intent.subTasks)
+            is TasksIntent.ShowDeleteConfirmation -> showDeleteConfirmation(intent.task)
+            is TasksIntent.HideDeleteConfirmation -> hideDeleteConfirmation()
+            is TasksIntent.ConfirmDelete -> confirmDelete()
             is TasksIntent.DeleteTask -> deleteTask(intent.taskId)
             is TasksIntent.ShowCreateDialog -> showCreateDialog()
             is TasksIntent.HideCreateDialog -> hideCreateDialog()
@@ -67,28 +76,127 @@ class TasksViewModel(
     private fun loadTasks() {
         _state.value = _state.value.copy(isLoading = true)
 
-        getTasksForDateUseCase(_state.value.selectedDate)
-            .onEach { tasks ->
-                // Carrega sub-tarefas para cada compromisso
-                val subTasksMap = mutableMapOf<String, List<Task>>()
-                tasks
-                    .filter { it.tipo == TaskType.COMMITMENT }
-                    .forEach { commitment ->
-                        getSubTasksUseCase(commitment.id)
-                            .onEach { subTasks ->
-                                subTasksMap[commitment.id] = subTasks
-                            }.launchIn(viewModelScope)
-                    }
+        val (startDate, endDate) = _state.value.dateRange
 
-                _state.value =
-                    _state.value.copy(
-                        tasks = tasks,
-                        subTasksMap = subTasksMap,
-                        isLoading = false,
-                        error = null,
-                    )
+        getTasksForDateRangeUseCase(startDate, endDate)
+            .onEach { tasks ->
+                // Agrupa tarefas por data
+                val tasksByDate = groupTasksByDate(tasks, startDate, endDate)
+
+                val commitments = tasks.filter { it.tipo == TaskType.COMMITMENT }
+
+                if (commitments.isEmpty()) {
+                    // Sem compromissos, atualiza estado imediatamente
+                    _state.value =
+                        _state.value.copy(
+                            tasks = tasks,
+                            tasksByDate = tasksByDate,
+                            subTasksMap = emptyMap(),
+                            isLoading = false,
+                            error = null,
+                        )
+                } else {
+                    // Combina flows de todas as sub-tarefas
+                    combine(
+                        commitments.map { commitment ->
+                            getSubTasksUseCase(commitment.id)
+                        },
+                    ) { subTasksArrays ->
+                        // Cria mapa commitment.id -> List<Task>
+                        commitments.mapIndexed { index, commitment ->
+                            commitment.id to subTasksArrays[index]
+                        }.toMap()
+                    }.onEach { subTasksMap ->
+                        _state.value =
+                            _state.value.copy(
+                                tasks = tasks,
+                                tasksByDate = tasksByDate,
+                                subTasksMap = subTasksMap,
+                                isLoading = false,
+                                error = null,
+                            )
+                    }.launchIn(viewModelScope)
+                }
             }.launchIn(viewModelScope)
     }
+
+    /**
+     * Agrupa tarefas por data, expandindo tarefas recorrentes
+     */
+    private fun groupTasksByDate(
+        tasks: List<Task>,
+        startDate: Date,
+        endDate: Date,
+    ): Map<Date, List<Task>> {
+        val tasksByDate = mutableMapOf<Date, MutableList<Task>>()
+
+        // Itera por cada dia no período
+        val calendar = Calendar.getInstance().apply { time = startDate }
+        val endCalendar = Calendar.getInstance().apply { time = endDate }
+
+        while (!calendar.after(endCalendar)) {
+            val currentDate = calendar.time
+
+            tasks.forEach { task ->
+                if (shouldShowTaskOnDate(task, currentDate)) {
+                    val normalizedDate = normalizeDate(currentDate)
+                    tasksByDate.getOrPut(normalizedDate) { mutableListOf() }.add(task)
+                }
+            }
+
+            calendar.add(Calendar.DAY_OF_MONTH, 1)
+        }
+
+        return tasksByDate.toSortedMap(compareBy { it })
+    }
+
+    /**
+     * Verifica se uma tarefa deve ser exibida em uma data específica
+     */
+    private fun shouldShowTaskOnDate(
+        task: Task,
+        date: Date,
+    ): Boolean {
+        val taskDate = task.scheduledDate ?: return false
+        val targetCal = Calendar.getInstance().apply { time = date }
+        val taskCal = Calendar.getInstance().apply { time = taskDate }
+
+        return when (task.recurrence) {
+            com.alunando.morando.domain.model.RecurrenceType.NONE -> {
+                isSameDay(taskCal, targetCal)
+            }
+            com.alunando.morando.domain.model.RecurrenceType.DAILY -> {
+                !targetCal.before(taskCal)
+            }
+            com.alunando.morando.domain.model.RecurrenceType.WEEKLY -> {
+                !targetCal.before(taskCal) &&
+                    taskCal.get(Calendar.DAY_OF_WEEK) == targetCal.get(Calendar.DAY_OF_WEEK)
+            }
+            com.alunando.morando.domain.model.RecurrenceType.MONTHLY -> {
+                !targetCal.before(taskCal) &&
+                    taskCal.get(Calendar.DAY_OF_MONTH) == targetCal.get(Calendar.DAY_OF_MONTH)
+            }
+        }
+    }
+
+    private fun isSameDay(
+        cal1: Calendar,
+        cal2: Calendar,
+    ): Boolean =
+        cal1.get(Calendar.YEAR) == cal2.get(Calendar.YEAR) &&
+            cal1.get(Calendar.DAY_OF_YEAR) == cal2.get(Calendar.DAY_OF_YEAR)
+
+    /**
+     * Normaliza data para meia-noite
+     */
+    private fun normalizeDate(date: Date): Date =
+        Calendar.getInstance().apply {
+            time = date
+            set(Calendar.HOUR_OF_DAY, 0)
+            set(Calendar.MINUTE, 0)
+            set(Calendar.SECOND, 0)
+            set(Calendar.MILLISECOND, 0)
+        }.time
 
     private fun toggleTaskComplete(
         taskId: String,
@@ -187,6 +295,92 @@ class TasksViewModel(
                     sendEffect(TasksEffect.ShowError("Erro ao criar compromisso"))
                 }
         }
+    }
+
+    private fun editTask(task: Task) {
+        _state.value =
+            _state.value.copy(
+                editingTask = task,
+                showCreateDialog = true,
+            )
+    }
+
+    private fun updateTask(task: Task) {
+        viewModelScope.launch {
+            val result = tasksRepository.updateTask(task)
+            result
+                .onSuccess {
+                    sendEffect(TasksEffect.ShowToast("Tarefa atualizada com sucesso"))
+                    _state.value = _state.value.copy(showCreateDialog = false, editingTask = null)
+                    loadTasks()
+                }.onError {
+                    sendEffect(TasksEffect.ShowError("Erro ao atualizar tarefa"))
+                }
+        }
+    }
+
+    private fun updateCommitment(
+        commitment: Task,
+        subTasks: List<Task>,
+    ) {
+        viewModelScope.launch {
+            // Atualiza o compromisso
+            val commitmentResult = tasksRepository.updateTask(commitment)
+            commitmentResult
+                .onSuccess {
+                    // Busca sub-tarefas existentes
+                    tasksRepository.getTasks().collect { allTasks ->
+                        val existingSubTasks = allTasks.filter { it.parentTaskId == commitment.id }
+
+                        // Deleta sub-tarefas que não existem mais na lista atualizada
+                        existingSubTasks.forEach { existing ->
+                            if (subTasks.none { it.id == existing.id }) {
+                                deleteTaskUseCase(existing.id)
+                            }
+                        }
+
+                        // Atualiza ou cria sub-tarefas
+                        subTasks.forEach { subTask ->
+                            val subTaskWithParent = subTask.copy(parentTaskId = commitment.id)
+                            if (subTask.id.isNotEmpty() && existingSubTasks.any { it.id == subTask.id }) {
+                                // Atualiza existente
+                                tasksRepository.updateTask(subTaskWithParent)
+                            } else {
+                                // Cria nova
+                                addTaskUseCase(subTaskWithParent)
+                            }
+                        }
+
+                        sendEffect(TasksEffect.ShowToast("Compromisso atualizado com sucesso"))
+                        _state.value = _state.value.copy(showCreateDialog = false, editingTask = null)
+                        loadTasks()
+                    }
+                }.onError {
+                    sendEffect(TasksEffect.ShowError("Erro ao atualizar compromisso"))
+                }
+        }
+    }
+
+    private fun showDeleteConfirmation(task: Task) {
+        _state.value =
+            _state.value.copy(
+                showDeleteDialog = true,
+                taskToDelete = task,
+            )
+    }
+
+    private fun hideDeleteConfirmation() {
+        _state.value =
+            _state.value.copy(
+                showDeleteDialog = false,
+                taskToDelete = null,
+            )
+    }
+
+    private fun confirmDelete() {
+        val taskId = _state.value.taskToDelete?.id ?: return
+        hideDeleteConfirmation()
+        deleteTask(taskId)
     }
 
     private fun deleteTask(taskId: String) {

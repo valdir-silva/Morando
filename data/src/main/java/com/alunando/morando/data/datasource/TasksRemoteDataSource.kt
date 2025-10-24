@@ -134,6 +134,47 @@ class TasksRemoteDataSource(
         }
 
     /**
+     * Busca tarefas para um período de datas, incluindo recorrentes
+     */
+    fun getTasksForDateRange(
+        startDate: Date,
+        endDate: Date,
+    ): Flow<List<Task>> =
+        callbackFlow {
+            // Verifica se está autenticado, senão retorna lista vazia
+            if (authManager.currentUserId.isEmpty()) {
+                trySend(emptyList())
+                awaitClose { }
+                return@callbackFlow
+            }
+
+            val listener =
+                getUserTasksCollection()
+                    .whereEqualTo("parentTaskId", null)
+                    .addSnapshotListener { snapshot, error ->
+                        if (error != null) {
+                            close(error)
+                            return@addSnapshotListener
+                        }
+
+                        val allTasks =
+                            snapshot?.documents?.mapNotNull { doc ->
+                                doc.toTask()
+                            } ?: emptyList()
+
+                        // Filtra tarefas para o período
+                        val tasksForRange =
+                            allTasks.filter { task ->
+                                shouldShowTaskInDateRange(task, startDate, endDate)
+                            }
+
+                        trySend(tasksForRange)
+                    }
+
+            awaitClose { listener.remove() }
+        }
+
+    /**
      * Busca sub-tarefas de um compromisso
      */
     fun getSubTasks(parentTaskId: String): Flow<List<Task>> =
@@ -190,9 +231,18 @@ class TasksRemoteDataSource(
         authManager.waitForAuthentication()
 
         val docRef = getUserTasksCollection().document()
-        val taskMap = task.toMap(authManager.currentUserId)
+        
+        // Garantir que compromissos não têm parent
+        val taskToSave =
+            if (task.tipo == TaskType.COMMITMENT) {
+                task.copy(parentTaskId = null)
+            } else {
+                task
+            }
+        
+        val taskMap = taskToSave.toMap(authManager.currentUserId)
         docRef.set(taskMap).await()
-        return task.copy(id = docRef.id)
+        return taskToSave.copy(id = docRef.id)
     }
 
     /**
@@ -202,9 +252,17 @@ class TasksRemoteDataSource(
         // Aguarda autenticação antes de tentar atualizar
         authManager.waitForAuthentication()
 
+        // Garantir que compromissos não têm parent
+        val taskToSave =
+            if (task.tipo == TaskType.COMMITMENT) {
+                task.copy(parentTaskId = null)
+            } else {
+                task
+            }
+
         getUserTasksCollection()
-            .document(task.id)
-            .set(task.toMap(authManager.currentUserId))
+            .document(taskToSave.id)
+            .set(taskToSave.toMap(authManager.currentUserId))
             .await()
     }
 
@@ -276,6 +334,31 @@ class TasksRemoteDataSource(
     ): Boolean =
         cal1.get(Calendar.YEAR) == cal2.get(Calendar.YEAR) &&
             cal1.get(Calendar.DAY_OF_YEAR) == cal2.get(Calendar.DAY_OF_YEAR)
+
+    /**
+     * Verifica se uma tarefa deve aparecer em algum dia do período
+     */
+    private fun shouldShowTaskInDateRange(
+        task: Task,
+        startDate: Date,
+        endDate: Date,
+    ): Boolean {
+        val taskDate = task.scheduledDate ?: return false
+        val startCal = Calendar.getInstance().apply { time = startDate }
+        val endCal = Calendar.getInstance().apply { time = endDate }
+        val taskCal = Calendar.getInstance().apply { time = taskDate }
+
+        return when (task.recurrence) {
+            RecurrenceType.NONE -> {
+                // Tarefa sem recorrência: verifica se está no período
+                !taskCal.before(startCal) && !taskCal.after(endCal)
+            }
+            RecurrenceType.DAILY, RecurrenceType.WEEKLY, RecurrenceType.MONTHLY -> {
+                // Tarefas recorrentes: mostra se começou antes ou durante o período
+                !taskCal.after(endCal)
+            }
+        }
+    }
 
     // Extension functions
     @Suppress("TooGenericExceptionCaught", "SwallowedException")

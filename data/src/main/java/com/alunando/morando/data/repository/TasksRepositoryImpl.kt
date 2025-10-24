@@ -20,6 +20,11 @@ class TasksRepositoryImpl(
 
     override fun getTasksForDate(date: Date): Flow<List<Task>> = remoteDataSource.getTasksForDate(date)
 
+    override fun getTasksForDateRange(
+        startDate: Date,
+        endDate: Date,
+    ): Flow<List<Task>> = remoteDataSource.getTasksForDateRange(startDate, endDate)
+
     override fun getSubTasks(parentTaskId: String): Flow<List<Task>> = remoteDataSource.getSubTasks(parentTaskId)
 
     @Suppress("TooGenericExceptionCaught")
