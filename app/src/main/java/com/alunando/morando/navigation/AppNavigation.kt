@@ -186,6 +186,9 @@ fun AppNavigation(
                 onNavigateToEdit = { id ->
                     navController.navigate(AppRoute.RecipeForm.createRoute(id))
                 },
+                onNavigateToInventory = {
+                    navController.navigate(AppRoute.Inventory.route)
+                },
             )
         }
 
@@ -225,6 +228,11 @@ fun AppNavigation(
                 recipeId = recipeId,
                 onNavigateBack = {
                     navController.popBackStack()
+                },
+                onNavigateToCookingList = {
+                    navController.navigate(AppRoute.Cooking.route) {
+                        popUpTo(AppRoute.Cooking.route) { inclusive = true }
+                    }
                 },
             )
         }
