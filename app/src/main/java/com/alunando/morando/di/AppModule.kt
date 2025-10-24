@@ -4,9 +4,11 @@ import com.alunando.morando.BuildConfig
 import com.alunando.morando.data.api.CosmosApiService
 import com.alunando.morando.data.api.OpenFoodFactsApiService
 import com.alunando.morando.data.api.ProductApiDataSource
+import com.alunando.morando.data.datasource.CookingRemoteDataSource
 import com.alunando.morando.data.datasource.InventoryRemoteDataSource
 import com.alunando.morando.data.datasource.TasksRemoteDataSource
 import com.alunando.morando.data.firebase.AuthManager
+import com.alunando.morando.data.repository.CookingRepositoryImpl
 import com.alunando.morando.data.repository.CookingRepositoryMock
 import com.alunando.morando.data.repository.InventoryRepositoryImpl
 import com.alunando.morando.data.repository.InventoryRepositoryMock
@@ -41,6 +43,7 @@ import com.alunando.morando.domain.usecase.SaveUserStovePreferenceUseCase
 import com.alunando.morando.domain.usecase.UpdateProductUseCase
 import com.alunando.morando.domain.usecase.UpdateRecipeUseCase
 import com.alunando.morando.domain.usecase.UploadProductImageUseCase
+import com.alunando.morando.domain.usecase.cooking.UploadRecipeImageUseCase
 import com.alunando.morando.feature.barcode.presentation.BarcodeScannerViewModel
 import com.alunando.morando.feature.contas.data.repository.ContasRepositoryMock
 import com.alunando.morando.feature.contas.domain.repository.ContasRepository
@@ -133,6 +136,7 @@ val appModule =
         // Data Sources (apenas quando não for MOCK)
         single { TasksRemoteDataSource(get(), get()) }
         single { InventoryRemoteDataSource(get(), get(), get(), get()) }
+        single { CookingRemoteDataSource(get(), get(), get()) }
 
         // Repositories - usa implementação mock ou real baseado no BuildConfig
         single<TasksRepository> {
@@ -150,7 +154,13 @@ val appModule =
             }
         }
         single<ShoppingRepository> { ShoppingRepositoryImpl() }
-        single<CookingRepository> { CookingRepositoryMock(get()) }
+        single<CookingRepository> {
+            if (BuildConfig.BACKEND_TYPE == "MOCK") {
+                CookingRepositoryMock(get())
+            } else {
+                CookingRepositoryImpl(get())
+            }
+        }
         single<ContasRepository> { ContasRepositoryMock() }
 
         // Use Cases - Tasks
@@ -184,6 +194,7 @@ val appModule =
         factory { CheckIngredientsAvailabilityUseCase(get()) }
         factory { GetUserStovePreferenceUseCase(get()) }
         factory { SaveUserStovePreferenceUseCase(get()) }
+        factory { UploadRecipeImageUseCase(get()) }
 
         // Use Cases - Contas
         factory { GetContasUseCase(get()) }
@@ -199,7 +210,7 @@ val appModule =
         viewModel { TasksViewModel(get(), get(), get(), get(), get(), get(), get()) }
         viewModel { InventoryViewModel(get(), get(), get(), get(), get(), get()) }
         viewModel { BarcodeScannerViewModel() }
-        viewModel { CookingViewModel(get(), get(), get(), get(), get(), get(), get(), get()) }
+        viewModel { CookingViewModel(get(), get(), get(), get(), get(), get(), get(), get(), get()) }
         viewModel { ContasViewModel(get(), get(), get(), get(), get(), get()) }
         viewModel { com.alunando.morando.ui.login.LoginViewModel(get()) }
     }
