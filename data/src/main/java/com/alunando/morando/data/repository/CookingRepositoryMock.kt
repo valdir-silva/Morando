@@ -82,6 +82,14 @@ class CookingRepositoryMock(
         return Result.Success(Unit)
     }
 
+    override suspend fun uploadRecipeImage(
+        recipeId: String,
+        imageData: ByteArray,
+    ): Result<String> {
+        // Mock: retorna URL fake
+        return Result.Success("https://via.placeholder.com/400x300?text=Recipe+Image")
+    }
+
     // ==================== RECEITAS MOCK ====================
 
     @Suppress("MagicNumber")

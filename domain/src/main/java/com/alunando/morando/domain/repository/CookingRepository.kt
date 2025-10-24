@@ -49,4 +49,12 @@ interface CookingRepository {
      * Salva o tipo de fogão preferido do usuário
      */
     suspend fun saveUserStovePreference(stoveType: StoveType): Result<Unit>
+
+    /**
+     * Faz upload da imagem de uma receita
+     */
+    suspend fun uploadRecipeImage(
+        recipeId: String,
+        imageData: ByteArray,
+    ): Result<String>
 }
