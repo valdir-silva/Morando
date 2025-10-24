@@ -10,9 +10,12 @@ object FirebaseConfig {
     const val COLLECTION_PRODUCTS = "products"
     const val COLLECTION_SHOPPING_LIST = "shopping_list"
     const val COLLECTION_UI_CONFIGS = "ui_configs"
+    const val COLLECTION_RECIPES = "recipes"
+    const val COLLECTION_PREFERENCES = "preferences"
 
     // Storage paths
     const val STORAGE_PRODUCTS = "products"
+    const val STORAGE_RECIPES = "recipes"
     const val STORAGE_IMAGES = "images"
 
     // Fields - Common
@@ -37,4 +40,17 @@ object FirebaseConfig {
     const val FIELD_COMPRADO = "comprado"
     const val FIELD_PRODUTO_ID = "produtoId"
     const val FIELD_QUANTIDADE = "quantidade"
+
+    // Fields - Recipes
+    const val FIELD_DESCRICAO = "descricao"
+    const val FIELD_TEMPO_PREPARO = "tempoPreparo"
+    const val FIELD_PORCOES = "porcoes"
+    const val FIELD_DIFICULDADE = "dificuldade"
+    const val FIELD_INGREDIENTES = "ingredientes"
+    const val FIELD_ETAPAS_MISE_EN_PLACE = "etapasMiseEnPlace"
+    const val FIELD_ETAPAS_PREPARO = "etapasPreparo"
+    const val FIELD_TIPO_FOGAO_PADRAO = "tipoFogaoPadrao"
+
+    // Fields - Preferences
+    const val FIELD_STOVE_TYPE = "stoveType"
 }
