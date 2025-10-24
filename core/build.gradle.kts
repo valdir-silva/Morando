@@ -56,6 +56,7 @@ dependencies {
     implementation(platform(libs.androidx.compose.bom))
     implementation(libs.bundles.compose)
     implementation(libs.androidx.activity.compose)
+    implementation("androidx.compose.material:material-icons-core")
 
     // Coil for image loading
     implementation(libs.coil.compose)

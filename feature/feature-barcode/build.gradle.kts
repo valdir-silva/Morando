@@ -60,6 +60,7 @@ dependencies {
     implementation(platform(libs.androidx.compose.bom))
     implementation(libs.bundles.compose)
     implementation(libs.androidx.activity.compose)
+    implementation("androidx.compose.material:material-icons-core")
 
     // ML Kit Barcode Scanning
     implementation(libs.mlkit.barcode.scanning)
