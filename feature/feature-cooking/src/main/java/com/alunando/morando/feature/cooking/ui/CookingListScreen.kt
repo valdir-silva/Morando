@@ -153,6 +153,7 @@ private fun CategoryFilters(
             label = { Text("Todas") },
         )
 
+        @Suppress("MagicNumber")
         RecipeCategory.entries.take(4).forEach { category ->
             FilterChip(
                 selected = selectedCategory == category,

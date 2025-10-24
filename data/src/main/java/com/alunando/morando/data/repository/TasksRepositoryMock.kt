@@ -15,6 +15,7 @@ import java.util.UUID
 /**
  * Implementação mock do TasksRepository para desenvolvimento sem Firebase
  */
+@Suppress("MagicNumber", "TooManyFunctions")
 class TasksRepositoryMock : TasksRepository {
     private val tasks =
         MutableStateFlow(
@@ -66,9 +67,11 @@ class TasksRepositoryMock : TasksRepository {
                     userId = "mock-user",
                     createdAt = Date(),
                     scheduledDate =
-                        Calendar.getInstance().apply {
-                            set(Calendar.DAY_OF_WEEK, Calendar.SATURDAY)
-                        }.time,
+                        Calendar
+                            .getInstance()
+                            .apply {
+                                set(Calendar.DAY_OF_WEEK, Calendar.SATURDAY)
+                            }.time,
                 ),
                 // Tarefa com recorrência mensal
                 Task(
@@ -81,9 +84,11 @@ class TasksRepositoryMock : TasksRepository {
                     userId = "mock-user",
                     createdAt = Date(),
                     scheduledDate =
-                        Calendar.getInstance().apply {
-                            set(Calendar.DAY_OF_MONTH, 5)
-                        }.time,
+                        Calendar
+                            .getInstance()
+                            .apply {
+                                set(Calendar.DAY_OF_MONTH, 5)
+                            }.time,
                 ),
                 // Compromisso para daqui 3 dias
                 Task(
@@ -96,9 +101,11 @@ class TasksRepositoryMock : TasksRepository {
                     userId = "mock-user",
                     createdAt = Date(),
                     scheduledDate =
-                        Calendar.getInstance().apply {
-                            add(Calendar.DAY_OF_MONTH, 3)
-                        }.time,
+                        Calendar
+                            .getInstance()
+                            .apply {
+                                add(Calendar.DAY_OF_MONTH, 3)
+                            }.time,
                 ),
                 // Sub-tarefas do compromisso
                 Task(
@@ -145,12 +152,14 @@ class TasksRepositoryMock : TasksRepository {
                     userId = "mock-user",
                     createdAt = Date(),
                     scheduledDate =
-                        Calendar.getInstance().apply {
-                            set(Calendar.DAY_OF_MONTH, 1)
-                            while (get(Calendar.DAY_OF_WEEK) != Calendar.SUNDAY) {
-                                add(Calendar.DAY_OF_MONTH, 1)
-                            }
-                        }.time,
+                        Calendar
+                            .getInstance()
+                            .apply {
+                                set(Calendar.DAY_OF_MONTH, 1)
+                                while (get(Calendar.DAY_OF_WEEK) != Calendar.SUNDAY) {
+                                    add(Calendar.DAY_OF_MONTH, 1)
+                                }
+                            }.time,
                 ),
                 // Sub-tarefas do compromisso recorrente
                 Task(

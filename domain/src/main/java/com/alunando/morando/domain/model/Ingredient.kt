@@ -12,4 +12,5 @@ data class Ingredient(
     val quantidade: Double,
     val unidade: String,
     val observacoes: String = "",
+    val productId: String? = null,
 ) : Parcelable

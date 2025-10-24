@@ -11,4 +11,10 @@ enum class RecipeCategory(val displayName: String) {
     BEBIDA("Bebida"),
     LANCHE("Lanche"),
     CAFE_DA_MANHA("Café da Manhã"),
+    ;
+
+    companion object {
+        fun fromString(value: String): RecipeCategory =
+            entries.find { it.name.equals(value, ignoreCase = true) } ?: PRATO_PRINCIPAL
+    }
 }

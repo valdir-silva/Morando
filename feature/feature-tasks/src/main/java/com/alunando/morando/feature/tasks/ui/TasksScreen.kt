@@ -183,13 +183,14 @@ fun TasksScreen(
                     viewModel.handleIntent(TasksIntent.UpdateCommitment(commitment, subTasks))
                 },
                 existingTask = state.editingTask,
-                existingSubTasks = state.editingTask?.let { task ->
-                    if (task.tipo == TaskType.COMMITMENT) {
-                        state.subTasksMap[task.id] ?: emptyList()
-                    } else {
-                        emptyList()
-                    }
-                } ?: emptyList(),
+                existingSubTasks =
+                    state.editingTask?.let { task ->
+                        if (task.tipo == TaskType.COMMITMENT) {
+                            state.subTasksMap[task.id] ?: emptyList()
+                        } else {
+                            emptyList()
+                        }
+                    } ?: emptyList(),
             )
         }
 

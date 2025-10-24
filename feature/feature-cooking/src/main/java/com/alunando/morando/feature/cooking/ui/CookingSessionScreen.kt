@@ -395,6 +395,7 @@ private fun CookingContent(
                     secondsRemaining = session.timerSecondsRemaining,
                     isRunning = session.timerRunning,
                     onStart = {
+                        @Suppress("MagicNumber")
                         viewModel.handleIntent(CookingIntent.StartTimer(currentStep.tempoMinutos * 60))
                     },
                     onPause = { viewModel.handleIntent(CookingIntent.PauseTimer) },

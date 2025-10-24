@@ -8,4 +8,10 @@ enum class StoveType(val displayName: String) {
     GAS("Gás"),
     ELECTRIC("Elétrico"),
     WOOD("Lenha"),
+    ;
+
+    companion object {
+        fun fromString(value: String): StoveType =
+            entries.find { it.name.equals(value, ignoreCase = true) } ?: INDUCTION
+    }
 }

@@ -36,12 +36,14 @@ fun IngredientAvailabilityChip(
                     Color(0xFF4CAF50),
                     "Disponível",
                 )
+
             IngredientAvailability.AvailabilityStatus.PARCIAL ->
                 Triple(
                     Icons.Default.Warning,
                     Color(0xFFFFA726),
                     "Parcial",
                 )
+
             IngredientAvailability.AvailabilityStatus.INDISPONIVEL ->
                 Triple(
                     Icons.Default.Warning,
@@ -85,6 +87,7 @@ fun IngredientAvailabilityChip(
 /**
  * Badge simples de disponibilidade
  */
+@Suppress("MagicNumber")
 @Composable
 fun AvailabilityBadge(
     totalIngredients: Int,

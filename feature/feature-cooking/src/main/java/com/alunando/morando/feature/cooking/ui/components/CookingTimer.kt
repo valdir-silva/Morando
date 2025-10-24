@@ -89,6 +89,7 @@ fun CookingTimer(
 /**
  * Formata segundos em MM:SS
  */
+@Suppress("MagicNumber")
 private fun formatTime(seconds: Int): String {
     val minutes = seconds / 60
     val secs = seconds % 60
